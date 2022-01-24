@@ -84,14 +84,21 @@ struct SearchView: View {
                 
                 VStack(alignment:.leading) {
                     Text(item.title ?? "")
+                        .frame(alignment:.leading)
                         .font(.headline)
                         .foregroundColor(.fairyCream)
+                        .multilineTextAlignment(.leading)
                     Text(item.creator.joined(separator: ", "))
                         .font(.footnote)
+                        .frame(alignment:.leading)
                         .foregroundColor(.fairyCream)
+                        .multilineTextAlignment(.leading)
                     Text(item.desc ?? "")
                         .font(.body)
+                        .frame(alignment:.leading)
                         .foregroundColor(.fairyCream)
+                        .multilineTextAlignment(.leading)
+
                 }
                 .frame(maxWidth: .infinity,
                        alignment: .leading)
