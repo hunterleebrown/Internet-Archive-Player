@@ -8,10 +8,7 @@
 import SwiftUI
 
 struct Tabs: View {
-
-    init() {
-        UITabBar.appearance().backgroundColor = UIColor.fairyRed
-    }
+    @Binding var showPlayer : Bool
 
     var body: some View {
         TabView {
@@ -27,14 +24,17 @@ struct Tabs: View {
         }
         .accentColor(.fairyCream)
         .tabStyle()
-      }
+        .modifier(BackgroundColorModifier(backgroundColor: .droopy))
+    }
 }
 
 extension View {
     func tabStyle() -> some View {
 
         onAppear {
-            let offColor = UIColor.darkGray
+            UITabBar.appearance().backgroundColor = IAColors.droppy
+
+            let offColor = UIColor.lightGray
             let itemAppearance = UITabBarItemAppearance()
             itemAppearance.normal.iconColor = offColor
 
@@ -56,6 +56,6 @@ extension View {
 
 struct Tabs_Previews: PreviewProvider {
     static var previews: some View {
-        Tabs()
+        Tabs(showPlayer: .constant(false))
     }
 }

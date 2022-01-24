@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-struct IATabViewModifier: ViewModifier {
+struct BackgroundColorModifier: ViewModifier {
     var backgroundColor: Color?
     func body(content: Content) -> some View{
         ZStack{
-            backgroundColor?.ignoresSafeArea(.all, edges: .top)
+            backgroundColor?.ignoresSafeArea(.all, edges: .all)
             content
         }
         .accentColor(.black)

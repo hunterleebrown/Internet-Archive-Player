@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC51279CCB7000495070 /* PlayerControls.swift */; };
+		5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC53279CCED100495070 /* PlayerButton.swift */; };
+		5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC55279CDE2100495070 /* AirPlayButton.swift */; };
+		5AD6BC58279CF31400495070 /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC57279CF31400495070 /* Playlist.swift */; };
 		5ADED039279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */; };
 		5ADED03B279B56EE00FB2E6D /* Tabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED03A279B56EE00FB2E6D /* Tabs.swift */; };
 		5ADED03D279B56F000FB2E6D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5ADED03C279B56F000FB2E6D /* Assets.xcassets */; };
@@ -18,7 +22,10 @@
 		5ADED068279B5D0200FB2E6D /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED067279B597800FB2E6D /* FavoritesView.swift */; };
 		5ADED06D279B608F00FB2E6D /* Iconochive-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5ADED06C279B608F00FB2E6D /* Iconochive-Regular.ttf */; };
 		5ADED06E279B60F500FB2E6D /* IAMediaUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */; };
-		5ADED071279B63C300FB2E6D /* IATabViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED070279B63C300FB2E6D /* IATabViewModifier.swift */; };
+		5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */; };
+		5ADED073279B7AA600FB2E6D /* MiniPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED072279B7AA600FB2E6D /* MiniPlayer.swift */; };
+		5ADED076279B8AEC00FB2E6D /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED075279B8AEC00FB2E6D /* Player.swift */; };
+		5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED077279B8BA000FB2E6D /* HomeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,7 +46,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5ADED035279B56EE00FB2E6D /* Internet Archive Player.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Internet Archive Player.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5AD6BC51279CCB7000495070 /* PlayerControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerControls.swift; sourceTree = "<group>"; };
+		5AD6BC53279CCED100495070 /* PlayerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButton.swift; sourceTree = "<group>"; };
+		5AD6BC55279CDE2100495070 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
+		5AD6BC57279CF31400495070 /* Playlist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
+		5ADED035279B56EE00FB2E6D /* ia-player.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ia-player.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet_Archive_PlayerApp.swift; sourceTree = "<group>"; };
 		5ADED03A279B56EE00FB2E6D /* Tabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tabs.swift; sourceTree = "<group>"; };
 		5ADED03C279B56F000FB2E6D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -53,7 +64,10 @@
 		5ADED067279B597800FB2E6D /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
 		5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAMediaUtils.swift; sourceTree = "<group>"; };
 		5ADED06C279B608F00FB2E6D /* Iconochive-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Iconochive-Regular.ttf"; sourceTree = "<group>"; };
-		5ADED070279B63C300FB2E6D /* IATabViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IATabViewModifier.swift; sourceTree = "<group>"; };
+		5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundColorModifier.swift; sourceTree = "<group>"; };
+		5ADED072279B7AA600FB2E6D /* MiniPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayer.swift; sourceTree = "<group>"; };
+		5ADED075279B8AEC00FB2E6D /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		5ADED077279B8BA000FB2E6D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,7 +108,7 @@
 		5ADED036279B56EE00FB2E6D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				5ADED035279B56EE00FB2E6D /* Internet Archive Player.app */,
+				5ADED035279B56EE00FB2E6D /* ia-player.app */,
 				5ADED045279B56F000FB2E6D /* Internet Archive PlayerTests.xctest */,
 				5ADED04F279B56F000FB2E6D /* Internet Archive PlayerUITests.xctest */,
 			);
@@ -105,12 +119,14 @@
 			isa = PBXGroup;
 			children = (
 				5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */,
+				5ADED077279B8BA000FB2E6D /* HomeView.swift */,
 				5ADED03A279B56EE00FB2E6D /* Tabs.swift */,
 				5ADED062279B588E00FB2E6D /* Search */,
 				5ADED063279B589600FB2E6D /* Favorites */,
 				5ADED069279B602900FB2E6D /* Utils */,
 				5ADED06B279B607800FB2E6D /* Resources */,
 				5ADED06F279B638F00FB2E6D /* Common */,
+				5ADED074279B8A4A00FB2E6D /* Player */,
 				5ADED03E279B56F000FB2E6D /* Preview Content */,
 			);
 			path = "Internet Archive Player";
@@ -177,9 +193,22 @@
 		5ADED06F279B638F00FB2E6D /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				5ADED070279B63C300FB2E6D /* IATabViewModifier.swift */,
+				5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */,
 			);
 			path = Common;
+			sourceTree = "<group>";
+		};
+		5ADED074279B8A4A00FB2E6D /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				5ADED072279B7AA600FB2E6D /* MiniPlayer.swift */,
+				5ADED075279B8AEC00FB2E6D /* Player.swift */,
+				5AD6BC51279CCB7000495070 /* PlayerControls.swift */,
+				5AD6BC53279CCED100495070 /* PlayerButton.swift */,
+				5AD6BC55279CDE2100495070 /* AirPlayButton.swift */,
+				5AD6BC57279CF31400495070 /* Playlist.swift */,
+			);
+			path = Player;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -199,7 +228,7 @@
 			);
 			name = "Internet Archive Player";
 			productName = "Internet Archive Player";
-			productReference = 5ADED035279B56EE00FB2E6D /* Internet Archive Player.app */;
+			productReference = 5ADED035279B56EE00FB2E6D /* ia-player.app */;
 			productType = "com.apple.product-type.application";
 		};
 		5ADED044279B56F000FB2E6D /* Internet Archive PlayerTests */ = {
@@ -313,10 +342,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5ADED071279B63C300FB2E6D /* IATabViewModifier.swift in Sources */,
+				5AD6BC58279CF31400495070 /* Playlist.swift in Sources */,
+				5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */,
+				5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */,
+				5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */,
 				5ADED068279B5D0200FB2E6D /* FavoritesView.swift in Sources */,
+				5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */,
 				5ADED03B279B56EE00FB2E6D /* Tabs.swift in Sources */,
+				5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */,
 				5ADED06E279B60F500FB2E6D /* IAMediaUtils.swift in Sources */,
+				5ADED076279B8AEC00FB2E6D /* Player.swift in Sources */,
+				5ADED073279B7AA600FB2E6D /* MiniPlayer.swift in Sources */,
 				5ADED039279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift in Sources */,
 				5ADED065279B58CB00FB2E6D /* SearchView.swift in Sources */,
 			);
@@ -479,7 +515,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Internet Archive Player/Preview Content\"";
-				DEVELOPMENT_TEAM = 3V9RT28258;
+				DEVELOPMENT_TEAM = YB9HQM8F84;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -492,8 +528,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "hunterleebrown.Internet-Archive-Player";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "hunterleebrown.ia-player";
+				PRODUCT_NAME = "ia-player";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -508,7 +544,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Internet Archive Player/Preview Content\"";
-				DEVELOPMENT_TEAM = 3V9RT28258;
+				DEVELOPMENT_TEAM = YB9HQM8F84;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -521,8 +557,8 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "hunterleebrown.Internet-Archive-Player";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "hunterleebrown.ia-player";
+				PRODUCT_NAME = "ia-player";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -11,7 +11,7 @@ struct SearchView: View {
     var body: some View {
         VStack {
             Text("This is Search")
-        }.modifier(IATabViewModifier(backgroundColor: Color.gray))
+        }.modifier(BackgroundColorModifier(backgroundColor: Color.gray))
 
     }
 }

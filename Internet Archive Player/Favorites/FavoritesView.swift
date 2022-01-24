@@ -12,7 +12,7 @@ struct FavoritesView: View {
         VStack {
             Text("This is Favorites")
         }
-        .modifier(IATabViewModifier(backgroundColor: Color.gray))
+        .modifier(BackgroundColorModifier(backgroundColor: Color.gray))
     }
 }
 

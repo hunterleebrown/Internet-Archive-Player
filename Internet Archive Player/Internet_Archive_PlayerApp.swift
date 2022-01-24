@@ -11,7 +11,7 @@ import SwiftUI
 struct Internet_Archive_PlayerApp: App {
     var body: some Scene {
         WindowGroup {
-            Tabs()
+            HomeView()
         }
     }
 }

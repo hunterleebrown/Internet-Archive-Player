@@ -88,6 +88,8 @@ struct IAColors
     
     static let fairyRed = UIColor(red: 201.0/255.0, green: 26.0/255.0, blue: 33.0/255.0, alpha: 1.0)
     static let fairyCream = UIColor(red: 255.0/255.0, green: 239.0/255.0, blue: 189.0/255.0, alpha: 1.0)
+    static let blackSheer = UIColor(red: 0, green: 0, blue: 0, alpha: 0.66)
+    static let droppy = UIColor(red: 66/255.0, green: 66/255.0, blue: 66/255.0, alpha: 1.0)
 
 }
 
@@ -104,12 +106,19 @@ extension UIColor {
     class var fairyCreamAlpha: UIColor {
         return UIColor(red: 255.0/255.0, green: 239.0/255.0, blue: 189.0/255.0, alpha: 0.75)
     }
+
+    class var sheerBlack: UIColor {
+        return IAColors.blackSheer
+    }
+
 }
 
 extension Color {
     static let fairyRed = Color(UIColor.fairyRed)
     static let fairyCream = Color(UIColor.fairyCream)
     static let fairyCreamAlpha = Color(UIColor.fairyCreamAlpha)
+    static let sheerBlack = Color(UIColor.sheerBlack)
+    static let droopy = Color(IAColors.droppy)
 }
 
 
