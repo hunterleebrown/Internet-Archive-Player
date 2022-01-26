@@ -7,23 +7,46 @@
 
 import SwiftUI
 import iaAPI
+import Alamofire
 
 struct SearchView: View {
     @State private var searchText = ""
     @ObservedObject var viewModel = SearchView.ViewModel()
-    
+    @FocusState private var searchFocused: Bool
+    @EnvironmentObject var playlistViewModel: Playlist.ViewModel
+
     var body: some View {
         NavigationView {
             VStack {
-                SearchBar()
-                    .padding(10)
-                //                    .background(Color.fairyRed)
+                TextField("Search The Internet Archive",
+                          text: $searchText,
+                          onCommit:{
+                    if !searchText.isEmpty {
+                        viewModel.cancelRequest()
+                        viewModel.searchText = searchText
+                        searchFocused = false
+                    }
+                })
+                    .focused($searchFocused)
+
+                    .onChange(of: searchText, perform: { text in
+                        if !text.isEmpty {
+                            viewModel.cancelRequest()
+                            viewModel.searchText = text
+                        } else {
+                            viewModel.cancelRequest()
+                            searchFocused = false
+                        }
+                    })
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(5)
+
                 ScrollView {
                     LazyVStack{
                         
                         ForEach(viewModel.items, id: \.self) { doc in
                             NavigationLink(destination: Detail(doc: doc)) {
-                                ItemView(item: doc)
+                                SearchItemView(item: doc)
                                     .padding(.leading, 10)
                                     .padding(.trailing, 10)
                                     .padding(.bottom, 10)
@@ -42,71 +65,7 @@ struct SearchView: View {
             .background(Color.droopy)
         }
         .background(Color.droopy)
-        .navigationViewStyle(StackNavigationViewStyle())
-        
-    }
-    
-    struct SearchBar: View {
-        @EnvironmentObject var viewModel: ViewModel
-        
-        var body: some View {
-            HStack(spacing: 20) {
-                SearchTextField($viewModel.searchText)
-                    .becomeFirstResponder()
-                    .onReturn {
-                    }
-                    .cornerRadius(4)
-                
-            }
-            .frame(height: 36.0)
-        }
-    }
-    
-    struct ItemView: View {
-        var item: IASearchDoc
-        var body: some View {
-            HStack(alignment:.top, spacing: 10.0) {
-                
-                AsyncImage(
-                    url: item.iconUrl,
-                    content: { image in
-                        image.resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: 80,
-                                   maxHeight: 80)
-                            .background(Color.black)
-                        
-                    },
-                    placeholder: {
-                        ProgressView()
-                    })
-                    .cornerRadius(15)
-                
-                VStack(alignment:.leading) {
-                    Text(item.title ?? "")
-                        .frame(alignment:.leading)
-                        .font(.headline)
-                        .foregroundColor(.fairyCream)
-                        .multilineTextAlignment(.leading)
-                    Text(item.creator.joined(separator: ", "))
-                        .font(.footnote)
-                        .frame(alignment:.leading)
-                        .foregroundColor(.fairyCream)
-                        .multilineTextAlignment(.leading)
-                    Text(item.desc ?? "")
-                        .font(.body)
-                        .frame(alignment:.leading)
-                        .foregroundColor(.fairyCream)
-                        .multilineTextAlignment(.leading)
-
-                }
-                .frame(maxWidth: .infinity,
-                       alignment: .leading)
-            }
-            .background(Color.droopy)
-            .frame(maxWidth: .infinity,
-                   minHeight: 90)
-        }
+        .navigationViewStyle(StackNavigationViewStyle())        
     }
 }
 
@@ -119,14 +78,21 @@ struct SearchView_Previews: PreviewProvider {
 extension SearchView {
     final class ViewModel: ObservableObject {
         @Published var items: [IASearchDoc] = []
-        
         @Published var searchText: String = "" {
             didSet { handleTextChange() }
         }
         let service: IAService
-        
+
+        private var request: Request?
+
         init() {
             self.service = IAService()
+        }
+
+        func cancelRequest() {
+            if let req = request {
+                req.cancel()
+            }
         }
         
         func handleTextChange() {
@@ -136,11 +102,11 @@ extension SearchView {
         
         func search(query: String) {
             self.items.removeAll()
-            self.service.search(queryString: query,
-                                searchField: .all,
-                                mediaTypes: [.audio],
-                                rows: 100,
-                                format: .mp3) { (docs, error) in
+            request = self.service.search(queryString: query,
+                                              searchField: .all,
+                                              mediaTypes: [.audio],
+                                              rows: 100,
+                                              format: .mp3) { (docs, error) in
                 docs?.forEach({ (doc) in
                     self.items.append(doc)
                 })
@@ -158,5 +124,11 @@ extension IASearchDoc: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(identifier)
         hasher.combine(title)
+    }
+}
+
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

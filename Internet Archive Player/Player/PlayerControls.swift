@@ -22,7 +22,7 @@ struct PlayerControls: View {
                 HStack {
                     PlayerButton(showPlayer ? .listFill : .list, 20, {
                         withAnimation {
-                            self.showPlayer = !self.showPlayer
+                            self.showPlayer.toggle()
                         }
                     })
                     Spacer()

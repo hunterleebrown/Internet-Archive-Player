@@ -9,11 +9,22 @@ import SwiftUI
 import iaAPI
 
 struct Detail: View {
-    
+    @EnvironmentObject var playlistViewModel: Playlist.ViewModel
     var doc: IASearchDoc?
     
     var body: some View {
-        Text(doc?.title ?? "")
+        VStack{
+            if let doc = doc {
+                SearchItemView(item: doc)
+                    .onLongPressGesture {
+                        playlistViewModel.items.append(doc)
+                    }
+                    .frame(alignment:.top)
+                    .padding(10)
+            }
+            Spacer()
+        }
+        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
     }
 }
 

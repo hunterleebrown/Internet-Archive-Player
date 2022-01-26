@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct Tabs: View {
-    @Binding var showPlayer : Bool
 
     var body: some View {
         TabView {
@@ -32,7 +31,6 @@ extension View {
     func tabStyle() -> some View {
 
         onAppear {
-            UITabBar.appearance().backgroundColor = IAColors.droppy
 
             let offColor = UIColor.lightGray
             let itemAppearance = UITabBarItemAppearance()
@@ -43,11 +41,16 @@ extension View {
             ]
 
             let appearance = UITabBarAppearance()
+            appearance.configureWithDefaultBackground()
             appearance.stackedLayoutAppearance = itemAppearance
             appearance.inlineLayoutAppearance = itemAppearance
             appearance.compactInlineLayoutAppearance = itemAppearance
+            appearance.configureWithDefaultBackground()
+            appearance.backgroundColor = IAColors.fairyRed
 
             UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+
 
         }
     }
@@ -56,6 +59,6 @@ extension View {
 
 struct Tabs_Previews: PreviewProvider {
     static var previews: some View {
-        Tabs(showPlayer: .constant(false))
+        Tabs()
     }
 }

@@ -9,17 +9,31 @@ import SwiftUI
 
 struct HomeView: View {
     @State var showPlayer = false
+    @StateObject var playlistViewModel = Playlist.ViewModel()
     var body: some View {
         VStack(alignment:.leading, spacing: 0) {
-
-            if (showPlayer) {
+            ZStack(alignment:.top) {
+                if showPlayer {
                 Playlist()
-            } else {
-                Tabs(showPlayer: $showPlayer)
+                    .zIndex(1)
+//                    .opacity(showPlayer ? 1 : 0)
+//                    .frame(height: showPlayer ? nil : 0, alignment: .bottom)
+                    .transition(.move(edge:.bottom))
+                }
+                Tabs()
+//                    .zIndex(showPlayer ? 2 : 1)
+//                    .opacity(showPlayer ? 0 : 1)
+//                    .frame(height: showPlayer ? 0 : nil, alignment: .bottom)
+//                    .transition(.scale(scale: 0.1, anchor: .bottom))
+
+
             }
             Player(showPlayer: $showPlayer)
-                .frame(height: 100)
+                .frame(height: 100, alignment: .bottom)
         }
+        .ignoresSafeArea(.keyboard)
+        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
+        .environmentObject(playlistViewModel)
     }
 }
 
