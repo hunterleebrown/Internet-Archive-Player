@@ -45,7 +45,7 @@ struct SearchView: View {
                     LazyVStack{
                         
                         ForEach(viewModel.items, id: \.self) { doc in
-                            NavigationLink(destination: Detail(doc: doc)) {
+                            NavigationLink(destination: Detail(doc)) {
                                 SearchItemView(item: doc)
                                     .padding(.leading, 10)
                                     .padding(.trailing, 10)

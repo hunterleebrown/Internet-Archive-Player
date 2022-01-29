@@ -15,7 +15,7 @@ struct Playlist: View {
     var body: some View {
         VStack(alignment:.leading, spacing: 0){
             HStack(spacing:10.0) {
-                Text(playlistViewModel.textToShow)
+                Text("Playlist")
                     .foregroundColor(.fairyCream)
                     .padding(10)
                 Spacer()
@@ -24,9 +24,12 @@ struct Playlist: View {
 
                 }) {
                     Text("Clear")
-                        .border(Color.fairyCream, width: 1.0)
                         .padding(10)
                         .foregroundColor(.fairyCream)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Color.fairyCream, lineWidth: 2)
+                    )
                 }
 
             }
@@ -37,7 +40,7 @@ struct Playlist: View {
                 LazyVStack{
 
                     ForEach(playlistViewModel.items, id: \.self) { doc in
-                        NavigationLink(destination: Detail(doc: doc)) {
+                        NavigationLink(destination: Detail(doc)) {
                             SearchItemView(item: doc)
                                 .padding(.leading, 10)
                                 .padding(.trailing, 10)
@@ -83,10 +86,6 @@ struct SwiftUIView_Previews: PreviewProvider {
 
 extension Playlist {
     final class ViewModel: ObservableObject {
-        let textToShow: String
         @Published var items: [IASearchDoc] = []
-        init() {
-            textToShow = "Bananas"
-        }
     }
 }

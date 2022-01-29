@@ -16,17 +16,9 @@ struct HomeView: View {
                 if showPlayer {
                 Playlist()
                     .zIndex(1)
-//                    .opacity(showPlayer ? 1 : 0)
-//                    .frame(height: showPlayer ? nil : 0, alignment: .bottom)
                     .transition(.move(edge:.bottom))
                 }
                 Tabs()
-//                    .zIndex(showPlayer ? 2 : 1)
-//                    .opacity(showPlayer ? 0 : 1)
-//                    .frame(height: showPlayer ? 0 : nil, alignment: .bottom)
-//                    .transition(.scale(scale: 0.1, anchor: .bottom))
-
-
             }
             Player(showPlayer: $showPlayer)
                 .frame(height: 100, alignment: .bottom)

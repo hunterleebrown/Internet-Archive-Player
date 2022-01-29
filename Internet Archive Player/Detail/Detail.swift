@@ -10,18 +10,16 @@ import iaAPI
 
 struct Detail: View {
     @EnvironmentObject var playlistViewModel: Playlist.ViewModel
+    @ObservedObject var viewModel: Detail.ViewModel
     var doc: IASearchDoc?
+
+    init(_ doc: IASearchDoc?) {
+        self.doc = doc
+        self.viewModel = Detail.ViewModel(doc)
+    }
     
     var body: some View {
         VStack{
-            if let doc = doc {
-                SearchItemView(item: doc)
-                    .onLongPressGesture {
-                        playlistViewModel.items.append(doc)
-                    }
-                    .frame(alignment:.top)
-                    .padding(10)
-            }
             Spacer()
         }
         .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
@@ -30,6 +28,18 @@ struct Detail: View {
 
 struct Detail_Previews: PreviewProvider {
     static var previews: some View {
-        Detail()
+        Detail(nil)
     }
+}
+
+extension Detail {
+    final class ViewModel: ObservableObject {
+        let service: IAService
+        let searchDoc: IASearchDoc?
+        init(_ doc: IASearchDoc?) {
+            self.service = IAService()
+            self.searchDoc = doc
+        }
+    }
+    
 }

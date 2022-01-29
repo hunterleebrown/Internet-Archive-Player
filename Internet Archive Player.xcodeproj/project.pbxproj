@@ -124,6 +124,7 @@
 		5ADED037279B56EE00FB2E6D /* Internet Archive Player */ = {
 			isa = PBXGroup;
 			children = (
+				CEF72C9827A24BF700B8AF15 /* Detail */,
 				5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */,
 				5ADED077279B8BA000FB2E6D /* HomeView.swift */,
 				5ADED03A279B56EE00FB2E6D /* Tabs.swift */,
@@ -167,7 +168,6 @@
 			isa = PBXGroup;
 			children = (
 				5ADED064279B58CB00FB2E6D /* SearchView.swift */,
-				CE16141A279E9EE900ED0055 /* Detail.swift */,
 				5A2FACD227A10FB200D02945 /* SearchItemView.swift */,
 			);
 			path = Search;
@@ -217,6 +217,14 @@
 				5AD6BC57279CF31400495070 /* Playlist.swift */,
 			);
 			path = Player;
+			sourceTree = "<group>";
+		};
+		CEF72C9827A24BF700B8AF15 /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				CE16141A279E9EE900ED0055 /* Detail.swift */,
+			);
+			path = Detail;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
