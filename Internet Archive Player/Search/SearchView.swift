@@ -43,13 +43,12 @@ struct SearchView: View {
 
                 ScrollView {
                     LazyVStack{
-                        
                         ForEach(viewModel.items, id: \.self) { doc in
                             NavigationLink(destination: Detail(doc)) {
                                 SearchItemView(item: doc)
-                                    .padding(.leading, 10)
-                                    .padding(.trailing, 10)
-                                    .padding(.bottom, 10)
+                                    .padding(.leading, 5)
+                                    .padding(.trailing, 5)
+                                    .padding(.bottom, 5)
                             }
                         }
                     }
@@ -57,6 +56,7 @@ struct SearchView: View {
                 }
                 .background(Color.droopy)
                 .listStyle(PlainListStyle())
+                .padding(0)
             }
             .frame(alignment: .leading)
             .environmentObject(viewModel)
@@ -65,7 +65,8 @@ struct SearchView: View {
             .background(Color.droopy)
         }
         .background(Color.droopy)
-        .navigationViewStyle(StackNavigationViewStyle())        
+        .navigationViewStyle(StackNavigationViewStyle())
+        .accentColor(Color.black)
     }
 }
 

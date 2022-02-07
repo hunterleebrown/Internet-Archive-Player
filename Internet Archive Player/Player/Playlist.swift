@@ -7,6 +7,9 @@
 
 import SwiftUI
 import iaAPI
+import MediaPlayer
+import AVFoundation
+import AVKit
 
 struct Playlist: View {
     @State private var seek = 1.0
@@ -87,5 +90,6 @@ struct SwiftUIView_Previews: PreviewProvider {
 extension Playlist {
     final class ViewModel: ObservableObject {
         @Published var items: [IASearchDoc] = []
+        let iaPlayer = IAPlayer()
     }
 }

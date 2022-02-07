@@ -12,7 +12,7 @@ import iaAPI
 struct SearchItemView: View {
     var item: IASearchDoc
     var body: some View {
-        HStack(alignment:.top, spacing: 10.0) {
+        HStack(alignment:.center, spacing: 10.0) {
 
             AsyncImage(
                 url: item.iconUrl,

@@ -8,7 +8,11 @@
 import SwiftUI
 
 struct PlayerControls: View {
+    @EnvironmentObject var playlistViewModel: Playlist.ViewModel
     @Binding var showPlayer: Bool
+
+    @State var playing: Bool = false
+
     var body: some View {
         GeometryReader{ g in
             VStack{
@@ -28,7 +32,10 @@ struct PlayerControls: View {
                     Spacer()
                     PlayerButton(.backwards)
                     Spacer()
-                    PlayerButton(.play, 44.0)
+                    PlayerButton(self.playing ? .pause : .play, 44.0) {
+                        playlistViewModel.iaPlayer.didTapPlayButton()
+                        self.playing = playlistViewModel.iaPlayer.playing
+                    }
                     Spacer()
                     PlayerButton(.forwards)
                     Spacer()
