@@ -52,9 +52,9 @@ struct SearchView: View {
                             }
                         }
                     }
-                    .background(Color.droopy)
+                    //                    .background(Color.droopy)
                 }
-                .background(Color.droopy)
+                //                .background(Color.droopy)
                 .listStyle(PlainListStyle())
                 .padding(0)
             }
@@ -62,9 +62,9 @@ struct SearchView: View {
             .environmentObject(viewModel)
             .navigationTitle("")
             .navigationBarHidden(true)
-            .background(Color.droopy)
+            //            .background(Color.droopy)
         }
-        .background(Color.droopy)
+        //        .background(Color.droopy)
         .navigationViewStyle(StackNavigationViewStyle())
         .accentColor(Color.black)
     }
@@ -104,10 +104,10 @@ extension SearchView {
         func search(query: String) {
             self.items.removeAll()
             request = self.service.search(queryString: query,
-                                              searchField: .all,
-                                              mediaTypes: [.audio],
-                                              rows: 100,
-                                              format: .mp3) { (docs, error) in
+                                          searchField: .all,
+                                          mediaTypes: [.audio],
+                                          rows: 100,
+                                          format: .mp3) { (docs, error) in
                 docs?.forEach({ (doc) in
                     self.items.append(doc)
                 })

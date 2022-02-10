@@ -11,6 +11,7 @@ import iaAPI
 
 struct SearchItemView: View {
     var item: IASearchDoc
+    var textColor: Color = .droopy
     var body: some View {
         HStack(alignment:.center, spacing: 10.0) {
 
@@ -33,24 +34,24 @@ struct SearchItemView: View {
                 Text(item.title ?? "")
                     .frame(alignment:.leading)
                     .font(.headline)
-                    .foregroundColor(.fairyCream)
+                    .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
                 Text(item.creator.joined(separator: ", "))
                     .font(.footnote)
                     .frame(alignment:.leading)
-                    .foregroundColor(.fairyCream)
+                    .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
                 Text(item.desc ?? "")
                     .font(.body)
                     .frame(alignment:.leading)
-                    .foregroundColor(.fairyCream)
+                    .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
 
             }
             .frame(maxWidth: .infinity,
                    alignment: .leading)
         }
-        .background(Color.droopy)
+//        .background(Color.droopy)
         .frame(maxWidth: .infinity,
                minHeight: 90)
     }

@@ -24,7 +24,7 @@ struct HomeView: View {
                 .frame(height: 100, alignment: .bottom)
         }
         .ignoresSafeArea(.keyboard)
-        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
+//        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
         .environmentObject(playlistViewModel)
     }
 }

@@ -90,6 +90,5 @@ struct SwiftUIView_Previews: PreviewProvider {
 extension Playlist {
     final class ViewModel: ObservableObject {
         @Published var items: [IASearchDoc] = []
-        let iaPlayer = IAPlayer()
     }
 }

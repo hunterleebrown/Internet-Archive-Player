@@ -14,6 +14,8 @@ struct Detail: View {
     var doc: IASearchDoc?
     @State var descriptionExpanded = false
 
+    @Inject var iaPlayer: IAPlayer
+
     init(_ doc: IASearchDoc?) {
         self.doc = doc
         self.viewModel = Detail.ViewModel(doc)
@@ -42,9 +44,11 @@ struct Detail: View {
                     Text(self.viewModel.archiveDoc?.title ?? "")
                         .font(.headline)
                         .bold()
+                        .multilineTextAlignment(.center)
                     if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator {
                         Text(artist)
                             .font(.subheadline)
+                            .multilineTextAlignment(.center)
                     }
 
                 }
@@ -71,18 +75,23 @@ struct Detail: View {
                         .padding(10)
                         .background(Color.white)
                         .frame(height: self.descriptionExpanded ? nil : 100)
+                        .frame(alignment:.leading)
+                        //                        .overlay(
+                        //                            RoundedRectangle(cornerRadius: 5.0)
+                        //                                .stroke(Color.gray, lineWidth: 1.0)
+                        //                        )
+                        //                        .shadow(color: Color.droopy, radius: 5, x: 0, y: 5)
                     }
                 }
 
-                LazyVStack(spacing:2) {
+                LazyVStack(spacing:5.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
                         FileView(file)
-                            .padding(.bottom, 5.0)
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
                                 if let archiveDoc = self.viewModel.archiveDoc {
-                                    playlistViewModel.iaPlayer.playFile(file: file, doc: archiveDoc)
+                                    iaPlayer.playFile(file: file, doc: archiveDoc)
                                 }
                             }
                     }
@@ -105,67 +114,91 @@ struct FileView: View {
     init(_ file: IAFile){
         iaFile = file
     }
+
+    var textColor = Color.droopy
+
     var body: some View {
-        HStack() {
-            VStack() {
-                let title = fileTitle(iaFile)
+        ZStack {
+            RoundedRectangle(cornerRadius: 5.0)
+                .fill(Color.white)
+                .background(Color.white)
+                .shadow(color: Color.droopy, radius: 2, x: 0, y: 2)
 
-                if let name = iaFile?.name {
-                    if title != name {
-                        Text(title)
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color.fairyCream)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    } else {
-                        Text(title)
-                            .font(.caption2)
-                            .foregroundColor(Color.fairyCream)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    }
-                }
-
-
-                if let name = iaFile?.name {
-                    if title != name {
-                        Text(iaFile?.name ?? "")
-                            .font(.caption2)
-                            .foregroundColor(Color.fairyCream)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(5.0)
-            Spacer()
             HStack() {
-                VStack(alignment:.leading) {
-                    Text("\(iaFile?.calculatedSize ?? "\"\"") mb")
-                        .font(.caption2)
-                        .foregroundColor(Color.fairyCream)
-                    Text(iaFile?.displayLength ?? "")
-                        .font(.caption2)
-                        .foregroundColor(Color.fairyCream)
-                }
+                VStack() {
+                    let title = fileTitle(iaFile)
 
-                Button(action: {
+                    if let name = iaFile?.name {
+                        if title != name {
+                            Text(title)
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(textColor)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .multilineTextAlignment(.leading)
+                        } else {
+                            Text(title)
+                                .font(.caption2)
+                                .foregroundColor(textColor)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
 
-                }) {
-                    Image(systemName: "cloud")
-                        .accentColor(Color.fairyCream)
-                        .aspectRatio(contentMode: .fill)
+
+                    if let name = iaFile?.name {
+                        if title != name {
+                            Text(iaFile?.name ?? "")
+                                .font(.caption2)
+                                .foregroundColor(textColor)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
                 }
-                .accentColor(Color.fairyRed)
-                .frame(width: 44, height: 44)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(5.0)
+                Spacer()
+                HStack() {
+                    VStack(alignment:.leading) {
+                        Text("\(iaFile?.calculatedSize ?? "\"\"") mb")
+                            .font(.caption2)
+                            .foregroundColor(textColor)
+                        Text(iaFile?.displayLength ?? "")
+                            .font(.caption2)
+                            .foregroundColor(textColor)
+                    }
+
+                    Button(action: {
+
+                    }) {
+                        Image(systemName: "icloud.and.arrow.down")
+                            .accentColor(textColor)
+                            .aspectRatio(contentMode: .fill)
+                    }
+                    .frame(width: 44, height: 44)
+
+                    Button(action: {
+
+                    }) {
+                        Image(systemName: "ellipsis")
+                            .accentColor(textColor)
+                            .aspectRatio(contentMode: .fill)
+                    }
+                    .frame(width: 44, height: 44)
+                }
+                //            .frame(width:100)
+                .padding(5.0)
             }
-//            .frame(width:100)
-            .padding(5.0)
         }
-        .background(Color.droopy)
-        .cornerRadius(5.0)
+
+
+        //        .background(Color.droopy)
+        //        .cornerRadius(5.0)
+        //        .overlay(
+        //            Rectangle()
+        //                .foregroundColor(Color.white)
+        //        )
     }
 
     private func fileTitle(_ iaFile: IAFile?) -> String {

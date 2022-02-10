@@ -10,7 +10,7 @@ import SwiftUI
 struct PlayerControls: View {
     @EnvironmentObject var playlistViewModel: Playlist.ViewModel
     @Binding var showPlayer: Bool
-
+    @Inject var iaPlayer: IAPlayer
     @State var playing: Bool = false
 
     var body: some View {
@@ -24,6 +24,9 @@ struct PlayerControls: View {
                     .font(.system(size: g.size.height > g.size.width ? g.size.width * 0.2: g.size.height * 0.2))
                     .foregroundColor(.fairyCream)
                 HStack {
+
+
+
                     PlayerButton(showPlayer ? .listFill : .list, 20, {
                         withAnimation {
                             self.showPlayer.toggle()
@@ -32,9 +35,12 @@ struct PlayerControls: View {
                     Spacer()
                     PlayerButton(.backwards)
                     Spacer()
-                    PlayerButton(self.playing ? .pause : .play, 44.0) {
-                        playlistViewModel.iaPlayer.didTapPlayButton()
-                        self.playing = playlistViewModel.iaPlayer.playing
+
+
+
+                    PlayerButton(iaPlayer.playing ? .pause : .play, 44.0) {
+                        iaPlayer.didTapPlayButton()
+//                        self.playing = iaPlayer.playing
                     }
                     Spacer()
                     PlayerButton(.forwards)
