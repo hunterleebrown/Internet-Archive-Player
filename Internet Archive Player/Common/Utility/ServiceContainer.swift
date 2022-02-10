@@ -15,13 +15,13 @@ struct ServiceContainer {
     }
 
 
-    public static var iaPlayer = IAPlayer()
+//    public static var iaPlayer = IAPlayer()
 
     static func resolve<T : Any>(serviceType: T.Type) throws -> T {
 
-        if serviceType == IAPlayer.self {
-            return (iaPlayer as! T)
-        }
+//        if serviceType == IAPlayer.self {
+//            return (iaPlayer as! T)
+//        }
 
 //        if serviceType == TrackingContext.self {
 //            return (trackingService as! T)

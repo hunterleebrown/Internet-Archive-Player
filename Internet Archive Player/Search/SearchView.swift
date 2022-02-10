@@ -29,15 +29,15 @@ struct SearchView: View {
                 })
                     .focused($searchFocused)
 
-                    .onChange(of: searchText, perform: { text in
-                        if !text.isEmpty {
-                            viewModel.cancelRequest()
-                            viewModel.searchText = text
-                        } else {
-                            viewModel.cancelRequest()
-                            searchFocused = false
-                        }
-                    })
+//                    .onChange(of: searchText, perform: { text in
+//                        if !text.isEmpty {
+//                            viewModel.cancelRequest()
+//                            viewModel.searchText = text
+//                        } else {
+//                            viewModel.cancelRequest()
+//                            searchFocused = false
+//                        }
+//                    })
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(5)
 

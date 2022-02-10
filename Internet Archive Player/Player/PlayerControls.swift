@@ -9,38 +9,40 @@ import SwiftUI
 
 struct PlayerControls: View {
     @EnvironmentObject var playlistViewModel: Playlist.ViewModel
-    @Binding var showPlayer: Bool
-    @Inject var iaPlayer: IAPlayer
+    @EnvironmentObject var iaPlayer: IAPlayer
+    
+    @Binding var showPlaylist: Bool
     @State var playing: Bool = false
-
+    
     var body: some View {
         GeometryReader{ g in
             VStack{
-
-                Text("Hunter Lee Brown")
-                    .foregroundColor(.fairyCream)
-                    .fontWeight(.bold)
-                Text("This is a super very long title that I'm trying to make a point on")
-                    .font(.system(size: g.size.height > g.size.width ? g.size.width * 0.2: g.size.height * 0.2))
-                    .foregroundColor(.fairyCream)
+                
+                VStack(){
+                    Text(iaPlayer.playingFile?.file.title ?? iaPlayer.playingFile?.file.name ?? "")
+                        .foregroundColor(.fairyCream)
+                        .fontWeight(.bold)
+                    Text(iaPlayer.playingFile?.doc.artist ??  iaPlayer.playingFile?.doc.creator ?? "")
+                        .font(.system(size: g.size.height > g.size.width ? g.size.width * 0.2: g.size.height * 0.2))
+                        .foregroundColor(.fairyCream)
+                }
+                .frame(height: 44.0, alignment: .center)
+                .padding(.leading, 5.0)
+                .padding(.trailing, 5.0)
+                
                 HStack {
-
-
-
-                    PlayerButton(showPlayer ? .listFill : .list, 20, {
+                    
+                    PlayerButton(showPlaylist ? .listFill : .list, 20, {
                         withAnimation {
-                            self.showPlayer.toggle()
+                            self.showPlaylist.toggle()
                         }
                     })
                     Spacer()
                     PlayerButton(.backwards)
                     Spacer()
-
-
-
+                    
                     PlayerButton(iaPlayer.playing ? .pause : .play, 44.0) {
                         iaPlayer.didTapPlayButton()
-//                        self.playing = iaPlayer.playing
                     }
                     Spacer()
                     PlayerButton(.forwards)
@@ -55,12 +57,12 @@ struct PlayerControls: View {
             .padding(.top, 5.0)
             .modifier(BackgroundColorModifier(backgroundColor: .fairyRed))
         }
-
+        
     }
 }
 
 struct PlayerControls_Previews: PreviewProvider {
     static var previews: some View {
-        PlayerControls(showPlayer: .constant(false))
+        PlayerControls(showPlaylist: .constant(false))
     }
 }

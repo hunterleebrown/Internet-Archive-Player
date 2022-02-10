@@ -11,20 +11,17 @@ import MediaPlayer
 import AVFoundation
 import AVKit
 
-class IAPlayer: NSObject, ObservableObject {
+typealias PlayerFile = (file: IAFile, doc: IAArchiveDoc)
 
-    var avPlayer: AVPlayer?
-//    var controlsController : IAPlayerViewController?
-    var observing = false
+class IAPlayer: NSObject, ObservableObject {
     @Published var playing = false
+    @Published var playingFile: PlayerFile? = nil
+    
+    var avPlayer: AVPlayer?
+    var observing = false
     var playUrl: URL!
 
     fileprivate var observerContext = 0
-
-
-    static let sharedInstance: IAPlayer = {
-        return IAPlayer()
-    }()
 
     var fileTitle: String?
     var fileIdentifierTitle: String?
@@ -35,13 +32,15 @@ class IAPlayer: NSObject, ObservableObject {
 //    typealias PlaylistWithIndex = (list:IAList, index:Int)
 //    var playingPlaylistWithIndex: PlaylistWithIndex?
 
-    func playFile(file:IAFile, doc:IAArchiveDoc){
+    func playFile(_ playerFile: PlayerFile){
 
-        self.fileTitle = file.title ?? file.name
-        self.fileIdentifierTitle = doc.title
-        self.fileIdentifier = doc.identifier
-        self.playUrl = doc.fileUrl(file: file)
+        self.fileTitle = playerFile.file.title ?? playerFile.file.name
+        self.fileIdentifierTitle = playerFile.doc.title
+        self.fileIdentifier = playerFile.doc.identifier
+        self.playUrl = playerFile.doc.fileUrl(file: playerFile.file)
 
+        self.playingFile = playerFile
+        
         self.loadAndPlay()
     }
 
@@ -71,12 +70,6 @@ class IAPlayer: NSObject, ObservableObject {
         }
 
         self.setActiveAudioSession()
-
-//        if let controller = controlsController {
-//            controller.nowPlayingTitle.text = self.fileTitle
-//            controller.nowPlayingItemButton.setTitle(self.fileIdentifierTitle, for: .normal)
-//            controller.displayNowPlayingTitle(message: self.fileTitle!)
-//        }
 
         avPlayer = AVPlayer(url: self.playUrl as URL)
 

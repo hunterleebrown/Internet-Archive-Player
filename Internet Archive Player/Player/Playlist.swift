@@ -42,13 +42,16 @@ struct Playlist: View {
             ScrollView {
                 LazyVStack{
 
-                    ForEach(playlistViewModel.items, id: \.self) { doc in
-                        NavigationLink(destination: Detail(doc)) {
-                            SearchItemView(item: doc)
-                                .padding(.leading, 10)
-                                .padding(.trailing, 10)
-                                .padding(.bottom, 10)
-                        }
+                    ForEach(playlistViewModel.items, id: \.self) { file in
+                        FileView(file)
+                            .padding(.leading, 5.0)
+                            .padding(.trailing, 5.0)
+                            .onTapGesture {
+//                                if let archiveDoc = self.viewModel.archiveDoc {
+//                                    iaPlayer.playFile((file: file, doc: archiveDoc))
+//                                }
+                            }
+
                     }
                 }
                 .background(Color.droopy)
@@ -89,6 +92,6 @@ struct SwiftUIView_Previews: PreviewProvider {
 
 extension Playlist {
     final class ViewModel: ObservableObject {
-        @Published var items: [IASearchDoc] = []
+        @Published var items: [IAFile] = []
     }
 }

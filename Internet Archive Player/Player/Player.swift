@@ -11,7 +11,7 @@ struct Player: View {
     @Binding var showPlayer: Bool
     var body: some View {
         VStack{
-            PlayerControls(showPlayer: $showPlayer)
+            PlayerControls(showPlaylist: $showPlayer)
         }
     }
 }
