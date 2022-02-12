@@ -34,6 +34,7 @@
 		CE16141B279E9EE900ED0055 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16141A279E9EE900ED0055 /* Detail.swift */; };
 		CED82BCD279E849200EB1248 /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = CED82BCC279E849200EB1248 /* iaAPI */; };
 		CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF72C9927B5D72600B8AF15 /* FileView.swift */; };
+		CEF72C9D27B8361300B8AF15 /* IAFile+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF72C9C27B8361300B8AF15 /* IAFile+Hashable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +84,7 @@
 		5ADED077279B8BA000FB2E6D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CE16141A279E9EE900ED0055 /* Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detail.swift; sourceTree = "<group>"; };
 		CEF72C9927B5D72600B8AF15 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
+		CEF72C9C27B8361300B8AF15 /* IAFile+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IAFile+Hashable.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,6 +152,7 @@
 				5ADED062279B588E00FB2E6D /* Search */,
 				5ADED063279B589600FB2E6D /* Favorites */,
 				5ADED069279B602900FB2E6D /* Utils */,
+				CEF72C9B27B835E600B8AF15 /* Model */,
 				5ADED06B279B607800FB2E6D /* Resources */,
 				5ADED06F279B638F00FB2E6D /* Common */,
 				5ADED074279B8A4A00FB2E6D /* Player */,
@@ -248,6 +251,14 @@
 				CE16141A279E9EE900ED0055 /* Detail.swift */,
 			);
 			path = Detail;
+			sourceTree = "<group>";
+		};
+		CEF72C9B27B835E600B8AF15 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				CEF72C9C27B8361300B8AF15 /* IAFile+Hashable.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -388,6 +399,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5AD6BC58279CF31400495070 /* Playlist.swift in Sources */,
+				CEF72C9D27B8361300B8AF15 /* IAFile+Hashable.swift in Sources */,
 				5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */,
 				5A4151BD27B3645E007A3623 /* Inject.swift in Sources */,
 				5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */,

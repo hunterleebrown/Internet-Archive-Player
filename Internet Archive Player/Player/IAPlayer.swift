@@ -11,11 +11,9 @@ import MediaPlayer
 import AVFoundation
 import AVKit
 
-typealias PlayerFile = (file: IAFile, doc: IAArchiveDoc)
-
 class IAPlayer: NSObject, ObservableObject {
     @Published var playing = false
-    @Published var playingFile: PlayerFile? = nil
+    @Published var playingFile: PlaylistItem? = nil
     
     var avPlayer: AVPlayer?
     var observing = false
@@ -32,7 +30,7 @@ class IAPlayer: NSObject, ObservableObject {
 //    typealias PlaylistWithIndex = (list:IAList, index:Int)
 //    var playingPlaylistWithIndex: PlaylistWithIndex?
 
-    func playFile(_ playerFile: PlayerFile){
+    func playFile(_ playerFile: PlaylistItem){
 
         self.fileTitle = playerFile.file.title ?? playerFile.file.name
         self.fileIdentifierTitle = playerFile.doc.title

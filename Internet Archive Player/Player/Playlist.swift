@@ -41,9 +41,8 @@ struct Playlist: View {
 
             ScrollView {
                 LazyVStack{
-
-                    ForEach(playlistViewModel.items, id: \.self) { file in
-                        FileView(file)
+                    ForEach(playlistViewModel.items, id: \.self) { playlistItem in
+                        FileView(playlistItem.file)
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
@@ -92,6 +91,33 @@ struct SwiftUIView_Previews: PreviewProvider {
 
 extension Playlist {
     final class ViewModel: ObservableObject {
-        @Published var items: [IAFile] = []
+        @Published var items: [PlaylistItem] = []
+    }
+}
+
+struct PlaylistItem: Hashable  {
+    
+    let file: IAFile
+    let doc: IAArchiveDoc
+    
+    init(_ file: IAFile, _ doc: IAArchiveDoc) {
+        self.file = file
+        self.doc = doc
+    }
+    
+    public static func == (lhs: PlaylistItem, rhs: PlaylistItem) -> Bool {
+        return lhs.file.name == rhs.file.name &&
+        lhs.file.title == rhs.file.title &&
+        lhs.file.format == rhs.file.format &&
+        lhs.file.track == rhs.file.track &&
+        lhs.doc.identifier == rhs.doc.identifier
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(file.title)
+        hasher.combine(file.track)
+        hasher.combine(file.name)
+        hasher.combine(file.format)
+        hasher.combine(doc.identifier)
     }
 }

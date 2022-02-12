@@ -91,14 +91,16 @@ struct Detail: View {
                             .padding(.trailing, 5.0)
                             .onTapGesture {
                                 if let archiveDoc = self.viewModel.archiveDoc {
-                                    iaPlayer.playFile((file: file, doc: archiveDoc))
-                                    let playlistFile = file
-                                    self.playlistViewModel.items.append(playlistFile)
+                                    let playlistItem = PlaylistItem(file, archiveDoc)
+                                    iaPlayer.playFile(playlistItem)
+                                    let copyOfPlaylistItem = playlistItem
+                                    self.playlistViewModel.items.append(copyOfPlaylistItem)
                                 }
                             }
                     }
                 }
             }
+            .id(UUID().uuidString)
             .padding(0)
         }
         //        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
@@ -144,20 +146,3 @@ extension Detail {
         }
     }
 }
-
-extension IAFile: Hashable {
-    public static func == (lhs: IAFile, rhs: IAFile) -> Bool {
-        return lhs.name == rhs.name &&
-        lhs.title == rhs.title &&
-        lhs.format == rhs.format &&
-        lhs.track == rhs.track
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(title)
-        hasher.combine(track)
-        hasher.combine(name)
-        hasher.combine(format)
-    }
-}
-
