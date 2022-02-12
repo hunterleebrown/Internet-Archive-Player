@@ -13,6 +13,9 @@ import AVKit
 
 class IAPlayer: NSObject, ObservableObject {
     @Published var playing = false
+    @Published var minTime: String? = nil
+    @Published var maxTime: String? = nil
+    @Published var sliderProgress: Double = 0.0
     @Published var playingFile: PlaylistItem? = nil
     
     var avPlayer: AVPlayer?
@@ -134,10 +137,70 @@ class IAPlayer: NSObject, ObservableObject {
 //                    player.rate > 0.0 ? controller.activityIndicator.startAnimating() : controller.activityIndicator.stopAnimating()
 //                }
 
-//                self.monitorPlayback()
+                self.monitorPlayback()
             }
 
         }
     }
 
+    func monitorPlayback() {
+
+        if let player = avPlayer {
+
+
+            if(player.currentItem != nil) {
+
+                let progress = CMTimeGetSeconds(player.currentTime()) / CMTimeGetSeconds((player.currentItem?.duration)!)
+
+//                if controller.playingProgress != nil {
+//                    controller.playingProgress.setValue(Float(progress), animated: false)
+//                    controller.topProgress.setProgress(Float(progress), animated: false)
+                    self.sliderProgress = progress;
+//                }
+
+                updatePlayerTimes()
+
+                if(player.rate != 0.0) {
+                    let delay = 0.1 * Double(NSEC_PER_SEC)
+                    let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+                    DispatchQueue.main.asyncAfter(deadline: time) {
+                        self.monitorPlayback()
+                    }
+                }
+            }
+
+            return
+        }
+    }
+
+    func updatePlayerTimes() {
+
+        if let player = avPlayer {
+
+            let calcTime = CMTimeGetSeconds((player.currentItem?.duration)!) - CMTimeGetSeconds(player.currentTime())
+
+            if(!calcTime.isNaN) {
+                if minTime != nil {
+                    minTime = IAStringUtils.timeFormatted(self.elapsedSeconds())
+                }
+                if maxTime != nil {
+                    maxTime = IAStringUtils.timeFormatted(Int(calcTime))
+                }
+            }
+        }
+    }
+
+    func elapsedSeconds()->Int {
+        if let player = avPlayer {
+
+            let calcTime = CMTimeGetSeconds((player.currentItem?.duration)!) - CMTimeGetSeconds(player.currentTime())
+            if(!calcTime.isNaN) {
+                let duration = CMTimeGetSeconds((player.currentItem?.duration)!)
+                return Int(duration) - Int(calcTime)
+            }
+            return 0
+        }
+
+        return 0
+    }
 }

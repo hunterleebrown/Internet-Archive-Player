@@ -14,6 +14,7 @@ import AVKit
 struct Playlist: View {
     @State private var seek = 1.0
     @EnvironmentObject var playlistViewModel: Playlist.ViewModel
+    @EnvironmentObject var iaPlayer: IAPlayer
 
     var body: some View {
         VStack(alignment:.leading, spacing: 0){
@@ -59,15 +60,15 @@ struct Playlist: View {
             .listStyle(PlainListStyle())
 
             VStack {
-                Slider(value: $seek,
-                       in: 0...100)
+                Slider(value: $iaPlayer.sliderProgress,
+                       in: 0...1)
                     .accentColor(.fairyCream)
                 HStack{
-                    Text("0:00:00")
+                    Text(iaPlayer.minTime ?? "")
                         .font(.system(size:9.0))
                         .foregroundColor(.fairyCream)
                     Spacer()
-                    Text("0.00.00")
+                    Text(iaPlayer.maxTime ?? "")
                         .font(.system(size:9.0))
                         .foregroundColor(.fairyCream)
 

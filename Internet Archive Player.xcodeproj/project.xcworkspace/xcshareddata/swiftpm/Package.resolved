@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Alamofire",
+        "repositoryURL": "https://github.com/Alamofire/Alamofire.git",
+        "state": {
+          "branch": null,
+          "revision": "f82c23a8a7ef8dc1a49a8bfc6a96883e79121864",
+          "version": "5.5.0"
+        }
+      },
+      {
+        "package": "iaAPI",
+        "repositoryURL": "git@github.com:hunterleebrown/iaAPI.git",
+        "state": {
+          "branch": null,
+          "revision": "4cd95438471a465b1b206254e523d430bbd5128c",
+          "version": "1.1.5"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
