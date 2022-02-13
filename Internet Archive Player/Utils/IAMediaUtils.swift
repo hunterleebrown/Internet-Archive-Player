@@ -186,7 +186,7 @@ struct IAMediaUtils
     
     static func imageUrlFrom(_ identifier: String)->URL?
     {
-        let itemImageUrl = "http://archive.org/services/img/\(identifier)"
+        let itemImageUrl = "https://archive.org/services/img/\(identifier)"
         if let url = URL(string: itemImageUrl) {
             return url
         } else {

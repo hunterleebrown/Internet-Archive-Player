@@ -84,7 +84,7 @@ class IAPlayer: NSObject, ObservableObject {
 //                controller.playingProgress.setValue(Float(0), animated: false)
 //            }
 
-//            self.setPlayingInfo(playing: false)
+            self.setPlayingInfo(playing: false)
             avPlayer = nil
         }
 
@@ -96,7 +96,7 @@ class IAPlayer: NSObject, ObservableObject {
         self.observing = true
 
         avPlayer?.play()
-
+        self.setPlayingInfo(playing: true)
 
     }
 
@@ -105,10 +105,10 @@ class IAPlayer: NSObject, ObservableObject {
         if let player = avPlayer {
             if player.currentItem != nil && self.playing {
                 player.pause()
-//                self.setPlayingInfo(playing: false)
+                self.setPlayingInfo(playing: false)
             } else {
                 player.play()
-//                self.setPlayingInfo(playing: true)
+                self.setPlayingInfo(playing: true)
             }
         }
     }
