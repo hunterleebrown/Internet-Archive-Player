@@ -9,8 +9,9 @@ import SwiftUI
 
 struct HomeView: View {
     @State var showPlayer = false
-    @StateObject var playlistViewModel = Playlist.ViewModel()
     @StateObject var iaPlayer = IAPlayer()
+    @StateObject var playlistViewModel = Playlist.ViewModel()
+    
     var body: some View {
         VStack(alignment:.leading, spacing: 0) {
             ZStack(alignment:.top) {

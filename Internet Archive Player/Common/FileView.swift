@@ -13,9 +13,12 @@ struct FileView: View {
     var iaFile: IAFile?
     var textColor = Color.white
     var auxControls = true
-    
-    init(_ file: IAFile){
+
+    var ellipsisAction: (()->())? = nil
+
+    init(_ file: IAFile, ellipsisAction: (()->())? = nil){
         iaFile = file
+        self.ellipsisAction = ellipsisAction
     }
     
     var body: some View {
@@ -80,6 +83,15 @@ struct FileView: View {
                             .aspectRatio(contentMode: .fill)
                     }
                     .frame(width: 44, height: 44)
+                    .contextMenu {
+                        Button(action: {
+                            if let doAction = self.ellipsisAction {
+                                doAction()
+                            }
+                        }){
+                            Text("Add to Playlist")
+                        }
+                    }
                 }
                 .padding(5.0)
             }

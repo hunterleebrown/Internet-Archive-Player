@@ -13,7 +13,9 @@ struct PlayerControls: View {
     
     @Binding var showPlaylist: Bool
     @State var playing: Bool = false
-    
+
+    var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
+
     var body: some View {
         GeometryReader{ g in
             VStack{
@@ -38,14 +40,18 @@ struct PlayerControls: View {
                         }
                     })
                     Spacer()
-                    PlayerButton(.backwards)
+                    PlayerButton(.backwards) {
+                        viewModel.goBackwards(iaPlayer, playlistViewModel.items)
+                    }
                     Spacer()
                     
                     PlayerButton(iaPlayer.playing ? .pause : .play, 44.0) {
                         iaPlayer.didTapPlayButton()
                     }
                     Spacer()
-                    PlayerButton(.forwards)
+                    PlayerButton(.forwards) {
+                        viewModel.goForwards(iaPlayer, playlistViewModel.items)
+                    }
                     Spacer()
                     AirPlayButton()
                         .frame(width: 33.0, height: 33.0)
@@ -58,6 +64,23 @@ struct PlayerControls: View {
             .modifier(BackgroundColorModifier(backgroundColor: .fairyRed))
         }
         
+    }
+}
+
+extension PlayerControls {
+    final class ViewModel {
+        func goForwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
+            if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
+                guard list.indices.contains(index + 1) else { return }
+                player.playFile(list[index + 1])
+            }
+        }
+        func goBackwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
+            if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
+                guard list.indices.contains(index - 1) else { return }
+                player.playFile(list[index - 1])
+            }
+        }
     }
 }
 

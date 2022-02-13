@@ -47,11 +47,8 @@ struct Playlist: View {
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
-//                                if let archiveDoc = self.viewModel.archiveDoc {
-//                                    iaPlayer.playFile((file: file, doc: archiveDoc))
-//                                }
+                                iaPlayer.playFile(playlistItem)
                             }
-
                     }
                 }
                 .background(Color.droopy)

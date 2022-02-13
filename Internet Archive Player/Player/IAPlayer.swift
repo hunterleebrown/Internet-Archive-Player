@@ -30,9 +30,6 @@ class IAPlayer: NSObject, ObservableObject {
 
     var mediaArtwork : MPMediaItemArtwork?
 
-//    typealias PlaylistWithIndex = (list:IAList, index:Int)
-//    var playingPlaylistWithIndex: PlaylistWithIndex?
-
     func playFile(_ playerFile: PlaylistItem){
 
         self.fileTitle = playerFile.file.title ?? playerFile.file.name

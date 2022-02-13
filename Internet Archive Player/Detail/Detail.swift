@@ -86,7 +86,12 @@ struct Detail: View {
                 
                 LazyVStack(spacing:5.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
-                        FileView(file)
+                        FileView(file, ellipsisAction: {
+                            if let archiveDoc = self.viewModel.archiveDoc {
+                                let playlistItem = PlaylistItem(file, archiveDoc)
+                                self.playlistViewModel.items.append(playlistItem)
+                            }
+                        })
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
@@ -100,7 +105,7 @@ struct Detail: View {
                     }
                 }
             }
-            .id(UUID().uuidString)
+//            .id(UUID().uuidString)
             .padding(0)
         }
         //        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
