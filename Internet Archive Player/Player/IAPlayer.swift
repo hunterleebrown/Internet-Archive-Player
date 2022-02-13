@@ -10,6 +10,8 @@ import iaAPI
 import MediaPlayer
 import AVFoundation
 import AVKit
+import UIKit
+import AlamofireImage
 
 class IAPlayer: NSObject, ObservableObject {
     @Published var playing = false
@@ -17,6 +19,7 @@ class IAPlayer: NSObject, ObservableObject {
     @Published var maxTime: String? = nil
     @Published var sliderProgress: Double = 0.0
     @Published var playingFile: PlaylistItem? = nil
+    var playingList: [PlaylistItem] = [PlaylistItem]()
     
     var avPlayer: AVPlayer?
     var observing = false
@@ -30,7 +33,24 @@ class IAPlayer: NSObject, ObservableObject {
 
     var mediaArtwork : MPMediaItemArtwork?
 
-    func playFile(_ playerFile: PlaylistItem){
+    override init() {
+        super.init()
+        NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+    }
+
+    @objc func continuePlaying() {
+        if self.playingList.count == 0 {
+            NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+        }
+
+        if let playingFile = playingFile, let index = playingList.firstIndex(of: playingFile) {
+            guard playingList.indices.contains(index + 1) else { return }
+            playFile(playingList[index + 1], playingList)
+        }
+
+    }
+
+    func playFile(_ playerFile: PlaylistItem, _ list:[PlaylistItem]){
 
         self.fileTitle = playerFile.file.title ?? playerFile.file.name
         self.fileIdentifierTitle = playerFile.doc.title
@@ -38,6 +58,7 @@ class IAPlayer: NSObject, ObservableObject {
         self.playUrl = playerFile.doc.fileUrl(file: playerFile.file)
 
         self.playingFile = playerFile
+        self.playingList = list
         
         self.loadAndPlay()
     }
@@ -75,19 +96,7 @@ class IAPlayer: NSObject, ObservableObject {
         self.observing = true
 
         avPlayer?.play()
-//        self.setPlayingInfo(playing: true)
 
-//        if let pI = playListWithIndex {
-//            NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
-//
-//            self.controlsController?.playList = pI.list
-//            self.playingPlaylistWithIndex = pI
-//
-//            NotificationCenter.default.addObserver(self, selector: #selector(IAPlayer.continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
-//
-//        } else {
-//            NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
-//        }
 
     }
 
@@ -118,7 +127,7 @@ class IAPlayer: NSObject, ObservableObject {
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 
-        if let player = avPlayer { //, let controller = controlsController
+        if let player = avPlayer {
 
             if player == object as! AVPlayer && "rate" == keyPath {
                 print("rate changed: \(player.rate)")
@@ -137,15 +146,10 @@ class IAPlayer: NSObject, ObservableObject {
     func monitorPlayback() {
 
         if let player = avPlayer {
-
             if(player.currentItem != nil) {
-
                 let progress = CMTimeGetSeconds(player.currentTime()) / CMTimeGetSeconds((player.currentItem?.duration)!)
-
                 self.sliderProgress = progress;
-
                 updatePlayerTimes()
-
                 if(player.rate != 0.0) {
                     let delay = 0.1 * Double(NSEC_PER_SEC)
                     let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
@@ -154,7 +158,6 @@ class IAPlayer: NSObject, ObservableObject {
                     }
                 }
             }
-
             return
         }
     }
@@ -183,4 +186,61 @@ class IAPlayer: NSObject, ObservableObject {
 
         return 0
     }
+
+
+    func setPlayingInfo(playing:Bool) {
+
+        if let identifier = self.playingFile?.doc.identifier {
+
+            let imageView = UIImageView()
+            let url = IAMediaUtils.imageUrlFrom(identifier)
+
+            if playing {
+                UIApplication.shared.beginReceivingRemoteControlEvents()
+            }
+
+            imageView.af.setImage(
+                withURL: url!,
+                placeholderImage: nil,
+                filter: nil,
+                progress: nil,
+                progressQueue: DispatchQueue.main,
+                imageTransition: UIImageView.ImageTransition.noTransition,
+                runImageTransitionIfCached: false) { (response) in
+
+                    switch response.result {
+                    case .success(let image):
+                        self.mediaArtwork = MPMediaItemArtwork(boundsSize: image.size, requestHandler: { (size) -> UIImage in
+                            image
+                        })
+
+//                        self.controlsController?.playerIcon.image = image
+//                        self.controlsController?.playerIcon.backgroundColor = UIColor.white
+
+                        let playBackRate = playing ? "1.0" : "0.0"
+
+                        var songInfo : [String : AnyObject] = [
+                            MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
+                            MPMediaItemPropertyAlbumTitle: self.playingFile?.doc.title! as AnyObject,
+                            MPMediaItemPropertyPlaybackDuration : NSNumber(value: CMTimeGetSeconds((self.avPlayer?.currentItem?.duration)!) as Double),
+                            MPNowPlayingInfoPropertyPlaybackRate: playBackRate as AnyObject
+                        ]
+
+                        if let artwork = self.mediaArtwork {
+                            songInfo[MPMediaItemPropertyArtwork] = artwork
+                        }
+
+                        songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
+
+                        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
+
+
+                    case .failure(let error):
+                        print("-----------> player couldn't get image: \(error)")
+                        break
+                    }
+                }
+        }
+    }
+
 }

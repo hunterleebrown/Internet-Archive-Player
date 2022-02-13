@@ -97,9 +97,9 @@ struct Detail: View {
                             .onTapGesture {
                                 if let archiveDoc = self.viewModel.archiveDoc {
                                     let playlistItem = PlaylistItem(file, archiveDoc)
-                                    iaPlayer.playFile(playlistItem)
                                     let copyOfPlaylistItem = playlistItem
                                     self.playlistViewModel.items.append(copyOfPlaylistItem)
+                                    iaPlayer.playFile(playlistItem, playlistViewModel.items)
                                 }
                             }
                     }

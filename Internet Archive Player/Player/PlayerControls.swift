@@ -45,7 +45,7 @@ struct PlayerControls: View {
                         viewModel.goBackwards(iaPlayer, playlistViewModel.items)
                     }
                     Spacer()
-                    
+
                     PlayerButton(iaPlayer.playing ? .pause : .play, 44.0) {
                         iaPlayer.didTapPlayButton()
                     }
@@ -64,8 +64,11 @@ struct PlayerControls: View {
             .padding(.top, 5.0)
             .modifier(BackgroundColorModifier(backgroundColor: .fairyRed))
         }
-        
     }
+
+
+
+
 }
 
 extension PlayerControls {
@@ -73,13 +76,13 @@ extension PlayerControls {
         func goForwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
             if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
                 guard list.indices.contains(index + 1) else { return }
-                player.playFile(list[index + 1])
+                player.playFile(list[index + 1], list)
             }
         }
         func goBackwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
             if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
                 guard list.indices.contains(index - 1) else { return }
-                player.playFile(list[index - 1])
+                player.playFile(list[index - 1], list)
             }
         }
     }

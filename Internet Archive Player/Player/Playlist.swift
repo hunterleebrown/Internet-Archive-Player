@@ -25,7 +25,7 @@ struct Playlist: View {
                 Spacer()
                 Button(action: {
                     playlistViewModel.items.removeAll()
-
+                    
                 }) {
                     Text("Clear")
                         .padding(10)
@@ -47,7 +47,7 @@ struct Playlist: View {
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
-                                iaPlayer.playFile(playlistItem)
+                                iaPlayer.playFile(playlistItem, playlistViewModel.items)
                             }
                     }
                 }
