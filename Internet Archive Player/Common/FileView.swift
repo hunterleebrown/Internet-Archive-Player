@@ -12,12 +12,19 @@ import iaAPI
 struct FileView: View {
     var iaFile: IAFile?
     var textColor = Color.white
+    var backgroundColor: Color? = Color.gray
     var auxControls = true
-
     var ellipsisAction: (()->())? = nil
 
-    init(_ file: IAFile, ellipsisAction: (()->())? = nil){
+    init(_ file: IAFile,
+         auxControls: Bool = true,
+         backgroundColor: Color? = Color.gray,
+         textColor: Color = Color.white,
+         ellipsisAction: (()->())? = nil){
         iaFile = file
+        self.auxControls = auxControls
+        self.backgroundColor = backgroundColor
+        self.textColor = textColor
         self.ellipsisAction = ellipsisAction
     }
     
@@ -67,7 +74,6 @@ struct FileView: View {
                             .font(.caption2)
                             .foregroundColor(textColor)
                     }
-                    
                     Button(action: {
                     }) {
                         Image(systemName: "icloud.and.arrow.down")
@@ -75,28 +81,40 @@ struct FileView: View {
                             .aspectRatio(contentMode: .fill)
                     }
                     .frame(width: 44, height: 44)
-                    
-                    Button(action: {
-                    }) {
-                        Image(systemName: "ellipsis")
-                            .accentColor(textColor)
-                            .aspectRatio(contentMode: .fill)
-                    }
-                    .frame(width: 44, height: 44)
-                    .contextMenu {
-                        Button(action: {
-                            if let doAction = self.ellipsisAction {
-                                doAction()
+
+                    if let ellipsisAction = ellipsisAction {
+                        Menu {
+                            Button(action: {
+                                ellipsisAction()
+                            }){
+                                Text("Add to Playlist")
                             }
-                        }){
-                            Text("Add to Playlist")
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .accentColor(textColor)
+                                .aspectRatio(contentMode: .fill)
                         }
+                        .highPriorityGesture(TapGesture())
+//                        Button(action: {
+//                        }) {
+//                            Image(systemName: "ellipsis")
+//                                .accentColor(textColor)
+//                                .aspectRatio(contentMode: .fill)
+//                        }
+//                        .frame(width: 44, height: 44)
+//                        .contextMenu {
+//                            Button(action: {
+//                                ellipsisAction()
+//                            }){
+//                                Text("Add to Playlist")
+//                            }
+//                        }
                     }
                 }
                 .padding(5.0)
             }
         }
-        .background(Color.gray)
+        .background(backgroundColor ?? nil)
         .cornerRadius(5.0)
         //        .overlay(
         //            Rectangle()

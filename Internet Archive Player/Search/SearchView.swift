@@ -18,16 +18,22 @@ struct SearchView: View {
     var body: some View {
         NavigationView {
             VStack {
-                TextField("Search The Internet Archive",
-                          text: $searchText,
-                          onCommit:{
-                    if !searchText.isEmpty {
-                        viewModel.cancelRequest()
-                        viewModel.searchText = searchText
-                        searchFocused = false
+                HStack(spacing: 5.0) {
+                    if viewModel.isSearching {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
                     }
-                })
-                    .focused($searchFocused)
+
+                    TextField("Search The Internet Archive",
+                              text: $searchText,
+                              onCommit:{
+                        if !searchText.isEmpty {
+                            viewModel.cancelRequest()
+                            viewModel.searchText = searchText
+                            searchFocused = false
+                        }})
+                        .focused($searchFocused)
+                }
 
 //                    .onChange(of: searchText, perform: { text in
 //                        if !text.isEmpty {
@@ -82,8 +88,9 @@ extension SearchView {
         @Published var searchText: String = "" {
             didSet { handleTextChange() }
         }
+        @Published var isSearching: Bool = false
+        
         let service: IAService
-
         private var request: Request?
 
         init() {
@@ -93,12 +100,14 @@ extension SearchView {
         func cancelRequest() {
             if let req = request {
                 req.cancel()
+                self.isSearching = false
             }
         }
         
         func handleTextChange() {
             guard searchText != "" else { return }
             self.search(query: searchText)
+            self.isSearching = true
         }
         
         func search(query: String) {
@@ -107,10 +116,12 @@ extension SearchView {
                                           searchField: .all,
                                           mediaTypes: [.audio],
                                           rows: 100,
-                                          format: .mp3) { (docs, error) in
+                                          format: .mp3)
+            { (docs, error) in
                 docs?.forEach({ (doc) in
                     self.items.append(doc)
                 })
+                self.isSearching = false
             }
         }
     }

@@ -123,12 +123,6 @@ class IAPlayer: NSObject, ObservableObject {
             if player == object as! AVPlayer && "rate" == keyPath {
                 print("rate changed: \(player.rate)")
 
-                if player.rate == 0 {
-//                    controller.playButton.setIAIcon(.iosPlayOutline, forState: UIControl.State())
-                } else {
-//                    controller.playButton.setIAIcon(.iosPauseOutline, forState: UIControl.State())
-                }
-
                 self.playing  = player.rate > 0.0
 //                if controller.activityIndicator != nil {
 //                    player.rate > 0.0 ? controller.activityIndicator.startAnimating() : controller.activityIndicator.stopAnimating()
@@ -144,16 +138,11 @@ class IAPlayer: NSObject, ObservableObject {
 
         if let player = avPlayer {
 
-
             if(player.currentItem != nil) {
 
                 let progress = CMTimeGetSeconds(player.currentTime()) / CMTimeGetSeconds((player.currentItem?.duration)!)
 
-//                if controller.playingProgress != nil {
-//                    controller.playingProgress.setValue(Float(progress), animated: false)
-//                    controller.topProgress.setProgress(Float(progress), animated: false)
-                    self.sliderProgress = progress;
-//                }
+                self.sliderProgress = progress;
 
                 updatePlayerTimes()
 
@@ -173,16 +162,10 @@ class IAPlayer: NSObject, ObservableObject {
     func updatePlayerTimes() {
 
         if let player = avPlayer {
-
             let calcTime = CMTimeGetSeconds((player.currentItem?.duration)!) - CMTimeGetSeconds(player.currentTime())
-
             if(!calcTime.isNaN) {
-                if minTime != nil {
-                    minTime = IAStringUtils.timeFormatted(self.elapsedSeconds())
-                }
-                if maxTime != nil {
-                    maxTime = IAStringUtils.timeFormatted(Int(calcTime))
-                }
+                minTime = IAStringUtils.timeFormatted(self.elapsedSeconds())
+                maxTime = IAStringUtils.timeFormatted(Int(calcTime))
             }
         }
     }

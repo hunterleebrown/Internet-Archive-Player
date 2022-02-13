@@ -19,7 +19,8 @@ struct PlayerControls: View {
     var body: some View {
         GeometryReader{ g in
             VStack{
-                
+                ProgressView(value: iaPlayer.sliderProgress, total: 1)
+                    .progressViewStyle(LinearProgressViewStyle(tint: .fairyCream))
                 VStack(){
                     Text(iaPlayer.playingFile?.file.title ?? iaPlayer.playingFile?.file.name ?? "")
                         .foregroundColor(.fairyCream)

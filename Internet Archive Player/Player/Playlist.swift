@@ -37,13 +37,13 @@ struct Playlist: View {
                 }
 
             }
-
-            Spacer()
-
             ScrollView {
                 LazyVStack{
                     ForEach(playlistViewModel.items, id: \.self) { playlistItem in
-                        FileView(playlistItem.file)
+
+                        FileView(playlistItem.file, auxControls: false,
+                                 backgroundColor: playlistItem == iaPlayer.playingFile ? .fairyCream : nil,
+                                 textColor: playlistItem == iaPlayer.playingFile ? .droopy : .white)
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
@@ -56,9 +56,20 @@ struct Playlist: View {
             .background(Color.droopy)
             .listStyle(PlainListStyle())
 
+            Spacer()
+
             VStack {
                 Slider(value: $iaPlayer.sliderProgress,
-                       in: 0...1)
+                       in: 0...1, onEditingChanged: { _ in
+                    guard let currentItem = iaPlayer.avPlayer?.currentItem else { return }
+                    if let player = iaPlayer.avPlayer {
+                        let duration = CMTimeGetSeconds(currentItem.duration)
+                        let sec = duration * Float64(iaPlayer.sliderProgress)
+                        let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
+                        player.seek(to: seakTime)
+                    }
+
+                })
                     .accentColor(.fairyCream)
                 HStack{
                     Text(iaPlayer.minTime ?? "")
@@ -70,9 +81,9 @@ struct Playlist: View {
                         .foregroundColor(.fairyCream)
 
                 }
-                .frame(height:30)
             }
             .frame(alignment: .bottom)
+            .frame(height:33)
         }
         .padding(10)
         .modifier(BackgroundColorModifier(backgroundColor: .droopy))
