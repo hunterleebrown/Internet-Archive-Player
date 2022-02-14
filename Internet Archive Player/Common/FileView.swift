@@ -10,13 +10,13 @@ import SwiftUI
 import iaAPI
 
 struct FileView: View {
-    var iaFile: IAFile?
+    var iaFile: PlaylistFile?
     var textColor = Color.white
     var backgroundColor: Color? = Color.gray
     var auxControls = true
     var ellipsisAction: (()->())? = nil
 
-    init(_ file: IAFile,
+    init(_ file: PlaylistFile,
          auxControls: Bool = true,
          backgroundColor: Color? = Color.gray,
          textColor: Color = Color.white,
@@ -122,8 +122,8 @@ struct FileView: View {
         //        )
     }
     
-    private func fileTitle(_ iaFile: IAFile?) -> String {
-        return iaFile?.displayName ?? iaFile?.title ?? iaFile?.name ?? ""
+    private func fileTitle(_ iaFile: PlaylistFile?) -> String {
+        return iaFile?.title ?? iaFile?.name ?? ""
     }
     
 }

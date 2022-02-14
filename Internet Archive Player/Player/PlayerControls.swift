@@ -25,7 +25,7 @@ struct PlayerControls: View {
                     Text(iaPlayer.playingFile?.file.title ?? iaPlayer.playingFile?.file.name ?? "")
                         .foregroundColor(.fairyCream)
                         .fontWeight(.bold)
-                    Text(iaPlayer.playingFile?.doc.artist ??  iaPlayer.playingFile?.doc.creator ?? "")
+                    Text(iaPlayer.playingFile?.artist ?? "")
                         .font(.system(size: g.size.height > g.size.width ? g.size.width * 0.2: g.size.height * 0.2))
                         .foregroundColor(.fairyCream)
                 }

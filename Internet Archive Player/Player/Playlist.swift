@@ -107,12 +107,16 @@ extension Playlist {
 
 struct PlaylistItem: Hashable  {
     
-    let file: IAFile
-    let doc: IAArchiveDoc
+    let file: PlaylistFile
+    let identifier: String
+    let artist: String
+    let identifierTitle: String
     
-    init(_ file: IAFile, _ doc: IAArchiveDoc) {
+    init(_ file: PlaylistFile, _ doc: IAArchiveDoc) {
         self.file = file
-        self.doc = doc
+        self.identifier = doc.identifier!
+        self.artist = doc.artist ?? doc.creator ?? ""
+        self.identifierTitle = doc.title ?? ""
     }
     
     public static func == (lhs: PlaylistItem, rhs: PlaylistItem) -> Bool {
@@ -120,7 +124,7 @@ struct PlaylistItem: Hashable  {
         lhs.file.title == rhs.file.title &&
         lhs.file.format == rhs.file.format &&
         lhs.file.track == rhs.file.track &&
-        lhs.doc.identifier == rhs.doc.identifier
+        lhs.identifier == rhs.identifier
     }
     
     public func hash(into hasher: inout Hasher) {
@@ -128,6 +132,80 @@ struct PlaylistItem: Hashable  {
         hasher.combine(file.track)
         hasher.combine(file.name)
         hasher.combine(file.format)
-        hasher.combine(doc.identifier)
+        hasher.combine(identifier)
+    }
+
+    public func fileUrl() ->URL {
+        let urlString = "https://archive.org/download/\(identifier)/\(file.name!)"
+        return URL(string: urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!)!
+    }
+}
+
+struct PlaylistFile: Hashable {
+
+    var name: String?
+    var title: String?
+    var track: String?
+    var size: String?
+    var format: iaAPI.IAFileFormat?
+    var length: String?
+
+    init(_ file: IAFile)  {
+        self.name = file.name
+        self.title = file.title
+        self.format = file.format
+        self.track = file.track
+        self.length = file.length
+        self.size = file.size
+    }
+
+    public static func == (lhs: PlaylistFile, rhs: PlaylistFile) -> Bool {
+        return lhs.name == rhs.name &&
+        lhs.title == rhs.title &&
+        lhs.format == rhs.format &&
+        lhs.track == rhs.track &&
+        lhs.length == rhs.length
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(title)
+        hasher.combine(track)
+        hasher.combine(name)
+        hasher.combine(format)
+        hasher.combine(length)
+    }
+
+    public var displayLength: String? {
+
+        if let l = length {
+            return IAStringUtils.timeFormatter(timeString: l)
+        }
+        return nil
+    }
+
+    public var cleanedTrack: Int?{
+
+        if let tr = track {
+            if let num = Int(tr) {
+                return num
+            } else {
+                let sp = tr.components(separatedBy: "/")
+                if let first = sp.first {
+                    let trimmed = first.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                    return Int(trimmed) ?? nil
+                }
+            }
+        }
+        return nil
+    }
+
+    public var calculatedSize: String? {
+
+        if let s = size {
+            if let rawSize = Int(s) {
+                return IAStringUtils.sizeString(size: rawSize)
+            }
+        }
+        return nil
     }
 }

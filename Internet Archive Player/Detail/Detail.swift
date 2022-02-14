@@ -78,9 +78,11 @@ struct Detail: View {
                 
                 LazyVStack(spacing:5.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
-                        FileView(file, ellipsisAction: {
+                        let playlistFile = PlaylistFile(file)
+                        FileView(playlistFile, ellipsisAction: {
                             if let archiveDoc = self.viewModel.archiveDoc {
-                                let playlistItem = PlaylistItem(file, archiveDoc)
+                                let playlistFile = PlaylistFile(file)
+                                let playlistItem = PlaylistItem(playlistFile, archiveDoc)
                                 self.playlistViewModel.items.append(playlistItem)
                             }
                         })
@@ -88,9 +90,9 @@ struct Detail: View {
                             .padding(.trailing, 5.0)
                             .onTapGesture {
                                 if let archiveDoc = self.viewModel.archiveDoc {
-                                    let playlistItem = PlaylistItem(file, archiveDoc)
-                                    let copyOfPlaylistItem = playlistItem
-                                    self.playlistViewModel.items.append(copyOfPlaylistItem)
+                                    let playlistFile = PlaylistFile(file)
+                                    let playlistItem = PlaylistItem(playlistFile, archiveDoc)
+                                    self.playlistViewModel.items.append(playlistItem)
                                     iaPlayer.playFile(playlistItem, playlistViewModel.items)
                                 }
                             }

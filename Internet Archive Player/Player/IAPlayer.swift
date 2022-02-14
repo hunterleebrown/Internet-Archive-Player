@@ -55,9 +55,9 @@ class IAPlayer: NSObject, ObservableObject {
     func playFile(_ playerFile: PlaylistItem, _ list:[PlaylistItem]){
 
         self.fileTitle = playerFile.file.title ?? playerFile.file.name
-        self.fileIdentifierTitle = playerFile.doc.title
-        self.fileIdentifier = playerFile.doc.identifier
-        self.playUrl = playerFile.doc.fileUrl(file: playerFile.file)
+        self.fileIdentifierTitle = playerFile.identifierTitle
+        self.fileIdentifier = playerFile.identifier
+        self.playUrl = playerFile.fileUrl()
 
         self.playingFile = playerFile
         self.playingList = list
@@ -177,7 +177,7 @@ class IAPlayer: NSObject, ObservableObject {
 
     func setPlayingInfo(playing:Bool) {
 
-        if let identifier = self.playingFile?.doc.identifier {
+        if let identifier = self.playingFile?.identifier {
 
             let imageView = UIImageView()
             let url = IAMediaUtils.imageUrlFrom(identifier)
@@ -208,7 +208,7 @@ class IAPlayer: NSObject, ObservableObject {
 
                         var songInfo : [String : AnyObject] = [
                             MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
-                            MPMediaItemPropertyAlbumTitle: self.playingFile?.doc.title! as AnyObject,
+                            MPMediaItemPropertyAlbumTitle: self.fileIdentifier! as AnyObject,
                             MPMediaItemPropertyPlaybackDuration : NSNumber(value: CMTimeGetSeconds((self.avPlayer?.currentItem?.duration)!) as Double),
                             MPNowPlayingInfoPropertyPlaybackRate: playBackRate as AnyObject
                         ]
@@ -218,7 +218,7 @@ class IAPlayer: NSObject, ObservableObject {
                         }
 
                         songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
-                        songInfo[MPMediaItemPropertyAlbumArtist] = self.playingFile?.doc.artist as AnyObject
+                        songInfo[MPMediaItemPropertyAlbumArtist] = self.playingFile?.artist as AnyObject
 
 
                         MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
