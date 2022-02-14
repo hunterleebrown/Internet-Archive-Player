@@ -20,27 +20,23 @@ struct Playlist: View {
         VStack(alignment:.leading, spacing: 0){
             HStack(spacing:10.0) {
                 Text("Playlist")
+                    .font(.title)
                     .foregroundColor(.fairyCream)
                     .padding(10)
                 Spacer()
                 Button(action: {
                     playlistViewModel.items.removeAll()
-                    
+
                 }) {
                     Text("Clear")
                         .padding(10)
                         .foregroundColor(.fairyCream)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 5)
-                                .stroke(Color.fairyCream, lineWidth: 2)
-                    )
                 }
 
             }
             ScrollView {
                 LazyVStack{
                     ForEach(playlistViewModel.items, id: \.self) { playlistItem in
-
                         FileView(playlistItem.file, auxControls: false,
                                  backgroundColor: playlistItem == iaPlayer.playingFile ? .fairyCream : nil,
                                  textColor: playlistItem == iaPlayer.playingFile ? .droopy : .white)
@@ -50,6 +46,7 @@ struct Playlist: View {
                                 iaPlayer.playFile(playlistItem, playlistViewModel.items)
                             }
                     }
+                    .onDelete(perform: self.remove)
                 }
                 .background(Color.droopy)
             }
@@ -68,7 +65,6 @@ struct Playlist: View {
                         let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
                         player.seek(to: seakTime)
                     }
-
                 })
                     .accentColor(.fairyCream)
                 HStack{
@@ -88,6 +84,11 @@ struct Playlist: View {
         .padding(10)
         .modifier(BackgroundColorModifier(backgroundColor: .droopy))
     }
+
+    func remove(at offsets: IndexSet) {
+        self.playlistViewModel.items.remove(atOffsets: offsets)
+    }
+
 }
 
 struct SwiftUIView_Previews: PreviewProvider {

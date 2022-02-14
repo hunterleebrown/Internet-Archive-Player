@@ -55,33 +55,25 @@ struct Detail: View {
                 .padding(10)
                 
                 if let desc = self.viewModel.archiveDoc?.desc {
-                    //                        let html = "<div style='color:#ffffff; font-family: Arial, Helvetica, sans-serif;'>\(desc)</html>";
-                    if let data = desc.data(using: .unicode),
-                       let nsAttrString = try? NSAttributedString(
-                        data: data,
-                        options: [
-                            .documentType: NSAttributedString.DocumentType.html,
-                        ],
-                        documentAttributes: nil) {
-                        VStack() {
-                            Text(AttributedString(nsAttrString))
-                                .padding(5.0)
-                                .onTapGesture {
-                                    withAnimation {
-                                        self.descriptionExpanded.toggle()
-                                    }
+
+                    VStack() {
+                        Text(AttributedString(attString(desc: desc)))
+                            .padding(5.0)
+                            .onTapGesture {
+                                withAnimation {
+                                    self.descriptionExpanded.toggle()
                                 }
-                        }
-                        .padding(10)
-                        .background(Color.white)
-                        .frame(height: self.descriptionExpanded ? nil : 100)
-                        .frame(alignment:.leading)
-                        //                        .overlay(
-                        //                            RoundedRectangle(cornerRadius: 5.0)
-                        //                                .stroke(Color.gray, lineWidth: 1.0)
-                        //                        )
-                        //                        .shadow(color: Color.droopy, radius: 5, x: 0, y: 5)
+                            }
                     }
+                    .padding(10)
+                    .background(Color.white)
+                    .frame(height: self.descriptionExpanded ? nil : 100)
+                    .frame(alignment:.leading)
+                    //                        .overlay(
+                    //                            RoundedRectangle(cornerRadius: 5.0)
+                    //                                .stroke(Color.gray, lineWidth: 1.0)
+                    //                        )
+                    //                        .shadow(color: Color.droopy, radius: 5, x: 0, y: 5)
                 }
                 
                 LazyVStack(spacing:5.0) {
@@ -112,7 +104,20 @@ struct Detail: View {
         //        .navigationTitle(doc?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
     }
-    
+
+    func attString(desc: String) -> NSAttributedString {
+
+        if let data = desc.data(using: .unicode) {
+            return try! NSAttributedString(
+                data: data,
+                options: [
+                    .documentType: NSAttributedString.DocumentType.html,
+                ],
+                documentAttributes: nil)
+        }
+
+        return NSAttributedString()
+    }
 }
 
 

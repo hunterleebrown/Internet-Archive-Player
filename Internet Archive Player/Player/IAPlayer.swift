@@ -17,7 +17,7 @@ class IAPlayer: NSObject, ObservableObject {
     @Published var playing = false
     @Published var minTime: String? = nil
     @Published var maxTime: String? = nil
-    @Published var sliderProgress: Double = 0.0
+    @Published var sliderProgress: Double = 0
     @Published var playingFile: PlaylistItem? = nil
     var playingList: [PlaylistItem] = [PlaylistItem]()
     
@@ -36,6 +36,8 @@ class IAPlayer: NSObject, ObservableObject {
     override init() {
         super.init()
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+
+        self.setUpRemoteCommandCenterEvents()
     }
 
     @objc func continuePlaying() {
@@ -65,7 +67,7 @@ class IAPlayer: NSObject, ObservableObject {
 
     private func loadAndPlay() {
 
-        if playUrl.absoluteString.contains("http") {
+        if playUrl.absoluteString.contains("https") {
             guard IAReachability.isConnectedToNetwork() else {
                 NotificationCenter.default.post(name: NSNotification.Name(rawValue: "networkAlert"), object: nil)
                 return
@@ -74,16 +76,10 @@ class IAPlayer: NSObject, ObservableObject {
 
         if let player = avPlayer {
             player.pause()
-
             if(self.observing) {
                 player.removeObserver(self, forKeyPath: "rate", context: &observerContext)
                 self.observing = false
             }
-
-//            if let controller = self.controlsController, controller.playingProgress != nil {
-//                controller.playingProgress.setValue(Float(0), animated: false)
-//            }
-
             self.setPlayingInfo(playing: false)
             avPlayer = nil
         }
@@ -126,20 +122,11 @@ class IAPlayer: NSObject, ObservableObject {
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-
         if let player = avPlayer {
-
             if player == object as! AVPlayer && "rate" == keyPath {
-                print("rate changed: \(player.rate)")
-
                 self.playing  = player.rate > 0.0
-//                if controller.activityIndicator != nil {
-//                    player.rate > 0.0 ? controller.activityIndicator.startAnimating() : controller.activityIndicator.stopAnimating()
-//                }
-
                 self.monitorPlayback()
             }
-
         }
     }
 
@@ -206,7 +193,7 @@ class IAPlayer: NSObject, ObservableObject {
                 progress: nil,
                 progressQueue: DispatchQueue.main,
                 imageTransition: UIImageView.ImageTransition.noTransition,
-                runImageTransitionIfCached: false) { (response) in
+                runImageTransitionIfCached: false) { [self] (response) in
 
                     switch response.result {
                     case .success(let image):
@@ -217,7 +204,7 @@ class IAPlayer: NSObject, ObservableObject {
 //                        self.controlsController?.playerIcon.image = image
 //                        self.controlsController?.playerIcon.backgroundColor = UIColor.white
 
-                        let playBackRate = playing ? "1.0" : "0.0"
+                        let playBackRate = playing ? 1.0 : 0.0
 
                         var songInfo : [String : AnyObject] = [
                             MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
@@ -231,6 +218,8 @@ class IAPlayer: NSObject, ObservableObject {
                         }
 
                         songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
+                        songInfo[MPMediaItemPropertyAlbumArtist] = self.playingFile?.doc.artist as AnyObject
+
 
                         MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
 
@@ -240,6 +229,40 @@ class IAPlayer: NSObject, ObservableObject {
                         break
                     }
                 }
+        }
+    }
+
+
+
+    func setUpRemoteCommandCenterEvents() {
+        let commandCenter = MPRemoteCommandCenter.shared()
+
+        commandCenter.playCommand.addTarget { event in
+            self.avPlayer?.play()
+            return .success
+        }
+
+        commandCenter.pauseCommand.addTarget { event in
+            self.avPlayer?.pause()
+            return .success
+        }
+
+        commandCenter.nextTrackCommand.addTarget { event in
+            if let playingFile = self.playingFile, let index = self.playingList.firstIndex(of: playingFile) {
+                guard self.playingList.indices.contains(index + 1) else { return .commandFailed }
+                self.playFile(self.playingList[index + 1], self.playingList)
+                return .success
+            }
+            return .commandFailed
+        }
+
+        commandCenter.previousTrackCommand.addTarget { event in
+            if let playingFile = self.playingFile, let index = self.playingList.firstIndex(of: playingFile) {
+                guard self.playingList.indices.contains(index - 1) else { return .commandFailed }
+                self.playFile(self.playingList[index - 1], self.playingList)
+                return .success
+            }
+            return .commandFailed
         }
     }
 
