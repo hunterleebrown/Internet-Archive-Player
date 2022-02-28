@@ -75,31 +75,31 @@ struct Detail: View {
                     //                        )
                     //                        .shadow(color: Color.droopy, radius: 5, x: 0, y: 5)
                 }
+
                 
                 LazyVStack(spacing:5.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
-                        let playlistFile = PlaylistFile(file)
+                        let playlistFile = PlaylistFile(file.copy())
                         FileView(playlistFile, ellipsisAction: {
-                            if let archiveDoc = self.viewModel.archiveDoc {
-                                let playlistFile = PlaylistFile(file)
-                                let playlistItem = PlaylistItem(playlistFile, archiveDoc)
+                            if let archiveDoc = self.viewModel.archiveDoc?.copy() {
+                                let vmFile = PlaylistFile(file.copy())
+                                let playlistItem = PlaylistItem(vmFile, archiveDoc)
                                 self.playlistViewModel.items.append(playlistItem)
                             }
                         })
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
-                                if let archiveDoc = self.viewModel.archiveDoc {
-                                    let playlistFile = PlaylistFile(file)
-                                    let playlistItem = PlaylistItem(playlistFile, archiveDoc)
-                                    self.playlistViewModel.items.append(playlistItem)
-                                    iaPlayer.playFile(playlistItem, playlistViewModel.items)
+                                if let archiveDoc = self.viewModel.archiveDoc?.copy() {
+                                    let appVmFile = PlaylistFile(file.copy())
+                                    let appPlaylistItem = PlaylistItem(appVmFile, archiveDoc)
+                                    self.playlistViewModel.items.append(appPlaylistItem)
+                                    iaPlayer.playFile(appPlaylistItem, playlistViewModel.items)
                                 }
                             }
                     }
                 }
             }
-//            .id(UUID().uuidString)
             .padding(0)
         }
         //        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))

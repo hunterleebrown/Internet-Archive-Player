@@ -89,6 +89,7 @@ struct FileView: View {
                             }){
                                 Text("Add to Playlist")
                             }
+                            .frame(width: 44, height: 44)
                         } label: {
                             Image(systemName: "ellipsis")
                                 .accentColor(textColor)
@@ -126,4 +127,16 @@ struct FileView: View {
         return iaFile?.title ?? iaFile?.name ?? ""
     }
     
+}
+
+extension IAFile {
+    public func copy() -> IAFile {
+        return IAFile(name:self.name, title: self.title, track:self.track, size:self.size, rawFormat: self.format?.rawValue)
+    }
+}
+
+extension IAArchiveDoc {
+    public func copy() -> IAArchiveDoc {
+        return IAArchiveDoc(metadata: self.metadata, files: self.files)
+    }
 }

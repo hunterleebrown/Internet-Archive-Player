@@ -34,24 +34,22 @@ struct Playlist: View {
                 }
 
             }
-            ScrollView {
-                LazyVStack{
-                    ForEach(playlistViewModel.items, id: \.self) { playlistItem in
-                        FileView(playlistItem.file, auxControls: false,
-                                 backgroundColor: playlistItem == iaPlayer.playingFile ? .fairyCream : nil,
-                                 textColor: playlistItem == iaPlayer.playingFile ? .droopy : .white)
-                            .padding(.leading, 5.0)
-                            .padding(.trailing, 5.0)
-                            .onTapGesture {
-                                iaPlayer.playFile(playlistItem, playlistViewModel.items)
-                            }
-                    }
-                    .onDelete(perform: self.remove)
+            List{
+                ForEach(playlistViewModel.items, id: \.self) { playlistItem in
+                    FileView(playlistItem.file, auxControls: false,
+                             backgroundColor: playlistItem == iaPlayer.playingFile ? .fairyCream : nil,
+                             textColor: playlistItem == iaPlayer.playingFile ? .droopy : .white)
+                        .onTapGesture {
+                            iaPlayer.playFile(playlistItem, playlistViewModel.items)
+                        }
+                        .padding(0)
+                        .listRowBackground(Color.droopy)
                 }
-                .background(Color.droopy)
+                .onDelete(perform: self.remove)
             }
-            .background(Color.droopy)
             .listStyle(PlainListStyle())
+            .background(Color.droopy)
+            .padding(0)
 
             Spacer()
 
@@ -105,8 +103,8 @@ extension Playlist {
     }
 }
 
-struct PlaylistItem: Hashable  {
-    
+struct PlaylistItem: Hashable, Identifiable  {
+    var id = UUID()
     let file: PlaylistFile
     let identifier: String
     let artist: String
