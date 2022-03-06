@@ -13,16 +13,11 @@ struct SearchView: View {
     @State private var searchText = ""
     @ObservedObject var viewModel = SearchView.ViewModel()
     @FocusState private var searchFocused: Bool
-    @EnvironmentObject var playlistViewModel: Playlist.ViewModel
 
     var body: some View {
         NavigationView {
             VStack {
                 HStack(spacing: 5.0) {
-                    if viewModel.isSearching {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                    }
 
                     TextField("Search The Internet Archive",
                               text: $searchText,
@@ -33,19 +28,25 @@ struct SearchView: View {
                             searchFocused = false
                         }})
                         .focused($searchFocused)
+                    //                    .onChange(of: searchText, perform: { text in
+                    //                        if !text.isEmpty {
+                    //                            viewModel.cancelRequest()
+                    //                            viewModel.searchText = text
+                    //                        } else {
+                    //                            viewModel.cancelRequest()
+                    //                            searchFocused = false
+                    //                        }
+                    //                    })
+
+                    if viewModel.isSearching {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                    }
                 }
 
-//                    .onChange(of: searchText, perform: { text in
-//                        if !text.isEmpty {
-//                            viewModel.cancelRequest()
-//                            viewModel.searchText = text
-//                        } else {
-//                            viewModel.cancelRequest()
-//                            searchFocused = false
-//                        }
-//                    })
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(5)
+
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(5)
 
                 ScrollView {
                     LazyVStack{

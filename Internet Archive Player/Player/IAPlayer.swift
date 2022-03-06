@@ -19,8 +19,8 @@ class IAPlayer: NSObject, ObservableObject {
     @Published var maxTime: String? = nil
     @Published var sliderProgress: Double = 0
     @Published var playingFile: PlaylistItem? = nil
-    var playingList: [PlaylistItem] = [PlaylistItem]()
-    
+    @Published public private(set) var items: [PlaylistItem] = [PlaylistItem]()
+
     var avPlayer: AVPlayer?
     var observing = false
     var playUrl: URL!
@@ -36,23 +36,36 @@ class IAPlayer: NSObject, ObservableObject {
     override init() {
         super.init()
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
-
         self.setUpRemoteCommandCenterEvents()
     }
 
+    public func appendPlaylistItem(_ item: PlaylistItem){
+        if !self.items.contains(item) {
+            self.items.append(item)
+        }
+    }
+
+    public func clearPlaylist() {
+        self.items.removeAll()
+    }
+
+    public func removePlaylistItem(at offsets: IndexSet){
+        self.items.remove(atOffsets: offsets)
+    }
+
     @objc func continuePlaying() {
-        if self.playingList.count == 0 {
+        if self.items.count == 0 {
             NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
         }
 
-        if let playingFile = playingFile, let index = playingList.firstIndex(of: playingFile) {
-            guard playingList.indices.contains(index + 1) else { return }
-            playFile(playingList[index + 1], playingList)
+        if let playingFile = playingFile, let index = items.firstIndex(of: playingFile) {
+            guard items.indices.contains(index + 1) else { return }
+            playFile(items[index + 1])
         }
 
     }
 
-    func playFile(_ playerFile: PlaylistItem, _ list:[PlaylistItem]){
+    func playFile(_ playerFile: PlaylistItem){
 
         self.fileTitle = playerFile.file.title ?? playerFile.file.name
         self.fileIdentifierTitle = playerFile.identifierTitle
@@ -60,8 +73,7 @@ class IAPlayer: NSObject, ObservableObject {
         self.playUrl = playerFile.fileUrl()
 
         self.playingFile = playerFile
-        self.playingList = list
-        
+
         self.loadAndPlay()
     }
 
@@ -248,18 +260,18 @@ class IAPlayer: NSObject, ObservableObject {
         }
 
         commandCenter.nextTrackCommand.addTarget { event in
-            if let playingFile = self.playingFile, let index = self.playingList.firstIndex(of: playingFile) {
-                guard self.playingList.indices.contains(index + 1) else { return .commandFailed }
-                self.playFile(self.playingList[index + 1], self.playingList)
+            if let playingFile = self.playingFile, let index = self.items.firstIndex(of: playingFile) {
+                guard self.items.indices.contains(index + 1) else { return .commandFailed }
+                self.playFile(self.items[index + 1])
                 return .success
             }
             return .commandFailed
         }
 
         commandCenter.previousTrackCommand.addTarget { event in
-            if let playingFile = self.playingFile, let index = self.playingList.firstIndex(of: playingFile) {
-                guard self.playingList.indices.contains(index - 1) else { return .commandFailed }
-                self.playFile(self.playingList[index - 1], self.playingList)
+            if let playingFile = self.playingFile, let index = self.items.firstIndex(of: playingFile) {
+                guard self.items.indices.contains(index - 1) else { return .commandFailed }
+                self.playFile(self.items[index - 1])
                 return .success
             }
             return .commandFailed

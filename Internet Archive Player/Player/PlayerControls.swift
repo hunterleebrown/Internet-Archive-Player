@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct PlayerControls: View {
-    @EnvironmentObject var playlistViewModel: Playlist.ViewModel
     @EnvironmentObject var iaPlayer: IAPlayer
     
     @Binding var showPlaylist: Bool
@@ -42,7 +41,7 @@ struct PlayerControls: View {
                     })
                     Spacer()
                     PlayerButton(.backwards) {
-                        viewModel.goBackwards(iaPlayer, playlistViewModel.items)
+                        viewModel.goBackwards(iaPlayer, iaPlayer.items)
                     }
                     Spacer()
 
@@ -51,7 +50,7 @@ struct PlayerControls: View {
                     }
                     Spacer()
                     PlayerButton(.forwards) {
-                        viewModel.goForwards(iaPlayer, playlistViewModel.items)
+                        viewModel.goForwards(iaPlayer, iaPlayer.items)
                     }
                     Spacer()
                     AirPlayButton()
@@ -76,13 +75,13 @@ extension PlayerControls {
         func goForwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
             if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
                 guard list.indices.contains(index + 1) else { return }
-                player.playFile(list[index + 1], list)
+                player.playFile(list[index + 1])
             }
         }
         func goBackwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
             if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
                 guard list.indices.contains(index - 1) else { return }
-                player.playFile(list[index - 1], list)
+                player.playFile(list[index - 1])
             }
         }
     }

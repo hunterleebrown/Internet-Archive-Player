@@ -9,7 +9,6 @@ import SwiftUI
 import iaAPI
 
 struct Detail: View {
-    @EnvironmentObject var playlistViewModel: Playlist.ViewModel
     @EnvironmentObject var iaPlayer: IAPlayer
     
     @ObservedObject var viewModel: Detail.ViewModel
@@ -81,20 +80,20 @@ struct Detail: View {
                     ForEach(self.viewModel.files, id: \.self) { file in
                         let playlistFile = PlaylistFile(file.copy())
                         FileView(playlistFile, ellipsisAction: {
-                            if let archiveDoc = self.viewModel.archiveDoc?.copy() {
-                                let vmFile = PlaylistFile(file.copy())
+                            if let archiveDoc = self.viewModel.archiveDoc {
+                                let vmFile = PlaylistFile(file)
                                 let playlistItem = PlaylistItem(vmFile, archiveDoc)
-                                self.playlistViewModel.items.append(playlistItem)
+                                iaPlayer.appendPlaylistItem(playlistItem)
                             }
                         })
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
-                                if let archiveDoc = self.viewModel.archiveDoc?.copy() {
-                                    let appVmFile = PlaylistFile(file.copy())
+                                if let archiveDoc = self.viewModel.archiveDoc {
+                                    let appVmFile = PlaylistFile(file)
                                     let appPlaylistItem = PlaylistItem(appVmFile, archiveDoc)
-                                    self.playlistViewModel.items.append(appPlaylistItem)
-                                    iaPlayer.playFile(appPlaylistItem, playlistViewModel.items)
+                                    self.iaPlayer.appendPlaylistItem(appPlaylistItem)
+                                    iaPlayer.playFile(appPlaylistItem)
                                 }
                             }
                     }

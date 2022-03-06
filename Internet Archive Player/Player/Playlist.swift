@@ -13,7 +13,6 @@ import AVKit
 
 struct Playlist: View {
     @State private var seek = 1.0
-    @EnvironmentObject var playlistViewModel: Playlist.ViewModel
     @EnvironmentObject var iaPlayer: IAPlayer
 
     var body: some View {
@@ -25,22 +24,20 @@ struct Playlist: View {
                     .padding(10)
                 Spacer()
                 Button(action: {
-                    playlistViewModel.items.removeAll()
-
+                    iaPlayer.clearPlaylist()
                 }) {
                     Text("Clear")
                         .padding(10)
                         .foregroundColor(.fairyCream)
                 }
-
             }
             List{
-                ForEach(playlistViewModel.items, id: \.self) { playlistItem in
+                ForEach(iaPlayer.items, id: \.self) { playlistItem in
                     FileView(playlistItem.file, auxControls: false,
                              backgroundColor: playlistItem == iaPlayer.playingFile ? .fairyCream : nil,
                              textColor: playlistItem == iaPlayer.playingFile ? .droopy : .white)
                         .onTapGesture {
-                            iaPlayer.playFile(playlistItem, playlistViewModel.items)
+                            iaPlayer.playFile(playlistItem)
                         }
                         .padding(0)
                         .listRowBackground(Color.droopy)
@@ -84,7 +81,7 @@ struct Playlist: View {
     }
 
     func remove(at offsets: IndexSet) {
-        self.playlistViewModel.items.remove(atOffsets: offsets)
+        self.iaPlayer.removePlaylistItem(at: offsets)
     }
 
 }
@@ -93,13 +90,6 @@ struct SwiftUIView_Previews: PreviewProvider {
     
     static var previews: some View {
         Playlist()
-            .environmentObject(Playlist.ViewModel())
-    }
-}
-
-extension Playlist {
-    final class ViewModel: ObservableObject {
-        @Published var items: [PlaylistItem] = []
     }
 }
 

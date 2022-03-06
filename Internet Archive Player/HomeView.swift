@@ -10,7 +10,6 @@ import SwiftUI
 struct HomeView: View {
     @State var showPlayer = false
     @StateObject var iaPlayer = IAPlayer()
-    @StateObject var playlistViewModel = Playlist.ViewModel()
     
     var body: some View {
         VStack(alignment:.leading, spacing: 0) {
@@ -27,7 +26,6 @@ struct HomeView: View {
         }
         .ignoresSafeArea(.keyboard)
 //        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
-        .environmentObject(playlistViewModel)
         .environmentObject(iaPlayer)
     }
 }
