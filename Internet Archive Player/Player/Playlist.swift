@@ -33,12 +33,15 @@ struct Playlist: View {
             }
             List{
                 ForEach(iaPlayer.items, id: \.self) { playlistItem in
-                    FileView(playlistItem.file, auxControls: false,
+                    FileView(playlistItem,
+                             showImage: true,
+                             showDownloadButton: true,
                              backgroundColor: playlistItem == iaPlayer.playingFile ? .fairyCream : nil,
                              textColor: playlistItem == iaPlayer.playingFile ? .droopy : .white)
                         .onTapGesture {
                             iaPlayer.playFile(playlistItem)
                         }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                         .padding(0)
                         .listRowBackground(Color.droopy)
                 }
@@ -95,13 +98,15 @@ struct SwiftUIView_Previews: PreviewProvider {
 
 struct PlaylistItem: Hashable, Identifiable  {
     var id = UUID()
-    let file: PlaylistFile
+    let file: IAFile
     let identifier: String
     let artist: String
     let identifierTitle: String
+    let archiveDoc: IAArchiveDoc
     
-    init(_ file: PlaylistFile, _ doc: IAArchiveDoc) {
+    init(_ file: IAFile, _ doc: IAArchiveDoc) {
         self.file = file
+        self.archiveDoc = doc
         self.identifier = doc.identifier!
         self.artist = doc.artist ?? doc.creator ?? ""
         self.identifierTitle = doc.title ?? ""
@@ -126,6 +131,11 @@ struct PlaylistItem: Hashable, Identifiable  {
     public func fileUrl() ->URL {
         let urlString = "https://archive.org/download/\(identifier)/\(file.name!)"
         return URL(string: urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!)!
+    }
+
+    public var iconUrl: URL {
+        let itemImageUrl = "https://archive.org/services/img/\(identifier)"
+        return URL(string: itemImageUrl)!
     }
 }
 

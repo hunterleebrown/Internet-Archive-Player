@@ -67,24 +67,18 @@ struct Detail: View {
                     .background(Color.white)
                     .frame(height: self.descriptionExpanded ? nil : 100)
                     .frame(alignment:.leading)
-                    //                        .overlay(
-                    //                            RoundedRectangle(cornerRadius: 5.0)
-                    //                                .stroke(Color.gray, lineWidth: 1.0)
-                    //                        )
-                    //                        .shadow(color: Color.droopy, radius: 5, x: 0, y: 5)
                 }
 
                 
-                LazyVStack(spacing:5.0) {
+                LazyVStack(spacing:2.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
 
                         if let archiveDoc = self.viewModel.archiveDoc {
-                            self.createFileView(file, archiveDoc)
+                            let appPlaylistItem = PlaylistItem(file, archiveDoc)
+                            self.createFileView(appPlaylistItem)
                                 .padding(.leading, 5.0)
                                 .padding(.trailing, 5.0)
                                 .onTapGesture {
-                                    let appVmFile = PlaylistFile(file)
-                                    let appPlaylistItem = PlaylistItem(appVmFile, archiveDoc)
                                     self.iaPlayer.appendPlaylistItem(appPlaylistItem)
                                     iaPlayer.playFile(appPlaylistItem)
                                 }
@@ -102,24 +96,20 @@ struct Detail: View {
     /**
      Filter out the annoying 78rpm collection files with "_78_" tracks
      */
-    func createFileView(_ file: IAFile, _ doc: IAArchiveDoc) -> FileView? {
+    func createFileView(_ playlistItem: PlaylistItem) -> FileView? {
 
-        if let name = file.name, let count = doc.files?.count {
-            if count > 1 && doc.metadata.collection.contains("78rpm") && name.contains("78_") {
+        if let name = playlistItem.file.name, let count = playlistItem.archiveDoc.files?.count {
+            if count > 1 && playlistItem.archiveDoc.metadata.collection.contains("78rpm") && name.contains("78_") {
                 return nil
             }
         }
 
-        let playlistFile = PlaylistFile(file)
-        return FileView(playlistFile, ellipsisAction: {
-            if let archiveDoc = self.viewModel.archiveDoc {
-                let vmFile = PlaylistFile(file)
-                let playlistItem = PlaylistItem(vmFile, archiveDoc)
-                iaPlayer.appendPlaylistItem(playlistItem)
-            }
+        return FileView(playlistItem, showDownloadButton: false, ellipsisAction: {
+            iaPlayer.appendPlaylistItem(playlistItem)
         })
     }
 
+    
     func attString(desc: String) -> NSAttributedString {
 
         if let data = desc.data(using: .unicode) {
