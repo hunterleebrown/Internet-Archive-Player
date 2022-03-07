@@ -94,6 +94,7 @@ struct FileView: View {
                             Image(systemName: "ellipsis")
                                 .accentColor(textColor)
                                 .aspectRatio(contentMode: .fill)
+                                .frame(width: 44, height: 44)
                         }
                         .highPriorityGesture(TapGesture())
 //                        Button(action: {

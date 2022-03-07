@@ -69,6 +69,13 @@ struct SearchView: View {
             .environmentObject(viewModel)
             .navigationTitle("")
             .navigationBarHidden(true)
+            .background(
+                Image("petabox")
+                    .resizable()
+                    .opacity(0.3)
+                    .aspectRatio(contentMode: .fill)
+                    .blur(radius: 05)
+            )
             //            .background(Color.droopy)
         }
         //        .background(Color.droopy)

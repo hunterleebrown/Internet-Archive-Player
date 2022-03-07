@@ -104,8 +104,8 @@ struct Detail: View {
      */
     func createFileView(_ file: IAFile, _ doc: IAArchiveDoc) -> FileView? {
 
-        if let name = file.name {
-            if doc.metadata.collection.contains("78rpm") && name.contains("78_") {
+        if let name = file.name, let count = doc.files?.count {
+            if count > 1 && doc.metadata.collection.contains("78rpm") && name.contains("78_") {
                 return nil
             }
         }
