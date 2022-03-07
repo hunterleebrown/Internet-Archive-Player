@@ -10,7 +10,6 @@ import iaAPI
 
 struct Detail: View {
     @EnvironmentObject var iaPlayer: IAPlayer
-    
     @ObservedObject var viewModel: Detail.ViewModel
     var doc: IASearchDoc?
     @State var descriptionExpanded = false
@@ -78,24 +77,18 @@ struct Detail: View {
                 
                 LazyVStack(spacing:5.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
-                        let playlistFile = PlaylistFile(file.copy())
-                        FileView(playlistFile, ellipsisAction: {
-                            if let archiveDoc = self.viewModel.archiveDoc {
-                                let vmFile = PlaylistFile(file)
-                                let playlistItem = PlaylistItem(vmFile, archiveDoc)
-                                iaPlayer.appendPlaylistItem(playlistItem)
-                            }
-                        })
-                            .padding(.leading, 5.0)
-                            .padding(.trailing, 5.0)
-                            .onTapGesture {
-                                if let archiveDoc = self.viewModel.archiveDoc {
+
+                        if let archiveDoc = self.viewModel.archiveDoc {
+                            self.createFileView(file, archiveDoc)
+                                .padding(.leading, 5.0)
+                                .padding(.trailing, 5.0)
+                                .onTapGesture {
                                     let appVmFile = PlaylistFile(file)
                                     let appPlaylistItem = PlaylistItem(appVmFile, archiveDoc)
                                     self.iaPlayer.appendPlaylistItem(appPlaylistItem)
                                     iaPlayer.playFile(appPlaylistItem)
                                 }
-                            }
+                        }
                     }
                 }
             }
@@ -104,6 +97,27 @@ struct Detail: View {
         //        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
         //        .navigationTitle(doc?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /**
+     Filter out the annoying 78rpm collection files with "_78_" tracks
+     */
+    func createFileView(_ file: IAFile, _ doc: IAArchiveDoc) -> FileView? {
+
+        if let name = file.name {
+            if doc.metadata.collection.contains("78rpm") && name.contains("78_") {
+                return nil
+            }
+        }
+
+        let playlistFile = PlaylistFile(file)
+        return FileView(playlistFile, ellipsisAction: {
+            if let archiveDoc = self.viewModel.archiveDoc {
+                let vmFile = PlaylistFile(file)
+                let playlistItem = PlaylistItem(vmFile, archiveDoc)
+                iaPlayer.appendPlaylistItem(playlistItem)
+            }
+        })
     }
 
     func attString(desc: String) -> NSAttributedString {

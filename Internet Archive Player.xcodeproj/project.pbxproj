@@ -768,7 +768,7 @@
 			repositoryURL = "git@github.com:hunterleebrown/iaAPI.git";
 			requirement = {
 				kind = exactVersion;
-				version = 1.1.9;
+				version = 1.2.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
