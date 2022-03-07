@@ -11,12 +11,12 @@ import iaAPI
 struct Detail: View {
     @EnvironmentObject var iaPlayer: IAPlayer
     @ObservedObject var viewModel: Detail.ViewModel
-    var doc: IASearchDoc?
+    var identifier: String?
     @State var descriptionExpanded = false
     
-    init(_ doc: IASearchDoc?) {
-        self.doc = doc
-        self.viewModel = Detail.ViewModel(doc)
+    init(_ identifier: String?) {
+        self.identifier = identifier
+        self.viewModel = Detail.ViewModel(identifier)
         //        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.fairyCream]
     }
     
@@ -24,7 +24,7 @@ struct Detail: View {
         VStack(alignment: .leading){
             ScrollView {
                 VStack(alignment: .center, spacing: 5.0) {
-                    if let iconUrl = doc?.iconUrl {
+                    if let iconUrl = viewModel.archiveDoc?.iconUrl() {
                         AsyncImage(
                             url: iconUrl,
                             content: { image in
@@ -135,19 +135,18 @@ struct Detail_Previews: PreviewProvider {
 extension Detail {
     final class ViewModel: ObservableObject {
         let service: IAService
-        let searchDoc: IASearchDoc?
+        let identifier: String?
         @Published var archiveDoc: IAArchiveDoc? = nil
         @Published var files = [IAFile]()
         
-        init(_ doc: IASearchDoc?) {
+        init(_ identifier: String?) {
             self.service = IAService()
-            self.searchDoc = doc
+            self.identifier = identifier
             self.getArchiveDoc()
         }
         
         private func getArchiveDoc(){
-            guard let searchDoc = self.searchDoc,
-                  let identifier = searchDoc.identifier else { return }
+            guard let identifier = identifier else { return }
             
             self.service.archiveDoc(identifier: identifier) { result, error in
                 self.archiveDoc = result

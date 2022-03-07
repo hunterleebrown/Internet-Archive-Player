@@ -20,8 +20,8 @@ struct FileView: View {
     init(_ playlistItem: PlaylistItem,
          showImage: Bool = false,
          showDownloadButton: Bool = true,
-         backgroundColor: Color? = Color.white,
-         textColor: Color = Color.black,
+         backgroundColor: Color? = Color.fairyRedAlpha,
+         textColor: Color = Color.fairyCream,
          ellipsisAction: (()->())? = nil){
         self.playlistItem = playlistItem
         self.showImage = showImage

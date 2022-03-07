@@ -43,15 +43,13 @@ struct SearchView: View {
                             .progressViewStyle(CircularProgressViewStyle())
                     }
                 }
-
-
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(5)
 
                 ScrollView {
                     LazyVStack{
                         ForEach(viewModel.items, id: \.self) { doc in
-                            NavigationLink(destination: Detail(doc)) {
+                            NavigationLink(destination: Detail(doc.identifier)) {
                                 SearchItemView(item: doc)
                                     .padding(.leading, 5)
                                     .padding(.trailing, 5)
