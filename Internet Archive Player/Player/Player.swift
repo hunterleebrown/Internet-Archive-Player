@@ -8,16 +8,15 @@
 import SwiftUI
 
 struct Player: View {
-    @Binding var showPlayer: Bool
     var body: some View {
         VStack{
-            PlayerControls(showPlaylist: $showPlayer)
+            PlayerControls()
         }
     }
 }
 
 struct Player_Previews: PreviewProvider {
     static var previews: some View {
-        Player(showPlayer: .constant(false))
+        Player()
     }
 }

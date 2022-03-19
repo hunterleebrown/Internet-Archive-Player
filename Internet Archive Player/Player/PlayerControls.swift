@@ -9,8 +9,6 @@ import SwiftUI
 
 struct PlayerControls: View {
     @EnvironmentObject var iaPlayer: IAPlayer
-    
-    @Binding var showPlaylist: Bool
     @State var playing: Bool = false
 
     var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
@@ -60,9 +58,9 @@ struct PlayerControls: View {
 
                 HStack {
                     
-                    PlayerButton(showPlaylist ? .listFill : .list, 20, {
+                    PlayerButton(iaPlayer.showPlaylist ? .listFill : .list, 20, {
                         withAnimation {
-                            self.showPlaylist.toggle()
+                            iaPlayer.showPlaylist.toggle()
                         }
                     })
                     Spacer()
@@ -115,6 +113,6 @@ extension PlayerControls {
 
 struct PlayerControls_Previews: PreviewProvider {
     static var previews: some View {
-        PlayerControls(showPlaylist: .constant(false))
+        PlayerControls()
     }
 }

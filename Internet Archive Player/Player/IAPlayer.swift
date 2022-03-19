@@ -14,6 +14,7 @@ import UIKit
 import AlamofireImage
 
 class IAPlayer: NSObject, ObservableObject {
+    @Published var showPlaylist = false
     @Published var playing = false
     @Published var minTime: String? = nil
     @Published var maxTime: String? = nil

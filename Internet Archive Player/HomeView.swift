@@ -8,20 +8,19 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State var showPlayer = false
     @StateObject var iaPlayer = IAPlayer()
     
     var body: some View {
         VStack(alignment:.leading, spacing: 0) {
             ZStack(alignment:.top) {
-                if showPlayer {
+                if iaPlayer.showPlaylist {
                 Playlist()
                     .zIndex(1)
                     .transition(.move(edge:.bottom))
                 }
                 Tabs()
             }
-            Player(showPlayer: $showPlayer)
+            Player()
                 .frame(height: 100, alignment: .bottom)
         }
         .ignoresSafeArea(.keyboard)
