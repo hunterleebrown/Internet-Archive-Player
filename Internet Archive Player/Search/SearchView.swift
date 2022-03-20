@@ -116,13 +116,24 @@ extension SearchView {
             self.isSearching = true
         }
         
+//        func search(query: String) {
+//            self.items.removeAll()
+//            request = self.service.search(queryString: query,
+//                                          searchField: .all,
+//                                          mediaTypes: [.audio],
+//                                          rows: 100,
+//                                          format: .mp3)
+//            { (docs, error) in
+//                docs?.forEach({ (doc) in
+//                    self.items.append(doc)
+//                })
+//                self.isSearching = false
+//            }
+//        }
+        
         func search(query: String) {
             self.items.removeAll()
-            request = self.service.search(queryString: query,
-                                          searchField: .all,
-                                          mediaTypes: [.audio],
-                                          rows: 100,
-                                          format: .mp3)
+            self.service.mockSearch()
             { (docs, error) in
                 docs?.forEach({ (doc) in
                     self.items.append(doc)
