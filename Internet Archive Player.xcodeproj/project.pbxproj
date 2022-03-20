@@ -629,6 +629,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "hunterleebrown.ia-player";
 				PRODUCT_NAME = "ia-player";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = RELEASE;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -766,7 +767,7 @@
 			repositoryURL = "git@github.com:hunterleebrown/iaAPI.git";
 			requirement = {
 				kind = exactVersion;
-				version = 1.3.1;
+				version = 1.3.7;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

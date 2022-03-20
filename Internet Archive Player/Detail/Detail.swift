@@ -140,7 +140,12 @@ extension Detail {
         @Published var files = [IAFile]()
         
         init(_ identifier: String?) {
-            self.service = IAService()
+            #if DEBUG
+            self.service = IAService(.offline)
+            #elseif RELEASE
+            self.service = IAService(.online)
+            #endif
+            
             self.identifier = identifier
             self.getArchiveDoc()
         }
@@ -148,25 +153,15 @@ extension Detail {
         private func getArchiveDoc(){
             guard let identifier = identifier else { return }
             
-//            self.service.archiveDoc(identifier: identifier) { result, error in
-//                self.archiveDoc = result
-//                guard let files = self.archiveDoc?.files else { return }
-//
-//                files.forEach { f in
-//                    guard f.format == .mp3 else { return }
-//                    self.files.append(f)
-//                }
-//            }
-            self.service.mockArchiveDoc() { result, error in
+            self.service.archiveDoc(identifier: identifier) { result, error in
                 self.archiveDoc = result
                 guard let files = self.archiveDoc?.files else { return }
-                
+
                 files.forEach { f in
                     guard f.format == .mp3 else { return }
                     self.files.append(f)
                 }
             }
-            
         }
     }
 }
