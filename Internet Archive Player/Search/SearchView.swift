@@ -8,9 +8,9 @@
 import SwiftUI
 import iaAPI
 import Alamofire
+import Combine
 
 struct SearchView: View {
-    @State private var searchText = ""
     @ObservedObject var viewModel = SearchView.ViewModel()
     @FocusState private var searchFocused: Bool
 
@@ -20,11 +20,10 @@ struct SearchView: View {
                 HStack(spacing: 5.0) {
 
                     TextField("Search The Internet Archive",
-                              text: $searchText,
+                              text: $viewModel.searchText,
                               onCommit:{
-                        if !searchText.isEmpty {
+                        if !viewModel.searchText.isEmpty {
                             viewModel.cancelRequest()
-                            viewModel.searchText = searchText
                             searchFocused = false
                         }})
                         .focused($searchFocused)
@@ -94,10 +93,13 @@ extension SearchView {
         @Published var searchText: String = "" {
             didSet { handleTextChange() }
         }
+//        @Published var searchText: String = ""
         @Published var isSearching: Bool = false
         
         let service: IAService
         private var request: Request?
+
+//        var searchTextPubSet: Set<AnyCancellable> = []
 
         init() {
             #if DEBUG
@@ -105,6 +107,10 @@ extension SearchView {
             #elseif RELEASE
             self.service = IAService(.online)
             #endif
+
+//            $searchText.sink { _ in
+//                self.handleTextChange()
+//            }.store(in: &searchTextPubSet)
         }
 
         func cancelRequest() {

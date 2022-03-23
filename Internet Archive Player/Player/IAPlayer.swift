@@ -12,6 +12,7 @@ import AVFoundation
 import AVKit
 import UIKit
 import AlamofireImage
+import Combine
 
 class IAPlayer: NSObject, ObservableObject {
     @Published var showPlaylist = false
@@ -34,10 +35,15 @@ class IAPlayer: NSObject, ObservableObject {
 
     var mediaArtwork : MPMediaItemArtwork?
 
+    var itemSubscritpions: Set<AnyCancellable> = Set<AnyCancellable>()
+
     override init() {
         super.init()
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
         self.setUpRemoteCommandCenterEvents()
+        $items.sink { playListItems in
+            print("IAPlayer items are now: \(playListItems)");
+        }.store(in: &itemSubscritpions)
     }
 
     public func appendPlaylistItem(_ item: PlaylistItem){
