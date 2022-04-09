@@ -11,10 +11,10 @@ import iaAPI
 struct Detail: View {
     @EnvironmentObject var iaPlayer: IAPlayer
     @ObservedObject var viewModel: Detail.ViewModel
-    var identifier: String?
+    var identifier: String
     @State var descriptionExpanded = false
     
-    init(_ identifier: String?) {
+    init(_ identifier: String) {
         self.identifier = identifier
         self.viewModel = Detail.ViewModel(identifier)
         //        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.fairyCream]
@@ -24,7 +24,7 @@ struct Detail: View {
         VStack(alignment: .leading){
             ScrollView {
                 VStack(alignment: .center, spacing: 5.0) {
-                    if let iconUrl = viewModel.archiveDoc?.iconUrl() {
+                    if let iconUrl = viewModel.archiveDoc?.iconUrl {
                         AsyncImage(
                             url: iconUrl,
                             content: { image in
@@ -43,7 +43,7 @@ struct Detail: View {
                         .font(.headline)
                         .bold()
                         .multilineTextAlignment(.center)
-                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator {
+                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator.first {
                         Text(artist)
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
@@ -52,7 +52,7 @@ struct Detail: View {
                 }
                 .padding(10)
                 
-                if let desc = self.viewModel.archiveDoc?.desc {
+                if let desc = self.viewModel.archiveDoc?.description {
 
                     VStack() {
                         Text(AttributedString(attString(desc: desc)))
@@ -98,12 +98,6 @@ struct Detail: View {
      */
     func createFileView(_ playlistItem: PlaylistItem) -> FileView? {
 
-        if let name = playlistItem.file.name, let count = playlistItem.archiveDoc.files?.count {
-            if count > 1 && playlistItem.archiveDoc.metadata.collection.contains("78rpm") && name.contains("78_") {
-                return nil
-            }
-        }
-
         return FileView(playlistItem, showDownloadButton: false, ellipsisAction: {
             iaPlayer.appendPlaylistItem(playlistItem)
         })
@@ -126,40 +120,33 @@ struct Detail: View {
 }
 
 
-struct Detail_Previews: PreviewProvider {
-    static var previews: some View {
-        Detail(nil)
-    }
-}
+//struct Detail_Previews: PreviewProvider {
+//    static var previews: some View {
+//        Detail(nil)
+//    }
+//}
 
 extension Detail {
     final class ViewModel: ObservableObject {
-        let service: IAService
-        let identifier: String?
-        @Published var archiveDoc: IAArchiveDoc? = nil
-        @Published var files = [IAFile]()
+        let service: ArchiveService
+        let identifier: String
+        @Published var archiveDoc: ArchiveMetaData? = nil
+        @Published var files = [ArchiveFile]()
         
-        init(_ identifier: String?) {
-            #if DEBUG
-            self.service = IAService(.offline)
-            #elseif RELEASE
-            self.service = IAService(.online)
-            #endif
-            
+        init(_ identifier: String) {
+            self.service = ArchiveService()
             self.identifier = identifier
             self.getArchiveDoc()
         }
         
         private func getArchiveDoc(){
-            guard let identifier = identifier else { return }
-            
-            self.service.archiveDoc(identifier: identifier) { result, error in
-                self.archiveDoc = result
-                guard let files = self.archiveDoc?.files else { return }
-
-                files.forEach { f in
-                    guard f.format == .mp3 else { return }
-                    self.files.append(f)
+            Task {
+                do {
+                    let doc = try await self.service.getArchiveAsync(with: identifier)
+                    self.archiveDoc = doc.metadata
+                    self.files = doc.audioFiles
+                } catch {
+                    print(error)
                 }
             }
         }

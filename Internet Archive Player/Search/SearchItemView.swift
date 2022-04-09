@@ -10,7 +10,7 @@ import SwiftUI
 import iaAPI
 
 struct SearchItemView: View {
-    var item: IASearchDoc
+    var item: ArchiveMetaData
     var textColor: Color = .droopy
     var body: some View {
         HStack(alignment:.center, spacing: 10.0) {
@@ -41,11 +41,11 @@ struct SearchItemView: View {
                     .frame(alignment:.leading)
                     .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
-                Text(item.desc ?? "")
-                    .font(.body)
-                    .frame(alignment:.leading)
-                    .foregroundColor(textColor)
-                    .multilineTextAlignment(.leading)
+//                Text(item.description ?? "")
+//                    .font(.body)
+//                    .frame(alignment:.leading)
+//                    .foregroundColor(textColor)
+//                    .multilineTextAlignment(.leading)
 
             }
             .frame(maxWidth: .infinity,

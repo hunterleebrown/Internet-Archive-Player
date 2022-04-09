@@ -137,20 +137,29 @@ struct FileView: View {
         //        )
     }
     
-    private func fileTitle(_ iaFile: IAFile?) -> String {
+    private func fileTitle(_ iaFile: ArchiveFile?) -> String {
         return iaFile?.title ?? iaFile?.name ?? ""
     }
     
 }
 
-extension IAFile {
-    public func copy() -> IAFile {
-        return IAFile(name:self.name, title: self.title, track:self.track, size:self.size, rawFormat: self.format?.rawValue)
-    }
-}
 
-extension IAArchiveDoc {
-    public func copy() -> IAArchiveDoc {
-        return IAArchiveDoc(metadata: self.metadata, files: self.files)
+extension ArchiveFile {
+    public var displayLength: String? {
+
+        if let l = length {
+            return IAStringUtils.timeFormatter(timeString: l)
+        }
+        return nil
+    }
+
+    public var calculatedSize: String? {
+
+        if let s = size {
+            if let rawSize = Int(s) {
+                return IAStringUtils.sizeString(size: rawSize)
+            }
+        }
+        return nil
     }
 }

@@ -12,7 +12,6 @@
 		5A4151BA27B0FEAA007A3623 /* IAPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B927B0FEAA007A3623 /* IAPlayer.swift */; };
 		5A4151BD27B3645E007A3623 /* Inject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BC27B3645E007A3623 /* Inject.swift */; };
 		5A4151BF27B364B4007A3623 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BE27B364B4007A3623 /* ServiceContainer.swift */; };
-		5AAF285A27B9CA8300ED2B30 /* AlamofireImage in Frameworks */ = {isa = PBXBuildFile; productRef = 5AAF285927B9CA8300ED2B30 /* AlamofireImage */; };
 		5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC51279CCB7000495070 /* PlayerControls.swift */; };
 		5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC53279CCED100495070 /* PlayerButton.swift */; };
 		5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC55279CDE2100495070 /* AirPlayButton.swift */; };
@@ -93,7 +92,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CED82BCD279E849200EB1248 /* iaAPI in Frameworks */,
-				5AAF285A27B9CA8300ED2B30 /* AlamofireImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,7 +278,6 @@
 			name = "Internet Archive Player";
 			packageProductDependencies = (
 				CED82BCC279E849200EB1248 /* iaAPI */,
-				5AAF285927B9CA8300ED2B30 /* AlamofireImage */,
 			);
 			productName = "Internet Archive Player";
 			productReference = 5ADED035279B56EE00FB2E6D /* ia-player.app */;
@@ -356,7 +353,6 @@
 			mainGroup = 5ADED02C279B56EE00FB2E6D;
 			packageReferences = (
 				CED82BCB279E849200EB1248 /* XCRemoteSwiftPackageReference "iaAPI" */,
-				5AAF285827B9CA8300ED2B30 /* XCRemoteSwiftPackageReference "AlamofireImage" */,
 			);
 			productRefGroup = 5ADED036279B56EE00FB2E6D /* Products */;
 			projectDirPath = "";
@@ -754,30 +750,17 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		5AAF285827B9CA8300ED2B30 /* XCRemoteSwiftPackageReference "AlamofireImage" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/AlamofireImage.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.0;
-			};
-		};
 		CED82BCB279E849200EB1248 /* XCRemoteSwiftPackageReference "iaAPI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:hunterleebrown/iaAPI.git";
 			requirement = {
-				kind = exactVersion;
-				version = 1.3.7;
+				branch = "ditching-alamofire";
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		5AAF285927B9CA8300ED2B30 /* AlamofireImage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5AAF285827B9CA8300ED2B30 /* XCRemoteSwiftPackageReference "AlamofireImage" */;
-			productName = AlamofireImage;
-		};
 		CED82BCC279E849200EB1248 /* iaAPI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CED82BCB279E849200EB1248 /* XCRemoteSwiftPackageReference "iaAPI" */;

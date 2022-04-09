@@ -8,12 +8,9 @@
 import Foundation
 import iaAPI
 
-extension IAFile: Hashable {
-    public static func == (lhs: IAFile, rhs: IAFile) -> Bool {
-        return lhs.name == rhs.name &&
-        lhs.title == rhs.title &&
-        lhs.format == rhs.format &&
-        lhs.track == rhs.track
+extension ArchiveFile: Hashable {
+    public static func == (lhs: ArchiveFile, rhs: ArchiveFile) -> Bool {
+        return lhs.id == rhs.id
     }
     
     public func hash(into hasher: inout Hasher) {

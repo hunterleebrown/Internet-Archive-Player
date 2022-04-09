@@ -7,7 +7,6 @@
 
 import SwiftUI
 import iaAPI
-import Alamofire
 import Combine
 
 struct SearchView: View {
@@ -23,7 +22,7 @@ struct SearchView: View {
                               text: $viewModel.searchText,
                               onCommit:{
                         if !viewModel.searchText.isEmpty {
-                            viewModel.cancelRequest()
+//                            viewModel.cancelRequest()
                             searchFocused = false
                         }})
                         .focused($searchFocused)
@@ -48,7 +47,7 @@ struct SearchView: View {
                 ScrollView {
                     LazyVStack{
                         ForEach(viewModel.items, id: \.self) { doc in
-                            NavigationLink(destination: Detail(doc.identifier)) {
+                            NavigationLink(destination: Detail(doc.identifier!)) {
                                 SearchItemView(item: doc)
                                     .padding(.leading, 5)
                                     .padding(.trailing, 5)
@@ -89,37 +88,18 @@ struct SearchView_Previews: PreviewProvider {
 
 extension SearchView {
     final class ViewModel: ObservableObject {
-        @Published var items: [IASearchDoc] = []
+        @Published var items: [ArchiveMetaData] = []
         @Published var searchText: String = "" {
             didSet { handleTextChange() }
         }
-//        @Published var searchText: String = ""
         @Published var isSearching: Bool = false
         
-        let service: IAService
-        private var request: Request?
-
-//        var searchTextPubSet: Set<AnyCancellable> = []
+        let service: ArchiveService
 
         init() {
-            #if DEBUG
-            self.service = IAService(.offline)
-            #elseif RELEASE
-            self.service = IAService(.online)
-            #endif
-
-//            $searchText.sink { _ in
-//                self.handleTextChange()
-//            }.store(in: &searchTextPubSet)
+            self.service = ArchiveService()
         }
 
-        func cancelRequest() {
-            if let req = request {
-                req.cancel()
-                self.isSearching = false
-            }
-        }
-        
         func handleTextChange() {
             guard searchText != "" else { return }
             self.search(query: searchText)
@@ -128,25 +108,24 @@ extension SearchView {
         
         func search(query: String) {
             self.items.removeAll()
-            request = self.service.search(queryString: query,
-                                          searchField: .all,
-                                          mediaTypes: [.audio],
-                                          rows: 100,
-                                          format: .mp3)
-            { (docs, error) in
-                docs?.forEach({ (doc) in
-                    self.items.append(doc)
-                })
-                self.isSearching = false
+
+            Task {
+                do {
+                    let items = try await self.service.searchAsync(query: query, format: .mp3).response.docs
+                    DispatchQueue.main.async {
+                        self.items = items
+                    }
+                } catch {
+                    print(error)
+                }
             }
         }
-        
     }
 }
 
-extension IASearchDoc: Hashable {
+extension ArchiveMetaData: Hashable {
     
-    public static func == (lhs: IASearchDoc, rhs: IASearchDoc) -> Bool {
+    public static func == (lhs: ArchiveMetaData, rhs: ArchiveMetaData) -> Bool {
         return lhs.identifier == rhs.identifier && lhs.title == rhs.title
     }
     

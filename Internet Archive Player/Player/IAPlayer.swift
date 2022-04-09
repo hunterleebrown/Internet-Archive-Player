@@ -11,7 +11,6 @@ import MediaPlayer
 import AVFoundation
 import AVKit
 import UIKit
-import AlamofireImage
 import Combine
 
 class IAPlayer: NSObject, ObservableObject {
@@ -205,49 +204,49 @@ class IAPlayer: NSObject, ObservableObject {
                 UIApplication.shared.beginReceivingRemoteControlEvents()
             }
 
-            imageView.af.setImage(
-                withURL: url!,
-                placeholderImage: nil,
-                filter: nil,
-                progress: nil,
-                progressQueue: DispatchQueue.main,
-                imageTransition: UIImageView.ImageTransition.noTransition,
-                runImageTransitionIfCached: false) { [self] (response) in
-
-                    switch response.result {
-                    case .success(let image):
-                        self.mediaArtwork = MPMediaItemArtwork(boundsSize: image.size, requestHandler: { (size) -> UIImage in
-                            image
-                        })
-
-//                        self.controlsController?.playerIcon.image = image
-//                        self.controlsController?.playerIcon.backgroundColor = UIColor.white
-
-                        let playBackRate = playing ? 1.0 : 0.0
-
-                        var songInfo : [String : AnyObject] = [
-                            MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
-                            MPMediaItemPropertyAlbumTitle: self.fileIdentifier! as AnyObject,
-                            MPMediaItemPropertyPlaybackDuration : NSNumber(value: CMTimeGetSeconds((self.avPlayer?.currentItem?.duration)!) as Double),
-                            MPNowPlayingInfoPropertyPlaybackRate: playBackRate as AnyObject
-                        ]
-
-                        if let artwork = self.mediaArtwork {
-                            songInfo[MPMediaItemPropertyArtwork] = artwork
-                        }
-
-                        songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
-                        songInfo[MPMediaItemPropertyAlbumArtist] = self.playingFile?.artist as AnyObject
-
-
-                        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
-
-
-                    case .failure(let error):
-                        print("-----------> player couldn't get image: \(error)")
-                        break
-                    }
-                }
+//            imageView.af.setImage(
+//                withURL: url!,
+//                placeholderImage: nil,
+//                filter: nil,
+//                progress: nil,
+//                progressQueue: DispatchQueue.main,
+//                imageTransition: UIImageView.ImageTransition.noTransition,
+//                runImageTransitionIfCached: false) { [self] (response) in
+//
+//                    switch response.result {
+//                    case .success(let image):
+//                        self.mediaArtwork = MPMediaItemArtwork(boundsSize: image.size, requestHandler: { (size) -> UIImage in
+//                            image
+//                        })
+//
+////                        self.controlsController?.playerIcon.image = image
+////                        self.controlsController?.playerIcon.backgroundColor = UIColor.white
+//
+//                        let playBackRate = playing ? 1.0 : 0.0
+//
+//                        var songInfo : [String : AnyObject] = [
+//                            MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
+//                            MPMediaItemPropertyAlbumTitle: self.fileIdentifier! as AnyObject,
+//                            MPMediaItemPropertyPlaybackDuration : NSNumber(value: CMTimeGetSeconds((self.avPlayer?.currentItem?.duration)!) as Double),
+//                            MPNowPlayingInfoPropertyPlaybackRate: playBackRate as AnyObject
+//                        ]
+//
+//                        if let artwork = self.mediaArtwork {
+//                            songInfo[MPMediaItemPropertyArtwork] = artwork
+//                        }
+//
+//                        songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
+//                        songInfo[MPMediaItemPropertyAlbumArtist] = self.playingFile?.artist as AnyObject
+//
+//
+//                        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
+//
+//
+//                    case .failure(let error):
+//                        print("-----------> player couldn't get image: \(error)")
+//                        break
+//                    }
+//                }
         }
     }
 

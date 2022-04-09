@@ -98,17 +98,17 @@ struct SwiftUIView_Previews: PreviewProvider {
 
 struct PlaylistItem: Hashable, Identifiable  {
     var id = UUID()
-    let file: IAFile
+    let file: ArchiveFile
     let identifier: String
     let artist: String
     let identifierTitle: String
-    let archiveDoc: IAArchiveDoc
+    let archiveDoc: ArchiveMetaData
     
-    init(_ file: IAFile, _ doc: IAArchiveDoc) {
+    init(_ file: ArchiveFile, _ doc: ArchiveMetaData) {
         self.file = file
         self.archiveDoc = doc
         self.identifier = doc.identifier!
-        self.artist = doc.artist ?? doc.creator ?? ""
+        self.artist = doc.artist ?? doc.creator.first ?? ""
         self.identifierTitle = doc.title ?? ""
     }
     
@@ -128,14 +128,12 @@ struct PlaylistItem: Hashable, Identifiable  {
         hasher.combine(identifier)
     }
 
-    public func fileUrl() ->URL {
-        let urlString = "https://archive.org/download/\(identifier)/\(file.name!)"
-        return URL(string: urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!)!
+    public func fileUrl() -> URL {
+        return self.file.url!
     }
 
     public var iconUrl: URL {
-        let itemImageUrl = "https://archive.org/services/img/\(identifier)"
-        return URL(string: itemImageUrl)!
+        return self.archiveDoc.iconUrl
     }
 }
 
@@ -145,10 +143,10 @@ struct PlaylistFile: Hashable {
     var title: String?
     var track: String?
     var size: String?
-    var format: iaAPI.IAFileFormat?
+    var format: iaAPI.ArchiveFileFormat?
     var length: String?
 
-    init(_ file: IAFile)  {
+    init(_ file: ArchiveFile)  {
         self.name = file.name
         self.title = file.title
         self.format = file.format
