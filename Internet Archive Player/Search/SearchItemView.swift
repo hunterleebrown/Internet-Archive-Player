@@ -31,12 +31,12 @@ struct SearchItemView: View {
                 .cornerRadius(15)
 
             VStack(alignment:.leading) {
-                Text(item.title ?? "")
+                Text(item.archiveTitle ?? "")
                     .frame(alignment:.leading)
                     .font(.headline)
                     .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
-                Text(item.creator.joined(separator: ", "))
+                Text(item.creator?.joined(separator: ", ") ?? "")
                     .font(.footnote)
                     .frame(alignment:.leading)
                     .foregroundColor(textColor)

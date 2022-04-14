@@ -39,11 +39,11 @@ struct Detail: View {
                             })
                             .cornerRadius(15)
                     }
-                    Text(self.viewModel.archiveDoc?.title ?? "")
+                    Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                         .font(.headline)
                         .bold()
                         .multilineTextAlignment(.center)
-                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator.first {
+                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
                         Text(artist)
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
@@ -132,7 +132,7 @@ extension Detail {
         let identifier: String
         @Published var archiveDoc: ArchiveMetaData? = nil
         @Published var files = [ArchiveFile]()
-        
+
         init(_ identifier: String) {
             self.service = ArchiveService()
             self.identifier = identifier
@@ -144,7 +144,7 @@ extension Detail {
                 do {
                     let doc = try await self.service.getArchiveAsync(with: identifier)
                     self.archiveDoc = doc.metadata
-                    self.files = doc.audioFiles
+                    self.files = doc.non78Audio
                 } catch {
                     print(error)
                 }

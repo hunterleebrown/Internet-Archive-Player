@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2FACD227A10FB200D02945 /* SearchItemView.swift */; };
+		5A305F522807BF5E00735FAA /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 5A305F512807BF5E00735FAA /* iaAPI */; };
 		5A4151B827B0FDF8007A3623 /* IAReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B727B0FDF8007A3623 /* IAReachability.swift */; };
 		5A4151BA27B0FEAA007A3623 /* IAPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B927B0FEAA007A3623 /* IAPlayer.swift */; };
 		5A4151BD27B3645E007A3623 /* Inject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BC27B3645E007A3623 /* Inject.swift */; };
@@ -31,9 +32,7 @@
 		5ADED076279B8AEC00FB2E6D /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED075279B8AEC00FB2E6D /* Player.swift */; };
 		5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED077279B8BA000FB2E6D /* HomeView.swift */; };
 		CE16141B279E9EE900ED0055 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16141A279E9EE900ED0055 /* Detail.swift */; };
-		CED82BCD279E849200EB1248 /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = CED82BCC279E849200EB1248 /* iaAPI */; };
 		CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF72C9927B5D72600B8AF15 /* FileView.swift */; };
-		CEF72C9D27B8361300B8AF15 /* IAFile+Hashable.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF72C9C27B8361300B8AF15 /* IAFile+Hashable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,7 +82,6 @@
 		5ADED077279B8BA000FB2E6D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CE16141A279E9EE900ED0055 /* Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detail.swift; sourceTree = "<group>"; };
 		CEF72C9927B5D72600B8AF15 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
-		CEF72C9C27B8361300B8AF15 /* IAFile+Hashable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "IAFile+Hashable.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,7 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CED82BCD279E849200EB1248 /* iaAPI in Frameworks */,
+				5A305F522807BF5E00735FAA /* iaAPI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,7 +253,6 @@
 		CEF72C9B27B835E600B8AF15 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				CEF72C9C27B8361300B8AF15 /* IAFile+Hashable.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -277,7 +274,7 @@
 			);
 			name = "Internet Archive Player";
 			packageProductDependencies = (
-				CED82BCC279E849200EB1248 /* iaAPI */,
+				5A305F512807BF5E00735FAA /* iaAPI */,
 			);
 			productName = "Internet Archive Player";
 			productReference = 5ADED035279B56EE00FB2E6D /* ia-player.app */;
@@ -352,7 +349,7 @@
 			);
 			mainGroup = 5ADED02C279B56EE00FB2E6D;
 			packageReferences = (
-				CED82BCB279E849200EB1248 /* XCRemoteSwiftPackageReference "iaAPI" */,
+				5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */,
 			);
 			productRefGroup = 5ADED036279B56EE00FB2E6D /* Products */;
 			projectDirPath = "";
@@ -398,7 +395,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5AD6BC58279CF31400495070 /* Playlist.swift in Sources */,
-				CEF72C9D27B8361300B8AF15 /* IAFile+Hashable.swift in Sources */,
 				5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */,
 				5A4151BD27B3645E007A3623 /* Inject.swift in Sources */,
 				5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */,
@@ -750,7 +746,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		CED82BCB279E849200EB1248 /* XCRemoteSwiftPackageReference "iaAPI" */ = {
+		5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:hunterleebrown/iaAPI.git";
 			requirement = {
@@ -761,9 +757,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CED82BCC279E849200EB1248 /* iaAPI */ = {
+		5A305F512807BF5E00735FAA /* iaAPI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CED82BCB279E849200EB1248 /* XCRemoteSwiftPackageReference "iaAPI" */;
+			package = 5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */;
 			productName = iaAPI;
 		};
 /* End XCSwiftPackageProductDependency section */

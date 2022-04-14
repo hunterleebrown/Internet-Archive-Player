@@ -22,8 +22,7 @@ struct SearchView: View {
                               text: $viewModel.searchText,
                               onCommit:{
                         if !viewModel.searchText.isEmpty {
-//                            viewModel.cancelRequest()
-                            searchFocused = false
+                            viewModel.search(query: viewModel.searchText)
                         }})
                         .focused($searchFocused)
                     //                    .onChange(of: searchText, perform: { text in
@@ -89,9 +88,7 @@ struct SearchView_Previews: PreviewProvider {
 extension SearchView {
     final class ViewModel: ObservableObject {
         @Published var items: [ArchiveMetaData] = []
-        @Published var searchText: String = "" {
-            didSet { handleTextChange() }
-        }
+        @Published var searchText: String = ""
         @Published var isSearching: Bool = false
         
         let service: ArchiveService
@@ -100,38 +97,22 @@ extension SearchView {
             self.service = ArchiveService()
         }
 
-        func handleTextChange() {
-            guard searchText != "" else { return }
-            self.search(query: searchText)
-            self.isSearching = true
-        }
-        
         func search(query: String) {
+            guard !searchText.isEmpty, searchText.count > 2 else { return }
             self.items.removeAll()
-
+            self.isSearching = true
             Task {
                 do {
                     let items = try await self.service.searchAsync(query: query, format: .mp3).response.docs
                     DispatchQueue.main.async {
                         self.items = items
+                        self.isSearching = false
                     }
                 } catch {
                     print(error)
                 }
             }
         }
-    }
-}
-
-extension ArchiveMetaData: Hashable {
-    
-    public static func == (lhs: ArchiveMetaData, rhs: ArchiveMetaData) -> Bool {
-        return lhs.identifier == rhs.identifier && lhs.title == rhs.title
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
-        hasher.combine(title)
     }
 }
 

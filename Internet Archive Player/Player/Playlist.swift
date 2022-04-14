@@ -108,8 +108,8 @@ struct PlaylistItem: Hashable, Identifiable  {
         self.file = file
         self.archiveDoc = doc
         self.identifier = doc.identifier!
-        self.artist = doc.artist ?? doc.creator.first ?? ""
-        self.identifierTitle = doc.title ?? ""
+        self.artist = doc.artist ?? doc.creator?.first ?? ""
+        self.identifierTitle = doc.archiveTitle ?? ""
     }
     
     public static func == (lhs: PlaylistItem, rhs: PlaylistItem) -> Bool {
