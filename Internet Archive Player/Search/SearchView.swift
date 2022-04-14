@@ -15,33 +15,38 @@ struct SearchView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                HStack(spacing: 5.0) {
 
+            VStack(spacing:0) {
+                HStack(spacing: 5.0) {
                     TextField("Search The Internet Archive",
                               text: $viewModel.searchText,
                               onCommit:{
                         if !viewModel.searchText.isEmpty {
                             viewModel.search(query: viewModel.searchText)
                         }})
-                        .focused($searchFocused)
-                    //                    .onChange(of: searchText, perform: { text in
-                    //                        if !text.isEmpty {
-                    //                            viewModel.cancelRequest()
-                    //                            viewModel.searchText = text
-                    //                        } else {
-                    //                            viewModel.cancelRequest()
-                    //                            searchFocused = false
-                    //                        }
-                    //                    })
-
+                    .focused($searchFocused)
                     if viewModel.isSearching {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle())
                     }
                 }
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(5)
+                .padding(.leading, 5)
+                .padding(.trailing, 5)
+
+                if viewModel.noDataFound {
+                    VStack(spacing:0) {
+                        Text(viewModel.archiveError ?? "Error with Search")
+                            .padding(10)
+                            .foregroundColor(Color.fairyCream)
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .background(Rectangle().fill(Color.fairyRedAlpha).cornerRadius(10))
+                    }
+                    .padding(5.0)
+                    .transition(.move(edge: .leading))
+
+                }
 
                 ScrollView {
                     LazyVStack{
@@ -54,9 +59,7 @@ struct SearchView: View {
                             }
                         }
                     }
-                    //                    .background(Color.droopy)
                 }
-                //                .background(Color.droopy)
                 .listStyle(PlainListStyle())
                 .padding(0)
             }
@@ -71,9 +74,7 @@ struct SearchView: View {
                     .aspectRatio(contentMode: .fill)
                     .blur(radius: 05)
             )
-            //            .background(Color.droopy)
         }
-        //        .background(Color.droopy)
         .navigationViewStyle(StackNavigationViewStyle())
         .accentColor(Color.black)
     }
@@ -86,10 +87,18 @@ struct SearchView_Previews: PreviewProvider {
 }
 
 extension SearchView {
-    final class ViewModel: ObservableObject {
+    @MainActor final class ViewModel: ObservableObject {
         @Published var items: [ArchiveMetaData] = []
-        @Published var searchText: String = ""
+        @Published var searchText: String = "" {
+            didSet {
+                withAnimation(.easeOut(duration: 0.33)) {
+                    noDataFound = false
+                }
+            }
+        }
         @Published var isSearching: Bool = false
+        @Published var noDataFound: Bool = false
+        @Published var archiveError: String?
         
         let service: ArchiveService
 
@@ -101,15 +110,18 @@ extension SearchView {
             guard !searchText.isEmpty, searchText.count > 2 else { return }
             self.items.removeAll()
             self.isSearching = true
+            self.noDataFound = false
             Task {
                 do {
                     let items = try await self.service.searchAsync(query: query, format: .mp3).response.docs
-                    DispatchQueue.main.async {
-                        self.items = items
+                    self.items = items
+                    self.isSearching = false
+                } catch let error as ArchiveServiceError {
+                    withAnimation(.easeIn(duration: 0.33)) {
+                        self.archiveError = error.description
+                        self.noDataFound = true
                         self.isSearching = false
                     }
-                } catch {
-                    print(error)
                 }
             }
         }

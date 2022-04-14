@@ -17,7 +17,6 @@ struct Detail: View {
     init(_ identifier: String) {
         self.identifier = identifier
         self.viewModel = Detail.ViewModel(identifier)
-        //        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.fairyCream]
     }
     
     var body: some View {
@@ -88,14 +87,12 @@ struct Detail: View {
             }
             .padding(0)
         }
-        //        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
-        //        .navigationTitle(doc?.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear() {
+//            viewModel.getArchiveDoc()
+        }
     }
 
-    /**
-     Filter out the annoying 78rpm collection files with "_78_" tracks
-     */
     func createFileView(_ playlistItem: PlaylistItem) -> FileView? {
 
         return FileView(playlistItem, showDownloadButton: false, ellipsisAction: {
@@ -103,7 +100,6 @@ struct Detail: View {
         })
     }
 
-    
     func attString(desc: String) -> NSAttributedString {
 
         if let data = desc.data(using: .unicode) {
@@ -127,7 +123,7 @@ struct Detail: View {
 //}
 
 extension Detail {
-    final class ViewModel: ObservableObject {
+    @MainActor final class ViewModel: ObservableObject {
         let service: ArchiveService
         let identifier: String
         @Published var archiveDoc: ArchiveMetaData? = nil
@@ -139,12 +135,16 @@ extension Detail {
             self.getArchiveDoc()
         }
         
-        private func getArchiveDoc(){
+        public func getArchiveDoc(){
             Task {
                 do {
                     let doc = try await self.service.getArchiveAsync(with: identifier)
-                    self.archiveDoc = doc.metadata
-                    self.files = doc.non78Audio
+
+                    withAnimation {
+                        self.archiveDoc = doc.metadata
+                        self.files = doc.non78Audio
+                    }
+
                 } catch {
                     print(error)
                 }
