@@ -12,7 +12,6 @@ import SystemConfiguration
 
 open class IAReachability {
     
-    
     class func isConnectedToNetwork() -> Bool {
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(MemoryLayout.size(ofValue: zeroAddress))

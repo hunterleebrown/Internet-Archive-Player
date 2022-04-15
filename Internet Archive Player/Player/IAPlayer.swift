@@ -15,12 +15,13 @@ import Combine
 
 class IAPlayer: NSObject, ObservableObject {
     @Published var showPlaylist = false
+    @Published var showPlayingDetailView = false
     @Published var playing = false
     @Published var minTime: String? = nil
     @Published var maxTime: String? = nil
     @Published var sliderProgress: Double = 0
-    @Published var playingFile: PlaylistItem? = nil
-    @Published public private(set) var items: [PlaylistItem] = [PlaylistItem]()
+    @Published var playingFile: ArchiveFile? = nil
+    @Published public private(set) var items: [ArchiveFile] = [ArchiveFile]()
 
     var avPlayer: AVPlayer?
     var observing = false
@@ -45,7 +46,7 @@ class IAPlayer: NSObject, ObservableObject {
         }.store(in: &itemSubscritpions)
     }
 
-    public func appendPlaylistItem(_ item: PlaylistItem){
+    public func appendPlaylistItem(_ item: ArchiveFile){
         if !self.items.contains(item) {
             self.items.append(item)
         }
@@ -71,14 +72,14 @@ class IAPlayer: NSObject, ObservableObject {
 
     }
 
-    func playFile(_ playerFile: PlaylistItem){
+    func playFile(_ archiveFile: ArchiveFile){
 
-        self.fileTitle = playerFile.file.title ?? playerFile.file.name
-        self.fileIdentifierTitle = playerFile.identifierTitle
-        self.fileIdentifier = playerFile.identifier
-        self.playUrl = playerFile.fileUrl()
+        self.fileTitle = archiveFile.title ?? archiveFile.name
+        self.fileIdentifierTitle = archiveFile.archiveTitle
+        self.fileIdentifier = archiveFile.identifier
+        self.playUrl = archiveFile.url
 
-        self.playingFile = playerFile
+        self.playingFile = archiveFile
 
         self.loadAndPlay()
     }
@@ -172,8 +173,10 @@ class IAPlayer: NSObject, ObservableObject {
         if let player = avPlayer {
             let calcTime = CMTimeGetSeconds((player.currentItem?.duration)!) - CMTimeGetSeconds(player.currentTime())
             if(!calcTime.isNaN) {
-                minTime = IAStringUtils.timeFormatted(self.elapsedSeconds())
-                maxTime = IAStringUtils.timeFormatted(Int(calcTime))
+//                DispatchQueue.main.async { [self] in
+//                    self.minTime = IAStringUtils.timeFormatted(self.elapsedSeconds())
+//                    self.maxTime = IAStringUtils.timeFormatted(Int(calcTime))
+//                }
             }
         }
     }

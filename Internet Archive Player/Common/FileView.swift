@@ -9,26 +9,36 @@ import Foundation
 import SwiftUI
 import iaAPI
 
+enum FileViewMode {
+    case detail
+    case playlist
+}
+
+
 struct FileView: View {
-    var playlistItem: PlaylistItem
+    var archiveFile: ArchiveFile
     var textColor = Color.white
     var backgroundColor: Color? = Color.gray
     var showImage: Bool = false
     var showDownloadButton = true
+    var fileViewMode: FileViewMode = .detail
     var ellipsisAction: (()->())? = nil
 
-    init(_ playlistItem: PlaylistItem,
+    init(_ archiveFile: ArchiveFile,
          showImage: Bool = false,
          showDownloadButton: Bool = true,
          backgroundColor: Color? = Color.fairyRedAlpha,
          textColor: Color = Color.fairyCream,
+         fileViewMode: FileViewMode = .detail,
          ellipsisAction: (()->())? = nil){
-        self.playlistItem = playlistItem
+
+        self.archiveFile = archiveFile
         self.showImage = showImage
         self.showDownloadButton = showDownloadButton
         self.backgroundColor = backgroundColor
         self.textColor = textColor
         self.ellipsisAction = ellipsisAction
+        self.fileViewMode = fileViewMode
     }
     
     var body: some View {
@@ -36,7 +46,7 @@ struct FileView: View {
         HStack() {
             if (showImage) {
                 AsyncImage(
-                    url: playlistItem.iconUrl,
+                    url: archiveFile.iconUrl,
                     content: { image in
                         image.resizable()
                             .aspectRatio(contentMode: .fit)
@@ -54,58 +64,66 @@ struct FileView: View {
 
             Spacer()
             VStack() {
-                let title = fileTitle(playlistItem.file)
-                
-                if let name = playlistItem.file.name {
-                    if title != name {
-                        Text(title)
-                            .font(.caption)
-                            .fontWeight(.bold)
+                let title = archiveFile.displayTitle
+
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(textColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
+
+                if fileViewMode == .playlist {
+                    Text(archiveFile.archiveTitle ?? "")
+                        .font(.caption2)
+                        .foregroundColor(textColor)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+
+                    if let artist = archiveFile.artist {
+                        Text(artist)
+                            .font(.caption2)
                             .foregroundColor(textColor)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
-                    } else {
-                        Text(title)
+                    }
+
+                    if let creator = archiveFile.creator {
+                        Text(creator.joined(separator: ", "))
                             .font(.caption2)
                             .foregroundColor(textColor)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
                     }
                 }
-                
-                if let name = playlistItem.file.name {
-                    if title != name {
-                        Text(name)
-                            .font(.caption2)
-                            .foregroundColor(textColor)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    }
-                }
+
+
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(5.0)
             Spacer()
             HStack() {
                 VStack(alignment:.leading) {
-                    Text("\(playlistItem.file.calculatedSize ?? "\"\"") mb")
+                    Text(archiveFile.format?.rawValue ?? "")
                         .font(.caption2)
                         .foregroundColor(textColor)
-                    Text(playlistItem.file.displayLength ?? "")
+                    Text("\(archiveFile.calculatedSize ?? "\"\"") mb")
+                        .font(.caption2)
+                        .foregroundColor(textColor)
+                    Text(archiveFile.displayLength ?? "")
                         .font(.caption2)
                         .foregroundColor(textColor)
                 }
 
                 if (showDownloadButton) {
+
                     Button(action: {
                     }) {
                         Image(systemName: "icloud.and.arrow.down")
-                            .accentColor(textColor)
                             .aspectRatio(contentMode: .fill)
                             .frame(width: 44, height: 44)
                     }
                     .frame(width: 44, height: 44)
-                    .accentColor(textColor)
                 }
 
                 if let ellipsisAction = ellipsisAction {
@@ -118,23 +136,17 @@ struct FileView: View {
                         .frame(width: 44, height: 44)
                     } label: {
                         Image(systemName: "ellipsis")
-                            .accentColor(textColor)
                             .aspectRatio(contentMode: .fill)
                             .frame(width: 44, height: 44)
                     }
                     .highPriorityGesture(TapGesture())
                 }
-
-
             }
+            .accentColor(textColor)
             .padding(5.0)
         }
         .background(backgroundColor ?? nil)
         .cornerRadius(5.0)
-        //        .overlay(
-        //            Rectangle()
-        //                .foregroundColor(Color.white)
-        //        )
     }
     
     private func fileTitle(_ iaFile: ArchiveFile?) -> String {
@@ -142,7 +154,6 @@ struct FileView: View {
     }
     
 }
-
 
 extension ArchiveFile {
     public var displayLength: String? {
@@ -161,5 +172,14 @@ extension ArchiveFile {
             }
         }
         return nil
+    }
+
+    public var iconUrl: URL {
+        let itemImageUrl = "https://archive.org/services/img/\(identifier!)"
+        return URL(string: itemImageUrl)!
+    }
+
+    public var displayTitle: String {
+        return title ?? name ?? ""
     }
 }

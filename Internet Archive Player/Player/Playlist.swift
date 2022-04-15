@@ -32,14 +32,15 @@ struct Playlist: View {
                 }
             }
             List{
-                ForEach(iaPlayer.items, id: \.self) { playlistItem in
-                    FileView(playlistItem,
+                ForEach(iaPlayer.items, id: \.self) { archiveFile in
+                    FileView(archiveFile,
                              showImage: true,
                              showDownloadButton: true,
-                             backgroundColor: playlistItem == iaPlayer.playingFile ? .fairyCream : nil,
-                             textColor: playlistItem == iaPlayer.playingFile ? .droopy : .white)
+                             backgroundColor: archiveFile == iaPlayer.playingFile ? .fairyCream : nil,
+                             textColor: archiveFile == iaPlayer.playingFile ? .droopy : .white,
+                             fileViewMode: .playlist)
                         .onTapGesture {
-                            iaPlayer.playFile(playlistItem)
+                            iaPlayer.playFile(archiveFile)
                         }
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                         .padding(0)
@@ -73,7 +74,6 @@ struct Playlist: View {
                     Text(iaPlayer.maxTime ?? "")
                         .font(.system(size:9.0))
                         .foregroundColor(.fairyCream)
-
                 }
             }
             .frame(alignment: .bottom)
@@ -86,122 +86,11 @@ struct Playlist: View {
     func remove(at offsets: IndexSet) {
         self.iaPlayer.removePlaylistItem(at: offsets)
     }
-
 }
 
 struct SwiftUIView_Previews: PreviewProvider {
-    
     static var previews: some View {
         Playlist()
     }
 }
 
-struct PlaylistItem: Hashable, Identifiable  {
-    var id = UUID()
-    let file: ArchiveFile
-    let identifier: String
-    let artist: String
-    let identifierTitle: String
-    let archiveDoc: ArchiveMetaData
-    
-    init(_ file: ArchiveFile, _ doc: ArchiveMetaData) {
-        self.file = file
-        self.archiveDoc = doc
-        self.identifier = doc.identifier!
-        self.artist = doc.artist ?? doc.creator?.first ?? ""
-        self.identifierTitle = doc.archiveTitle ?? ""
-    }
-    
-    public static func == (lhs: PlaylistItem, rhs: PlaylistItem) -> Bool {
-        return lhs.file.name == rhs.file.name &&
-        lhs.file.title == rhs.file.title &&
-        lhs.file.format == rhs.file.format &&
-        lhs.file.track == rhs.file.track &&
-        lhs.identifier == rhs.identifier
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(file.title)
-        hasher.combine(file.track)
-        hasher.combine(file.name)
-        hasher.combine(file.format)
-        hasher.combine(identifier)
-    }
-
-    public func fileUrl() -> URL {
-        return self.file.url!
-    }
-
-    public var iconUrl: URL {
-        return self.archiveDoc.iconUrl
-    }
-}
-
-struct PlaylistFile: Hashable {
-
-    var name: String?
-    var title: String?
-    var track: String?
-    var size: String?
-    var format: iaAPI.ArchiveFileFormat?
-    var length: String?
-
-    init(_ file: ArchiveFile)  {
-        self.name = file.name
-        self.title = file.title
-        self.format = file.format
-        self.track = file.track
-        self.length = file.length
-        self.size = file.size
-    }
-
-    public static func == (lhs: PlaylistFile, rhs: PlaylistFile) -> Bool {
-        return lhs.name == rhs.name &&
-        lhs.title == rhs.title &&
-        lhs.format == rhs.format &&
-        lhs.track == rhs.track &&
-        lhs.length == rhs.length
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(title)
-        hasher.combine(track)
-        hasher.combine(name)
-        hasher.combine(format)
-        hasher.combine(length)
-    }
-
-    public var displayLength: String? {
-
-        if let l = length {
-            return IAStringUtils.timeFormatter(timeString: l)
-        }
-        return nil
-    }
-
-    public var cleanedTrack: Int?{
-
-        if let tr = track {
-            if let num = Int(tr) {
-                return num
-            } else {
-                let sp = tr.components(separatedBy: "/")
-                if let first = sp.first {
-                    let trimmed = first.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-                    return Int(trimmed) ?? nil
-                }
-            }
-        }
-        return nil
-    }
-
-    public var calculatedSize: String? {
-
-        if let s = size {
-            if let rawSize = Int(s) {
-                return IAStringUtils.sizeString(size: rawSize)
-            }
-        }
-        return nil
-    }
-}

@@ -71,37 +71,28 @@ struct Detail: View {
                 
                 LazyVStack(spacing:2.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
-
-                        if let archiveDoc = self.viewModel.archiveDoc {
-                            let appPlaylistItem = PlaylistItem(file, archiveDoc)
-                            self.createFileView(appPlaylistItem)
-                                .padding(.leading, 5.0)
-                                .padding(.trailing, 5.0)
-                                .onTapGesture {
-                                    self.iaPlayer.appendPlaylistItem(appPlaylistItem)
-                                    iaPlayer.playFile(appPlaylistItem)
-                                }
-                        }
+                        self.createFileView(file)
+                            .padding(.leading, 5.0)
+                            .padding(.trailing, 5.0)
+                            .onTapGesture {
+                                self.iaPlayer.appendPlaylistItem(file)
+                                iaPlayer.playFile(file)
+                            }
                     }
                 }
             }
             .padding(0)
         }
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear() {
-//            viewModel.getArchiveDoc()
-        }
     }
 
-    func createFileView(_ playlistItem: PlaylistItem) -> FileView? {
-
-        return FileView(playlistItem, showDownloadButton: false, ellipsisAction: {
-            iaPlayer.appendPlaylistItem(playlistItem)
+    func createFileView(_ archiveFile: ArchiveFile) -> FileView? {
+        return FileView(archiveFile, showDownloadButton: false, ellipsisAction: {
+            iaPlayer.appendPlaylistItem(archiveFile)
         })
     }
 
     func attString(desc: String) -> NSAttributedString {
-
         if let data = desc.data(using: .unicode) {
             return try! NSAttributedString(
                 data: data,
@@ -110,7 +101,6 @@ struct Detail: View {
                 ],
                 documentAttributes: nil)
         }
-
         return NSAttributedString()
     }
 }
@@ -142,7 +132,10 @@ extension Detail {
 
                     withAnimation {
                         self.archiveDoc = doc.metadata
-                        self.files = doc.non78Audio
+                        self.files = doc.non78Audio.sorted{
+                            guard let track1 = $0.track, let track2 = $1.track else { return false}
+                            return track1 < track2
+                        }
                     }
 
                 } catch {

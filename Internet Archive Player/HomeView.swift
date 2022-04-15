@@ -9,14 +9,24 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject var iaPlayer = IAPlayer()
-    
+
     var body: some View {
         VStack(alignment:.leading, spacing: 0) {
             ZStack(alignment:.top) {
+
+//                if iaPlayer.showPlayingDetailView {
+//                    if let identifier = iaPlayer.playingFile?.identifier {
+//                        Detail(identifier)
+//                            .zIndex(2)
+//                            .transition(.move(edge:.bottom))
+//                            .background(Color.white)
+//                    }
+//                }
+
                 if iaPlayer.showPlaylist {
-                Playlist()
-                    .zIndex(1)
-                    .transition(.move(edge:.bottom))
+                    Playlist()
+                        .zIndex(1)
+                        .transition(.move(edge:.bottom))
                 }
                 Tabs()
             }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import iaAPI
 
 struct PlayerControls: View {
     @EnvironmentObject var iaPlayer: IAPlayer
@@ -36,21 +37,26 @@ struct PlayerControls: View {
                             .cornerRadius(5)
                             .frame(maxWidth: 44,
                                    maxHeight: 44)
-                        Spacer()
+                            .onTapGesture {
+                                withAnimation {
+                                    iaPlayer.showPlayingDetailView.toggle()
+                                }
+                            }
                     }
 
-                    VStack(alignment: .trailing, spacing:5.0){
-                        Text(iaPlayer.playingFile?.file.title ?? iaPlayer.playingFile?.file.name ?? "")
-                            .font(.system(size: g.size.height > g.size.width ? g.size.width * 0.2: g.size.height * 0.2))
+                    VStack(alignment: .leading, spacing:2.0){
+                        Text(iaPlayer.playingFile?.title ?? iaPlayer.playingFile?.name ?? "")
+                            .font(.caption)
                             .foregroundColor(.fairyCream)
-                            .fontWeight(.bold)
-                            .frame(alignment:.leading)
-                        Text(iaPlayer.playingFile?.artist ?? "")
-                            .font(.system(size: g.size.height > g.size.width ? g.size.width * 0.2: g.size.height * 0.2))
+                            .frame(maxWidth: .infinity, alignment:.leading)
+                            .multilineTextAlignment(.leading)
+                        Text(iaPlayer.playingFile?.artist ?? iaPlayer.playingFile?.creator?.joined(separator: ", ") ?? "")
+                            .font(.caption2)
                             .foregroundColor(.fairyCream)
-                            .frame(alignment: .leading)
+                            .frame(maxWidth:. infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
                     }
-                    .frame(alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(height: 44.0)
                 .padding(.leading, 5.0)
@@ -96,13 +102,13 @@ struct PlayerControls: View {
 
 extension PlayerControls {
     final class ViewModel {
-        func goForwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
+        func goForwards(_ player: IAPlayer, _ list: [ArchiveFile]) {
             if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
                 guard list.indices.contains(index + 1) else { return }
                 player.playFile(list[index + 1])
             }
         }
-        func goBackwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
+        func goBackwards(_ player: IAPlayer, _ list: [ArchiveFile]) {
             if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
                 guard list.indices.contains(index - 1) else { return }
                 player.playFile(list[index - 1])
