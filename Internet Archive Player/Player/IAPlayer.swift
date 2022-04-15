@@ -143,8 +143,10 @@ class IAPlayer: NSObject, ObservableObject {
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if let player = avPlayer {
             if player == object as! AVPlayer && "rate" == keyPath {
-                self.playing  = player.rate > 0.0
-                self.monitorPlayback()
+                DispatchQueue.main.async {
+                    self.playing  = player.rate > 0.0
+                    self.monitorPlayback()
+                }
             }
         }
     }

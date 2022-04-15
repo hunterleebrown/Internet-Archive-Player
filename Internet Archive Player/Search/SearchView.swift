@@ -10,8 +10,13 @@ import iaAPI
 import Combine
 
 struct SearchView: View {
-    @ObservedObject var viewModel = SearchView.ViewModel()
+    @ObservedObject var viewModel: SearchView.ViewModel
     @FocusState private var searchFocused: Bool
+
+    init() {
+        self.viewModel = SearchView.ViewModel()
+        searchFocused = false
+    }
 
     var body: some View {
         NavigationView {
