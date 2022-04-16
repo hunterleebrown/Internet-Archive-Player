@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "git@github.com:hunterleebrown/iaAPI.git",
       "state" : {
-        "branch" : "ditching-alamofire",
-        "revision" : "3d6228fc3a3fe659edbe30f52c87a6cc9d507e5c"
+        "revision" : "f2987e991097f431d7ef2059ae037f436b6dd9d6",
+        "version" : "2.0.0"
       }
     }
   ],

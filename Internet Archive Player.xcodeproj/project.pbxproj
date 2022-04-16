@@ -750,8 +750,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:hunterleebrown/iaAPI.git";
 			requirement = {
-				branch = "ditching-alamofire";
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
