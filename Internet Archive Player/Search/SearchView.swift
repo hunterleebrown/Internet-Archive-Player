@@ -7,48 +7,55 @@
 
 import SwiftUI
 import iaAPI
-import Alamofire
 import Combine
 
 struct SearchView: View {
-    @ObservedObject var viewModel = SearchView.ViewModel()
+    @EnvironmentObject var iaPlayer: Player
+    @StateObject var viewModel = SearchView.ViewModel()
     @FocusState private var searchFocused: Bool
+
+    init() {
+        searchFocused = false
+    }
 
     var body: some View {
         NavigationView {
-            VStack {
+            VStack(spacing:0) {
                 HStack(spacing: 5.0) {
-
                     TextField("Search The Internet Archive",
                               text: $viewModel.searchText,
                               onCommit:{
                         if !viewModel.searchText.isEmpty {
-                            viewModel.cancelRequest()
-                            searchFocused = false
+                            viewModel.search(query: viewModel.searchText)
                         }})
-                        .focused($searchFocused)
-                    //                    .onChange(of: searchText, perform: { text in
-                    //                        if !text.isEmpty {
-                    //                            viewModel.cancelRequest()
-                    //                            viewModel.searchText = text
-                    //                        } else {
-                    //                            viewModel.cancelRequest()
-                    //                            searchFocused = false
-                    //                        }
-                    //                    })
-
+                    .focused($searchFocused)
                     if viewModel.isSearching {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle())
                     }
                 }
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(5)
+                .padding(.leading, 5)
+                .padding(.trailing, 5)
+
+                if viewModel.noDataFound {
+                    VStack(spacing:0) {
+                        Text(viewModel.archiveError ?? "Error with Search")
+                            .padding(10)
+                            .foregroundColor(Color.fairyCream)
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .background(Rectangle().fill(Color.fairyRedAlpha).cornerRadius(10))
+                    }
+                    .padding(5.0)
+                    .transition(.move(edge: .leading))
+
+                }
 
                 ScrollView {
                     LazyVStack{
                         ForEach(viewModel.items, id: \.self) { doc in
-                            NavigationLink(destination: Detail(doc.identifier)) {
+                            NavigationLink(destination: Detail(doc.identifier!)) {
                                 SearchItemView(item: doc)
                                     .padding(.leading, 5)
                                     .padding(.trailing, 5)
@@ -56,14 +63,11 @@ struct SearchView: View {
                             }
                         }
                     }
-                    //                    .background(Color.droopy)
                 }
-                //                .background(Color.droopy)
                 .listStyle(PlainListStyle())
                 .padding(0)
             }
             .frame(alignment: .leading)
-            .environmentObject(viewModel)
             .navigationTitle("")
             .navigationBarHidden(true)
             .background(
@@ -72,10 +76,11 @@ struct SearchView: View {
                     .opacity(0.3)
                     .aspectRatio(contentMode: .fill)
                     .blur(radius: 05)
+//                LinearGradient(
+//                    colors: [Color.fairyRed, Color.fairyCream],
+//                    startPoint: .top, endPoint: .bottom)
             )
-            //            .background(Color.droopy)
         }
-        //        .background(Color.droopy)
         .navigationViewStyle(StackNavigationViewStyle())
         .accentColor(Color.black)
     }
@@ -89,70 +94,42 @@ struct SearchView_Previews: PreviewProvider {
 
 extension SearchView {
     final class ViewModel: ObservableObject {
-        @Published var items: [IASearchDoc] = []
+        @Published var items: [ArchiveMetaData] = []
         @Published var searchText: String = "" {
-            didSet { handleTextChange() }
+            didSet {
+                withAnimation(.easeOut(duration: 0.33)) {
+                    noDataFound = false
+                }
+            }
         }
-//        @Published var searchText: String = ""
         @Published var isSearching: Bool = false
+        @Published var noDataFound: Bool = false
+        @Published var archiveError: String?
         
-        let service: IAService
-        private var request: Request?
-
-//        var searchTextPubSet: Set<AnyCancellable> = []
+        let service: ArchiveService
 
         init() {
-            #if DEBUG
-            self.service = IAService(.offline)
-            #elseif RELEASE
-            self.service = IAService(.online)
-            #endif
-
-//            $searchText.sink { _ in
-//                self.handleTextChange()
-//            }.store(in: &searchTextPubSet)
+            self.service = ArchiveService()
         }
 
-        func cancelRequest() {
-            if let req = request {
-                req.cancel()
-                self.isSearching = false
-            }
-        }
-        
-        func handleTextChange() {
-            guard searchText != "" else { return }
-            self.search(query: searchText)
-            self.isSearching = true
-        }
-        
         func search(query: String) {
+            guard !searchText.isEmpty, searchText.count > 2 else { return }
             self.items.removeAll()
-            request = self.service.search(queryString: query,
-                                          searchField: .all,
-                                          mediaTypes: [.audio],
-                                          rows: 100,
-                                          format: .mp3)
-            { (docs, error) in
-                docs?.forEach({ (doc) in
-                    self.items.append(doc)
-                })
-                self.isSearching = false
+            self.isSearching = true
+            self.noDataFound = false
+            Task { @MainActor in
+                do {
+                    self.items = try await self.service.searchAsync(query: query, format: .mp3).response.docs
+                    self.isSearching = false
+                } catch let error as ArchiveServiceError {
+                    withAnimation(.easeIn(duration: 0.33)) {
+                        self.archiveError = error.description
+                        self.noDataFound = true
+                        self.isSearching = false
+                    }
+                }
             }
         }
-        
-    }
-}
-
-extension IASearchDoc: Hashable {
-    
-    public static func == (lhs: IASearchDoc, rhs: IASearchDoc) -> Bool {
-        return lhs.identifier == rhs.identifier && lhs.title == rhs.title
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
-        hasher.combine(title)
     }
 }
 

@@ -6,20 +6,25 @@
 //
 
 import SwiftUI
+import iaAPI
+import Combine
 
 struct PlayerControls: View {
-    @EnvironmentObject var iaPlayer: IAPlayer
-    @State var playing: Bool = false
+    @EnvironmentObject var iaPlayer: Player
+    @StateObject var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
+    @State var playing = false
+    @State var showingPlaylist = false
 
-    var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
+    static var showPlayList = PassthroughSubject<Bool, Never>()
+    static var showPlayingDetails = PassthroughSubject<String, Never>()
 
     var body: some View {
         GeometryReader{ g in
             VStack(alignment: .leading){
-                ProgressView(value: iaPlayer.sliderProgress, total: 1)
+                ProgressView(value: viewModel.progress, total: 1)
                     .progressViewStyle(LinearProgressViewStyle(tint: .fairyCream))
                 HStack(alignment: .top, spacing: 5.0){
-                    if let playingFile = iaPlayer.playingFile {
+                    if let playingFile = viewModel.playingFile {
                         AsyncImage(
                             url: playingFile.iconUrl,
                             content: { image in
@@ -36,21 +41,26 @@ struct PlayerControls: View {
                             .cornerRadius(5)
                             .frame(maxWidth: 44,
                                    maxHeight: 44)
-                        Spacer()
+                            .onTapGesture {
+                                if let identifier = viewModel.playingFile?.identifier {
+                                    PlayerControls.showPlayingDetails.send(identifier)
+                                }
+                            }
                     }
 
-                    VStack(alignment: .trailing, spacing:5.0){
-                        Text(iaPlayer.playingFile?.file.title ?? iaPlayer.playingFile?.file.name ?? "")
-                            .font(.system(size: g.size.height > g.size.width ? g.size.width * 0.2: g.size.height * 0.2))
+                    VStack(alignment: .leading, spacing:2.0){
+                        Text(viewModel.playingFile?.displayTitle ?? "")
+                            .font(.caption)
                             .foregroundColor(.fairyCream)
-                            .fontWeight(.bold)
-                            .frame(alignment:.leading)
-                        Text(iaPlayer.playingFile?.artist ?? "")
-                            .font(.system(size: g.size.height > g.size.width ? g.size.width * 0.2: g.size.height * 0.2))
+                            .frame(maxWidth: .infinity, alignment:.leading)
+                            .multilineTextAlignment(.leading)
+                        Text(viewModel.playingFile?.artist ?? viewModel.playingFile?.creator?.joined(separator: ", ") ?? "")
+                            .font(.caption2)
                             .foregroundColor(.fairyCream)
-                            .frame(alignment: .leading)
+                            .frame(maxWidth:. infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
                     }
-                    .frame(alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(height: 44.0)
                 .padding(.leading, 5.0)
@@ -58,23 +68,20 @@ struct PlayerControls: View {
 
                 HStack {
                     
-                    PlayerButton(iaPlayer.showPlaylist ? .listFill : .list, 20, {
-                        withAnimation {
-                            iaPlayer.showPlaylist.toggle()
-                        }
+                    PlayerButton(showingPlaylist ? .listFill : .list, 20, {
+                        PlayerControls.showPlayList.send(!showingPlaylist)
                     })
                     Spacer()
                     PlayerButton(.backwards) {
-                        viewModel.goBackwards(iaPlayer, iaPlayer.items)
+                        iaPlayer.advancePlayer(.backwards)
                     }
                     Spacer()
-
-                    PlayerButton(iaPlayer.playing ? .pause : .play, 44.0) {
+                    PlayerButton(viewModel.playing ? .pause : .play, 44.0) {
                         iaPlayer.didTapPlayButton()
                     }
                     Spacer()
                     PlayerButton(.forwards) {
-                        viewModel.goForwards(iaPlayer, iaPlayer.items)
+                        iaPlayer.advancePlayer(.forwards)
                     }
                     Spacer()
                     AirPlayButton()
@@ -86,6 +93,12 @@ struct PlayerControls: View {
             }
             .padding(.top, 5.0)
             .modifier(BackgroundColorModifier(backgroundColor: .fairyRed))
+            .onAppear() {
+                viewModel.setSubscribers(iaPlayer)
+            }
+            .onReceive(PlayerControls.showPlayList) { shouldShow in
+                showingPlaylist = shouldShow
+            }
         }
     }
 
@@ -95,18 +108,33 @@ struct PlayerControls: View {
 }
 
 extension PlayerControls {
-    final class ViewModel {
-        func goForwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
-            if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
-                guard list.indices.contains(index + 1) else { return }
-                player.playFile(list[index + 1])
-            }
-        }
-        func goBackwards(_ player: IAPlayer, _ list: [PlaylistItem]) {
-            if let playingFile = player.playingFile, let index = list.firstIndex(of: playingFile) {
-                guard list.indices.contains(index - 1) else { return }
-                player.playFile(list[index - 1])
-            }
+    final class ViewModel: ObservableObject {
+        var cancellables = Set<AnyCancellable>()
+        @Published var playing: Bool = false
+        @Published var playingFile: ArchiveFile?
+        @Published var progress: Double = 0.0
+
+        func setSubscribers(_ iaPlayer: Player) {
+            iaPlayer.playingPublisher
+                .removeDuplicates()
+                .sink { isPlaying in
+                    self.playing = isPlaying
+                }
+                .store(in: &cancellables)
+
+            iaPlayer.playingFilePublisher
+                .removeDuplicates()
+                .sink { file in
+                    self.playingFile = file
+                }
+                .store(in: &cancellables)
+
+            iaPlayer.sliderProgressPublisher
+                .removeDuplicates()
+                .sink { prog in
+                    self.progress = prog
+                }
+                .store(in: &cancellables)
         }
     }
 }

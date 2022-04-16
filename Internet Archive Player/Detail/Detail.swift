@@ -7,24 +7,23 @@
 
 import SwiftUI
 import iaAPI
+import UIKit
 
 struct Detail: View {
-    @EnvironmentObject var iaPlayer: IAPlayer
-    @ObservedObject var viewModel: Detail.ViewModel
-    var identifier: String?
+    @EnvironmentObject var iaPlayer: Player
+    @StateObject var viewModel = Detail.ViewModel()
+    var identifier: String
     @State var descriptionExpanded = false
+    @State var titleScrollOffset: CGFloat = .zero
     
-    init(_ identifier: String?) {
+    init(_ identifier: String) {
         self.identifier = identifier
-        self.viewModel = Detail.ViewModel(identifier)
-        //        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.fairyCream]
     }
     
     var body: some View {
-        VStack(alignment: .leading){
             ScrollView {
                 VStack(alignment: .center, spacing: 5.0) {
-                    if let iconUrl = viewModel.archiveDoc?.iconUrl() {
+                    if let iconUrl = viewModel.archiveDoc?.iconUrl {
                         AsyncImage(
                             url: iconUrl,
                             content: { image in
@@ -37,22 +36,31 @@ struct Detail: View {
                             placeholder: {
                                 ProgressView()
                             })
-                            .cornerRadius(15)
+                        .cornerRadius(15)
                     }
-                    Text(self.viewModel.archiveDoc?.title ?? "")
+                    Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                         .font(.headline)
                         .bold()
                         .multilineTextAlignment(.center)
-                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator {
+                        .background(GeometryReader {
+                            Color.clear.preference(key: ViewOffsetKey.self,
+                                value: $0.frame(in: .named("scroll")).origin.y)
+                        })
+                        .onPreferenceChange(ViewOffsetKey.self) {
+//                            print("offset >> \($0)")
+                            titleScrollOffset = $0
+                        }
+
+                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
                         Text(artist)
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
                     }
-                    
+
                 }
                 .padding(10)
-                
-                if let desc = self.viewModel.archiveDoc?.desc {
+
+                if let desc = self.viewModel.archiveDoc?.description {
 
                     VStack() {
                         Text(AttributedString(attString(desc: desc)))
@@ -69,49 +77,44 @@ struct Detail: View {
                     .frame(alignment:.leading)
                 }
 
-                
+
                 LazyVStack(spacing:2.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
-
-                        if let archiveDoc = self.viewModel.archiveDoc {
-                            let appPlaylistItem = PlaylistItem(file, archiveDoc)
-                            self.createFileView(appPlaylistItem)
-                                .padding(.leading, 5.0)
-                                .padding(.trailing, 5.0)
-                                .onTapGesture {
-                                    self.iaPlayer.appendPlaylistItem(appPlaylistItem)
-                                    iaPlayer.playFile(appPlaylistItem)
-                                }
-                        }
+                        self.createFileView(file)
+                            .padding(.leading, 5.0)
+                            .padding(.trailing, 5.0)
+                            .onTapGesture {
+                                self.iaPlayer.appendPlaylistItem(file)
+                                iaPlayer.playFile(file)
+                            }
                     }
                 }
             }
+            .coordinateSpace(name: "scroll")
             .padding(0)
-        }
-        //        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
-        //        .navigationTitle(doc?.title ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(titleScrollOffset < 0 ? viewModel.archiveDoc?.archiveTitle ?? "" : "")
+            .onAppear() {
+                self.viewModel.getArchiveDoc(identifier: self.identifier)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                Button(action: {
+                }) {
+                    Image(systemName: "heart")
+                        .tint(.fairyRed)
+                }
+            }
+            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.85), titleColor: .black)
+
     }
 
-    /**
-     Filter out the annoying 78rpm collection files with "_78_" tracks
-     */
-    func createFileView(_ playlistItem: PlaylistItem) -> FileView? {
-
-        if let name = playlistItem.file.name, let count = playlistItem.archiveDoc.files?.count {
-            if count > 1 && playlistItem.archiveDoc.metadata.collection.contains("78rpm") && name.contains("78_") {
-                return nil
-            }
-        }
-
-        return FileView(playlistItem, showDownloadButton: false, ellipsisAction: {
-            iaPlayer.appendPlaylistItem(playlistItem)
+    func createFileView(_ archiveFile: ArchiveFile) -> FileView? {
+        return FileView(archiveFile, showDownloadButton: false, ellipsisAction: {
+            iaPlayer.appendPlaylistItem(archiveFile)
         })
     }
 
-    
     func attString(desc: String) -> NSAttributedString {
-
         if let data = desc.data(using: .unicode) {
             return try! NSAttributedString(
                 data: data,
@@ -120,7 +123,6 @@ struct Detail: View {
                 ],
                 documentAttributes: nil)
         }
-
         return NSAttributedString()
     }
 }
@@ -128,40 +130,45 @@ struct Detail: View {
 
 struct Detail_Previews: PreviewProvider {
     static var previews: some View {
-        Detail(nil)
+        Detail("hunterleebrown-lovesongs")
     }
 }
 
 extension Detail {
     final class ViewModel: ObservableObject {
-        let service: IAService
-        let identifier: String?
-        @Published var archiveDoc: IAArchiveDoc? = nil
-        @Published var files = [IAFile]()
-        
-        init(_ identifier: String?) {
-            #if DEBUG
-            self.service = IAService(.offline)
-            #elseif RELEASE
-            self.service = IAService(.online)
-            #endif
-            
-            self.identifier = identifier
-            self.getArchiveDoc()
+        let service: ArchiveService
+        @Published var archiveDoc: ArchiveMetaData? = nil
+        @Published var files = [ArchiveFile]()
+
+        init() {
+            self.service = ArchiveService()
         }
         
-        private func getArchiveDoc(){
-            guard let identifier = identifier else { return }
-            
-            self.service.archiveDoc(identifier: identifier) { result, error in
-                self.archiveDoc = result
-                guard let files = self.archiveDoc?.files else { return }
+        public func getArchiveDoc(identifier: String){
+            Task { @MainActor in
+                do {
+                    let doc = try await self.service.getArchiveAsync(with: identifier)
 
-                files.forEach { f in
-                    guard f.format == .mp3 else { return }
-                    self.files.append(f)
+                    withAnimation {
+                        self.archiveDoc = doc.metadata
+                        self.files = doc.non78Audio.sorted{
+                            guard let track1 = $0.track, let track2 = $1.track else { return false}
+                            return track1 < track2
+                        }
+                    }
+
+                } catch {
+                    print(error)
                 }
             }
         }
+    }
+}
+
+struct ViewOffsetKey: PreferenceKey {
+    typealias Value = CGFloat
+    static var defaultValue = CGFloat.zero
+    static func reduce(value: inout Value, nextValue: () -> Value) {
+        value += nextValue()
     }
 }

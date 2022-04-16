@@ -10,7 +10,7 @@ import SwiftUI
 import iaAPI
 
 struct SearchItemView: View {
-    var item: IASearchDoc
+    var item: ArchiveMetaData
     var textColor: Color = .droopy
     var body: some View {
         HStack(alignment:.center, spacing: 10.0) {
@@ -31,21 +31,21 @@ struct SearchItemView: View {
                 .cornerRadius(15)
 
             VStack(alignment:.leading) {
-                Text(item.title ?? "")
+                Text(item.archiveTitle ?? "")
                     .frame(alignment:.leading)
                     .font(.headline)
                     .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
-                Text(item.creator.joined(separator: ", "))
+                Text(item.creator?.joined(separator: ", ") ?? "")
                     .font(.footnote)
                     .frame(alignment:.leading)
                     .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
-                Text(item.desc ?? "")
-                    .font(.body)
-                    .frame(alignment:.leading)
-                    .foregroundColor(textColor)
-                    .multilineTextAlignment(.leading)
+//                Text(item.description ?? "")
+//                    .font(.body)
+//                    .frame(alignment:.leading)
+//                    .foregroundColor(textColor)
+//                    .multilineTextAlignment(.leading)
 
             }
             .frame(maxWidth: .infinity,
