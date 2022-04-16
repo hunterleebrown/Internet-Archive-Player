@@ -69,15 +69,13 @@ struct PlayerControls: View {
                 HStack {
                     
                     PlayerButton(showingPlaylist ? .listFill : .list, 20, {
-                        showingPlaylist.toggle()
-                        PlayerControls.showPlayList.send(showingPlaylist)
+                        PlayerControls.showPlayList.send(!showingPlaylist)
                     })
                     Spacer()
                     PlayerButton(.backwards) {
                         iaPlayer.advancePlayer(.backwards)
                     }
                     Spacer()
-
                     PlayerButton(viewModel.playing ? .pause : .play, 44.0) {
                         iaPlayer.didTapPlayButton()
                     }
@@ -97,6 +95,9 @@ struct PlayerControls: View {
             .modifier(BackgroundColorModifier(backgroundColor: .fairyRed))
             .onAppear() {
                 viewModel.setSubscribers(iaPlayer)
+            }
+            .onReceive(PlayerControls.showPlayList) { shouldShow in
+                showingPlaylist = shouldShow
             }
         }
     }

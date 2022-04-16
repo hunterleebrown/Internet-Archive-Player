@@ -7,19 +7,20 @@
 
 import SwiftUI
 import iaAPI
+import UIKit
 
 struct Detail: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel = Detail.ViewModel()
     var identifier: String
     @State var descriptionExpanded = false
+    @State var titleScrollOffset: CGFloat = .zero
     
     init(_ identifier: String) {
         self.identifier = identifier
     }
     
     var body: some View {
-        VStack(alignment: .leading){
             ScrollView {
                 VStack(alignment: .center, spacing: 5.0) {
                     if let iconUrl = viewModel.archiveDoc?.iconUrl {
@@ -35,21 +36,30 @@ struct Detail: View {
                             placeholder: {
                                 ProgressView()
                             })
-                            .cornerRadius(15)
+                        .cornerRadius(15)
                     }
                     Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                         .font(.headline)
                         .bold()
                         .multilineTextAlignment(.center)
+                        .background(GeometryReader {
+                            Color.clear.preference(key: ViewOffsetKey.self,
+                                value: $0.frame(in: .named("scroll")).origin.y)
+                        })
+                        .onPreferenceChange(ViewOffsetKey.self) {
+//                            print("offset >> \($0)")
+                            titleScrollOffset = $0
+                        }
+
                     if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
                         Text(artist)
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
                     }
-                    
+
                 }
                 .padding(10)
-                
+
                 if let desc = self.viewModel.archiveDoc?.description {
 
                     VStack() {
@@ -67,7 +77,7 @@ struct Detail: View {
                     .frame(alignment:.leading)
                 }
 
-                
+
                 LazyVStack(spacing:2.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
                         self.createFileView(file)
@@ -80,12 +90,22 @@ struct Detail: View {
                     }
                 }
             }
+            .coordinateSpace(name: "scroll")
             .padding(0)
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear() {
-            self.viewModel.getArchiveDoc(identifier: self.identifier)
-        }
+            .navigationTitle(titleScrollOffset < 0 ? viewModel.archiveDoc?.archiveTitle ?? "" : "")
+            .onAppear() {
+                self.viewModel.getArchiveDoc(identifier: self.identifier)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                Button(action: {
+                }) {
+                    Image(systemName: "heart")
+                        .tint(.fairyRed)
+                }
+            }
+            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.85), titleColor: .black)
+
     }
 
     func createFileView(_ archiveFile: ArchiveFile) -> FileView? {
@@ -108,11 +128,11 @@ struct Detail: View {
 }
 
 
-//struct Detail_Previews: PreviewProvider {
-//    static var previews: some View {
-//        Detail(nil)
-//    }
-//}
+struct Detail_Previews: PreviewProvider {
+    static var previews: some View {
+        Detail("hunterleebrown-lovesongs")
+    }
+}
 
 extension Detail {
     final class ViewModel: ObservableObject {
@@ -142,5 +162,13 @@ extension Detail {
                 }
             }
         }
+    }
+}
+
+struct ViewOffsetKey: PreferenceKey {
+    typealias Value = CGFloat
+    static var defaultValue = CGFloat.zero
+    static func reduce(value: inout Value, nextValue: () -> Value) {
+        value += nextValue()
     }
 }

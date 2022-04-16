@@ -16,77 +16,92 @@ struct Playlist: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel = Playlist.ViewModel()
     @State private var seek = 1.0
+    @State private var showingAlert = false
 
     var body: some View {
-        VStack(alignment:.leading, spacing: 0){
-            HStack(spacing:10.0) {
-                Text("Playlist")
-                    .font(.title)
-                    .foregroundColor(.fairyCream)
-                    .padding(10)
-                Spacer()
-                Button(action: {
-                    iaPlayer.clearPlaylist()
-                }) {
-                    Text("Clear")
-                        .padding(10)
-                        .foregroundColor(.fairyCream)
-                }
-            }
-            List{
-                ForEach(viewModel.items, id: \.self) { archiveFile in
-                    FileView(archiveFile,
-                             showImage: true,
-                             showDownloadButton: true,
-                             backgroundColor: archiveFile == viewModel.playingFile ? .fairyCream : nil,
-                             textColor: archiveFile == viewModel.playingFile ? .droopy : .white,
-                             fileViewMode: .playlist)
+        NavigationView {
+            VStack(alignment:.leading, spacing: 0){
+                List{
+                    ForEach(viewModel.items, id: \.self) { archiveFile in
+                        FileView(archiveFile,
+                                 showImage: true,
+                                 showDownloadButton: true,
+                                 backgroundColor: archiveFile == viewModel.playingFile ? .fairyCream : nil,
+                                 textColor: archiveFile == viewModel.playingFile ? .droopy : .white,
+                                 fileViewMode: .playlist)
                         .onTapGesture {
                             iaPlayer.playFile(archiveFile)
                         }
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                         .padding(0)
                         .listRowBackground(Color.droopy)
+                    }
+                    .onDelete(perform: self.remove)
                 }
-                .onDelete(perform: self.remove)
+                .listStyle(PlainListStyle())
+                .background(Color.droopy)
+                .padding(0)
+
+                Spacer()
+
+                VStack {
+                    //                Slider(value: $iaPlayer.sliderProgress,
+                    //                       in: 0...1, onEditingChanged: { _ in
+                    //                    guard let currentItem = iaPlayer.avPlayer?.currentItem else { return }
+                    //                    if let player = iaPlayer.avPlayer {
+                    //                        let duration = CMTimeGetSeconds(currentItem.duration)
+                    //                        let sec = duration * Float64(iaPlayer.sliderProgress)
+                    //                        let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
+                    //                        player.seek(to: seakTime)
+                    //                    }
+                    //                })
+                    //                    .accentColor(.fairyCream)
+                    HStack{
+                        Text(iaPlayer.minTime ?? "")
+                            .font(.system(size:9.0))
+                            .foregroundColor(.fairyCream)
+                        Spacer()
+                        Text(iaPlayer.maxTime ?? "")
+                            .font(.system(size:9.0))
+                            .foregroundColor(.fairyCream)
+                    }
+                }
+                .frame(alignment: .bottom)
+                .frame(height:33)
             }
-            .listStyle(PlainListStyle())
-            .background(Color.droopy)
-            .padding(0)
+            .padding(10)
+            .modifier(BackgroundColorModifier(backgroundColor: .droopy))
+            .navigationTitle("Playlist")
+            .navigationBarColor(backgroundColor: IAColors.droopy, titleColor: UIColor.fairyCream)
+            .onAppear() {
+                viewModel.setUpSubscribers(iaPlayer)
+                iaPlayer.sendPlayingFileForPlaylist()
+                iaPlayer.sendItemsPlaylist()
+            }
+            .toolbar {
+                HStack {
+                    Button(action: {
+                        showingAlert = true
+                    }) {
+                        Text("Clear")
+                            .padding(10)
+                            .foregroundColor(.fairyCream)
+                    }
+                    .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
+                        Button("No", role: .cancel) { }
+                        Button("Yes") {
+                            iaPlayer.clearPlaylist()
+                        }
+                    }
 
-            Spacer()
-
-            VStack {
-//                Slider(value: $iaPlayer.sliderProgress,
-//                       in: 0...1, onEditingChanged: { _ in
-//                    guard let currentItem = iaPlayer.avPlayer?.currentItem else { return }
-//                    if let player = iaPlayer.avPlayer {
-//                        let duration = CMTimeGetSeconds(currentItem.duration)
-//                        let sec = duration * Float64(iaPlayer.sliderProgress)
-//                        let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
-//                        player.seek(to: seakTime)
-//                    }
-//                })
-//                    .accentColor(.fairyCream)
-                HStack{
-                    Text(iaPlayer.minTime ?? "")
-                        .font(.system(size:9.0))
-                        .foregroundColor(.fairyCream)
-                    Spacer()
-                    Text(iaPlayer.maxTime ?? "")
-                        .font(.system(size:9.0))
-                        .foregroundColor(.fairyCream)
+                    Button(action: {
+                        PlayerControls.showPlayList.send(false)
+                    }) {
+                        Image(systemName: "xmark")
+                            .tint(.fairyCream)
+                    }
                 }
             }
-            .frame(alignment: .bottom)
-            .frame(height:33)
-        }
-        .padding(10)
-        .modifier(BackgroundColorModifier(backgroundColor: .droopy))
-        .onAppear() {
-            viewModel.setUpSubscribers(iaPlayer)
-            iaPlayer.sendPlayingFileForPlaylist()
-            iaPlayer.sendItemsPlaylist()
         }
     }
 

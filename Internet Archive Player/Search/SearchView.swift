@@ -20,7 +20,6 @@ struct SearchView: View {
 
     var body: some View {
         NavigationView {
-
             VStack(spacing:0) {
                 HStack(spacing: 5.0) {
                     TextField("Search The Internet Archive",
@@ -77,6 +76,9 @@ struct SearchView: View {
                     .opacity(0.3)
                     .aspectRatio(contentMode: .fill)
                     .blur(radius: 05)
+//                LinearGradient(
+//                    colors: [Color.fairyRed, Color.fairyCream],
+//                    startPoint: .top, endPoint: .bottom)
             )
         }
         .navigationViewStyle(StackNavigationViewStyle())
