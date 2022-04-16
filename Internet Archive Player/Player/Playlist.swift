@@ -10,10 +10,12 @@ import iaAPI
 import MediaPlayer
 import AVFoundation
 import AVKit
+import Combine
 
 struct Playlist: View {
+    @EnvironmentObject var iaPlayer: Player
+    @StateObject var viewModel = Playlist.ViewModel()
     @State private var seek = 1.0
-    @EnvironmentObject var iaPlayer: IAPlayer
 
     var body: some View {
         VStack(alignment:.leading, spacing: 0){
@@ -32,12 +34,12 @@ struct Playlist: View {
                 }
             }
             List{
-                ForEach(iaPlayer.items, id: \.self) { archiveFile in
+                ForEach(viewModel.items, id: \.self) { archiveFile in
                     FileView(archiveFile,
                              showImage: true,
                              showDownloadButton: true,
-                             backgroundColor: archiveFile == iaPlayer.playingFile ? .fairyCream : nil,
-                             textColor: archiveFile == iaPlayer.playingFile ? .droopy : .white,
+                             backgroundColor: archiveFile == viewModel.playingFile ? .fairyCream : nil,
+                             textColor: archiveFile == viewModel.playingFile ? .droopy : .white,
                              fileViewMode: .playlist)
                         .onTapGesture {
                             iaPlayer.playFile(archiveFile)
@@ -55,17 +57,17 @@ struct Playlist: View {
             Spacer()
 
             VStack {
-                Slider(value: $iaPlayer.sliderProgress,
-                       in: 0...1, onEditingChanged: { _ in
-                    guard let currentItem = iaPlayer.avPlayer?.currentItem else { return }
-                    if let player = iaPlayer.avPlayer {
-                        let duration = CMTimeGetSeconds(currentItem.duration)
-                        let sec = duration * Float64(iaPlayer.sliderProgress)
-                        let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
-                        player.seek(to: seakTime)
-                    }
-                })
-                    .accentColor(.fairyCream)
+//                Slider(value: $iaPlayer.sliderProgress,
+//                       in: 0...1, onEditingChanged: { _ in
+//                    guard let currentItem = iaPlayer.avPlayer?.currentItem else { return }
+//                    if let player = iaPlayer.avPlayer {
+//                        let duration = CMTimeGetSeconds(currentItem.duration)
+//                        let sec = duration * Float64(iaPlayer.sliderProgress)
+//                        let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
+//                        player.seek(to: seakTime)
+//                    }
+//                })
+//                    .accentColor(.fairyCream)
                 HStack{
                     Text(iaPlayer.minTime ?? "")
                         .font(.system(size:9.0))
@@ -81,12 +83,42 @@ struct Playlist: View {
         }
         .padding(10)
         .modifier(BackgroundColorModifier(backgroundColor: .droopy))
+        .onAppear() {
+            viewModel.setUpSubscribers(iaPlayer)
+            iaPlayer.sendPlayingFileForPlaylist()
+            iaPlayer.sendItemsPlaylist()
+        }
     }
 
-    func remove(at offsets: IndexSet) {
+    private func remove(at offsets: IndexSet) {
         self.iaPlayer.removePlaylistItem(at: offsets)
+        viewModel.items.remove(atOffsets: offsets)
     }
 }
+
+extension Playlist {
+    final class ViewModel: ObservableObject {
+        @Published var playingFile: ArchiveFile? = nil
+        @Published var items: [ArchiveFile] = []
+
+        var cancellables = Set<AnyCancellable>()
+
+        public func setUpSubscribers(_ iaPlayer: Player) {
+            iaPlayer.playingFilePublisher
+                .sink { file in
+                    self.playingFile = file
+                }
+                .store(in: &cancellables)
+
+            iaPlayer.itemsPublisher
+                .sink { files in
+                    self.items = files
+                }
+                .store(in: &cancellables)
+        }
+    }
+}
+
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {

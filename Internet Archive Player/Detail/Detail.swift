@@ -9,14 +9,13 @@ import SwiftUI
 import iaAPI
 
 struct Detail: View {
-    @EnvironmentObject var iaPlayer: IAPlayer
-    @ObservedObject var viewModel: Detail.ViewModel
+    @EnvironmentObject var iaPlayer: Player
+    @StateObject var viewModel = Detail.ViewModel()
     var identifier: String
     @State var descriptionExpanded = false
     
     init(_ identifier: String) {
         self.identifier = identifier
-        self.viewModel = Detail.ViewModel(identifier)
     }
     
     var body: some View {
@@ -84,6 +83,9 @@ struct Detail: View {
             .padding(0)
         }
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear() {
+            self.viewModel.getArchiveDoc(identifier: self.identifier)
+        }
     }
 
     func createFileView(_ archiveFile: ArchiveFile) -> FileView? {
@@ -113,20 +115,17 @@ struct Detail: View {
 //}
 
 extension Detail {
-    @MainActor final class ViewModel: ObservableObject {
+    final class ViewModel: ObservableObject {
         let service: ArchiveService
-        let identifier: String
         @Published var archiveDoc: ArchiveMetaData? = nil
         @Published var files = [ArchiveFile]()
 
-        init(_ identifier: String) {
+        init() {
             self.service = ArchiveService()
-            self.identifier = identifier
-            self.getArchiveDoc()
         }
         
-        public func getArchiveDoc(){
-            Task {
+        public func getArchiveDoc(identifier: String){
+            Task { @MainActor in
                 do {
                     let doc = try await self.service.getArchiveAsync(with: identifier)
 

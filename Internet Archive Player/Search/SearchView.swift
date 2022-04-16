@@ -10,11 +10,11 @@ import iaAPI
 import Combine
 
 struct SearchView: View {
-    @ObservedObject var viewModel: SearchView.ViewModel
+    @EnvironmentObject var iaPlayer: Player
+    @StateObject var viewModel = SearchView.ViewModel()
     @FocusState private var searchFocused: Bool
 
     init() {
-        self.viewModel = SearchView.ViewModel()
         searchFocused = false
     }
 
@@ -69,7 +69,6 @@ struct SearchView: View {
                 .padding(0)
             }
             .frame(alignment: .leading)
-            .environmentObject(viewModel)
             .navigationTitle("")
             .navigationBarHidden(true)
             .background(
@@ -92,7 +91,7 @@ struct SearchView_Previews: PreviewProvider {
 }
 
 extension SearchView {
-    @MainActor final class ViewModel: ObservableObject {
+    final class ViewModel: ObservableObject {
         @Published var items: [ArchiveMetaData] = []
         @Published var searchText: String = "" {
             didSet {
@@ -116,10 +115,9 @@ extension SearchView {
             self.items.removeAll()
             self.isSearching = true
             self.noDataFound = false
-            Task {
+            Task { @MainActor in
                 do {
-                    let items = try await self.service.searchAsync(query: query, format: .mp3).response.docs
-                    self.items = items
+                    self.items = try await self.service.searchAsync(query: query, format: .mp3).response.docs
                     self.isSearching = false
                 } catch let error as ArchiveServiceError {
                     withAnimation(.easeIn(duration: 0.33)) {

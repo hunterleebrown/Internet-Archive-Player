@@ -8,36 +8,49 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject var iaPlayer = IAPlayer()
+    @StateObject var iaPlayer = Player()
+    @State var showPlaylist = false
+    @State var showPlayingDetails = false
+    @State var identifier = ""
 
     var body: some View {
         VStack(alignment:.leading, spacing: 0) {
             ZStack(alignment:.top) {
 
-//                if iaPlayer.showPlayingDetailView {
-//                    if let identifier = iaPlayer.playingFile?.identifier {
-//                        Detail(identifier)
-//                            .zIndex(2)
-//                            .transition(.move(edge:.bottom))
-//                            .background(Color.white)
-//                    }
-//                }
+                if showPlayingDetails {
+                    Detail(identifier)
+                        .zIndex(2)
+                        .transition(.move(edge:.bottom))
+                        .background(Color.white)
+                }
 
-                if iaPlayer.showPlaylist {
+                if showPlaylist {
                     Playlist()
                         .zIndex(1)
                         .transition(.move(edge:.bottom))
                 }
                 Tabs()
             }
-            Player()
+            PlayerControls()
                 .frame(height: 100, alignment: .bottom)
         }
         .ignoresSafeArea(.keyboard)
-//        .modifier(BackgroundColorModifier(backgroundColor: Color.droopy))
         .environmentObject(iaPlayer)
+        .onReceive(PlayerControls.showPlayList) { shouldShow in
+            withAnimation {
+                self.showPlaylist = shouldShow
+            }
+        }
+//        .onReceive(PlayerControls.showPlayingDetails) { id in
+//            withAnimation {
+//                identifier = id
+//                showPlayingDetails.toggle()
+//            }
+//        }
+
     }
 }
+
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {

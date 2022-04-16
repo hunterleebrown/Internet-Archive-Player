@@ -10,7 +10,7 @@
 		5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2FACD227A10FB200D02945 /* SearchItemView.swift */; };
 		5A305F522807BF5E00735FAA /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 5A305F512807BF5E00735FAA /* iaAPI */; };
 		5A4151B827B0FDF8007A3623 /* IAReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B727B0FDF8007A3623 /* IAReachability.swift */; };
-		5A4151BA27B0FEAA007A3623 /* IAPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B927B0FEAA007A3623 /* IAPlayer.swift */; };
+		5A4151BA27B0FEAA007A3623 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B927B0FEAA007A3623 /* Player.swift */; };
 		5A4151BD27B3645E007A3623 /* Inject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BC27B3645E007A3623 /* Inject.swift */; };
 		5A4151BF27B364B4007A3623 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BE27B364B4007A3623 /* ServiceContainer.swift */; };
 		5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC51279CCB7000495070 /* PlayerControls.swift */; };
@@ -29,7 +29,6 @@
 		5ADED06D279B608F00FB2E6D /* Iconochive-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5ADED06C279B608F00FB2E6D /* Iconochive-Regular.ttf */; };
 		5ADED06E279B60F500FB2E6D /* IAMediaUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */; };
 		5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */; };
-		5ADED076279B8AEC00FB2E6D /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED075279B8AEC00FB2E6D /* Player.swift */; };
 		5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED077279B8BA000FB2E6D /* HomeView.swift */; };
 		CE16141B279E9EE900ED0055 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16141A279E9EE900ED0055 /* Detail.swift */; };
 		CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF72C9927B5D72600B8AF15 /* FileView.swift */; };
@@ -55,7 +54,7 @@
 /* Begin PBXFileReference section */
 		5A2FACD227A10FB200D02945 /* SearchItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchItemView.swift; sourceTree = "<group>"; };
 		5A4151B727B0FDF8007A3623 /* IAReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAReachability.swift; sourceTree = "<group>"; };
-		5A4151B927B0FEAA007A3623 /* IAPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPlayer.swift; sourceTree = "<group>"; };
+		5A4151B927B0FEAA007A3623 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		5A4151BC27B3645E007A3623 /* Inject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inject.swift; sourceTree = "<group>"; };
 		5A4151BE27B364B4007A3623 /* ServiceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceContainer.swift; sourceTree = "<group>"; };
 		5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Internet-Archive-Player-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -78,7 +77,6 @@
 		5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAMediaUtils.swift; sourceTree = "<group>"; };
 		5ADED06C279B608F00FB2E6D /* Iconochive-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Iconochive-Regular.ttf"; sourceTree = "<group>"; };
 		5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundColorModifier.swift; sourceTree = "<group>"; };
-		5ADED075279B8AEC00FB2E6D /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		5ADED077279B8BA000FB2E6D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CE16141A279E9EE900ED0055 /* Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detail.swift; sourceTree = "<group>"; };
 		CEF72C9927B5D72600B8AF15 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
@@ -232,12 +230,11 @@
 			isa = PBXGroup;
 			children = (
 				5A4151B727B0FDF8007A3623 /* IAReachability.swift */,
-				5ADED075279B8AEC00FB2E6D /* Player.swift */,
 				5AD6BC51279CCB7000495070 /* PlayerControls.swift */,
 				5AD6BC53279CCED100495070 /* PlayerButton.swift */,
 				5AD6BC55279CDE2100495070 /* AirPlayButton.swift */,
 				5AD6BC57279CF31400495070 /* Playlist.swift */,
-				5A4151B927B0FEAA007A3623 /* IAPlayer.swift */,
+				5A4151B927B0FEAA007A3623 /* Player.swift */,
 			);
 			path = Player;
 			sourceTree = "<group>";
@@ -406,10 +403,9 @@
 				5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */,
 				5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */,
 				5ADED06E279B60F500FB2E6D /* IAMediaUtils.swift in Sources */,
-				5A4151BA27B0FEAA007A3623 /* IAPlayer.swift in Sources */,
+				5A4151BA27B0FEAA007A3623 /* Player.swift in Sources */,
 				5A4151B827B0FDF8007A3623 /* IAReachability.swift in Sources */,
 				CE16141B279E9EE900ED0055 /* Detail.swift in Sources */,
-				5ADED076279B8AEC00FB2E6D /* Player.swift in Sources */,
 				5ADED039279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift in Sources */,
 				5ADED065279B58CB00FB2E6D /* SearchView.swift in Sources */,
 				5A4151BF27B364B4007A3623 /* ServiceContainer.swift in Sources */,
