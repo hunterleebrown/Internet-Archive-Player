@@ -120,6 +120,11 @@ class Player: NSObject, ObservableObject {
         self.updatePlaylistSubscribers()
     }
 
+    public func rearrangePlaylist(fromOffsets source: IndexSet, toOffset destination: Int) {
+        self.items.move(fromOffsets: source, toOffset: destination)
+        self.updatePlaylistSubscribers()
+    }
+
     private func updatePlaylistSubscribers() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             self.itemsSubject.send(self.items)

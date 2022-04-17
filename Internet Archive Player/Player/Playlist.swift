@@ -26,26 +26,30 @@ struct Playlist: View {
                         FileView(archiveFile,
                                  showImage: true,
                                  showDownloadButton: true,
-                                 backgroundColor: archiveFile == viewModel.playingFile ? .fairyCream : nil,
-                                 textColor: archiveFile == viewModel.playingFile ? .droopy : .white,
+                                 backgroundColor: archiveFile == viewModel.playingFile ? .droopy : nil,
+                                 textColor: archiveFile == viewModel.playingFile ? .fairyCream : .droopy,
                                  fileViewMode: .playlist)
                         .onTapGesture {
                             iaPlayer.playFile(archiveFile)
                         }
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                         .padding(0)
-                        .listRowBackground(Color.droopy)
+                        .listRowBackground(Color.white)
+                        .accentColor(.droopy)
+                        .tint(.droopy)
                     }
                     .onDelete(perform: self.remove)
+                    .onMove(perform: self.move)
                 }
                 .listStyle(PlainListStyle())
-                .background(Color.droopy)
+                .accentColor(.droopy)
+                .background(Color.white)
                 .padding(0)
             }
             .padding(10)
-            .modifier(BackgroundColorModifier(backgroundColor: .droopy))
+            .modifier(BackgroundColorModifier(backgroundColor: .white))
             .navigationTitle("Playlist")
-            .navigationBarColor(backgroundColor: IAColors.droopy, titleColor: UIColor.fairyCream)
+            .navigationBarColor(backgroundColor: .white, titleColor: IAColors.droopy)
             .onAppear() {
                 viewModel.setUpSubscribers(iaPlayer)
                 iaPlayer.sendPlayingFileForPlaylist()
@@ -53,12 +57,14 @@ struct Playlist: View {
             }
             .toolbar {
                 HStack {
+                    EditButton()
+                        .accentColor(.droopy)
+
                     Button(action: {
                         showingAlert = true
                     }) {
-                        Text("Clear")
-                            .padding(10)
-                            .foregroundColor(.fairyCream)
+                        Image(systemName: "trash")
+                        .foregroundColor(.droopy)
                     }
                     .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
                         Button("No", role: .cancel) { }
@@ -68,11 +74,11 @@ struct Playlist: View {
                         }
                     }
 
-                    Button(action: {
+                    Button( action: {
                         PlayerControls.showPlayList.send(false)
-                    }) {
+                    }){
                         Image(systemName: "xmark")
-                            .tint(.fairyCream)
+                            .foregroundColor(.droopy)
                     }
                 }
             }
@@ -82,6 +88,11 @@ struct Playlist: View {
     private func remove(at offsets: IndexSet) {
         self.iaPlayer.removePlaylistItem(at: offsets)
         viewModel.items.remove(atOffsets: offsets)
+    }
+
+    private func move(fromOffsets source: IndexSet, toOffset destination: Int) {
+        self.viewModel.items.move(fromOffsets: source, toOffset: destination)
+        self.iaPlayer.rearrangePlaylist(fromOffsets: source, toOffset: destination)
     }
 }
 

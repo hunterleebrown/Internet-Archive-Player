@@ -122,6 +122,7 @@ struct FileView: View {
                         Image(systemName: "icloud.and.arrow.down")
                             .aspectRatio(contentMode: .fill)
                             .frame(width: 44, height: 44)
+                            .foregroundColor(textColor)
                     }
                     .frame(width: 44, height: 44)
                 }
@@ -136,6 +137,7 @@ struct FileView: View {
                         .frame(width: 44, height: 44)
                     } label: {
                         Image(systemName: "ellipsis")
+                            .foregroundColor(textColor)
                             .aspectRatio(contentMode: .fill)
                             .frame(width: 44, height: 44)
                     }

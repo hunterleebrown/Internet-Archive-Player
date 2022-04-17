@@ -12,10 +12,9 @@ import Combine
 struct PlayerControls: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
-    @State var showingPlaylist = false
 
     static var showPlayList = PassthroughSubject<Bool, Never>()
-    static var showPlayingDetails = PassthroughSubject<String, Never>()
+    static var showPlayingDetails = PassthroughSubject<ArchiveFile, Never>()
 
     var body: some View {
         GeometryReader{ g in
@@ -61,8 +60,8 @@ struct PlayerControls: View {
                             .frame(maxWidth: 44,
                                    maxHeight: 44)
                             .onTapGesture {
-                                if let identifier = viewModel.playingFile?.identifier {
-                                    PlayerControls.showPlayingDetails.send(identifier)
+                                if let file = viewModel.playingFile {
+                                    PlayerControls.showPlayingDetails.send(file)
                                 }
                             }
                     }
@@ -87,8 +86,8 @@ struct PlayerControls: View {
 
                 HStack {
                     
-                    PlayerButton(showingPlaylist ? .listFill : .list, 20, {
-                        PlayerControls.showPlayList.send(!showingPlaylist)
+                    PlayerButton(.list, 20, {
+                        PlayerControls.showPlayList.send(true)
                     })
                     Spacer()
                     PlayerButton(.backwards) {
@@ -114,9 +113,6 @@ struct PlayerControls: View {
             .modifier(BackgroundColorModifier(backgroundColor: .fairyRed))
             .onAppear() {
                 viewModel.setSubscribers(iaPlayer)
-            }
-            .onReceive(PlayerControls.showPlayList) { shouldShow in
-                showingPlaylist = shouldShow
             }
         }
     }

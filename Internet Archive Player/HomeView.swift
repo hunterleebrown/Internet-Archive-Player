@@ -6,34 +6,26 @@
 //
 
 import SwiftUI
+import iaAPI
 
 struct HomeView: View {
     @StateObject var iaPlayer = Player()
     @State var showPlaylist = false
-    @State var showPlayingDetails = false
+    @State var playingFile: ArchiveFile? = nil
     @State var identifier = ""
 
     var body: some View {
         VStack(alignment:.leading, spacing: 0) {
-            ZStack(alignment:.top) {
-
-                if showPlayingDetails {
-                    Detail(identifier)
-                        .zIndex(2)
-                        .transition(.move(edge:.bottom))
-                        .background(Color.white)
-                }
-
-                if showPlaylist {
-                    Playlist()
-                        .zIndex(1)
-                        .transition(.move(edge:.bottom))
-                }
-                Tabs()
-            }
+            Tabs()
             PlayerControls()
                 .frame(height: 130, alignment: .bottom)
         }
+        .sheet(isPresented: $showPlaylist, content: {
+            Playlist()
+        })
+        .sheet(item: $playingFile, content: { file in
+            Detail(file.identifier!)
+        })
         .ignoresSafeArea(.keyboard)
         .environmentObject(iaPlayer)
         .onReceive(PlayerControls.showPlayList) { shouldShow in
@@ -41,12 +33,11 @@ struct HomeView: View {
                 self.showPlaylist = shouldShow
             }
         }
-//        .onReceive(PlayerControls.showPlayingDetails) { id in
-//            withAnimation {
-//                identifier = id
-//                showPlayingDetails.toggle()
-//            }
-//        }
+        .onReceive(PlayerControls.showPlayingDetails) { file in
+            withAnimation {
+                playingFile = file
+            }
+        }
 
     }
 }
@@ -57,3 +48,4 @@ struct HomeView_Previews: PreviewProvider {
         HomeView()
     }
 }
+
