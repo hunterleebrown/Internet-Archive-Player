@@ -21,91 +21,90 @@ struct Detail: View {
     }
     
     var body: some View {
-            ScrollView {
-                VStack(alignment: .center, spacing: 5.0) {
-                    if let iconUrl = viewModel.archiveDoc?.iconUrl {
-                        AsyncImage(
-                            url: iconUrl,
-                            content: { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: 200,
-                                           maxHeight: 200)
-                                    .background(Color.clear)
-                            },
-                            placeholder: {
-                                ProgressView()
-                            })
-                        .cornerRadius(15)
-                    }
-                    Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
-                        .font(.headline)
-                        .bold()
-                        .multilineTextAlignment(.center)
-                        .background(GeometryReader {
-                            Color.clear.preference(key: ViewOffsetKey.self,
-                                value: $0.frame(in: .named("scroll")).origin.y)
+        ScrollView {
+            VStack(alignment: .center, spacing: 5.0) {
+                if let iconUrl = viewModel.archiveDoc?.iconUrl {
+                    AsyncImage(
+                        url: iconUrl,
+                        content: { image in
+                            image.resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(maxWidth: 200,
+                                       maxHeight: 200)
+                                .background(Color.clear)
+                        },
+                        placeholder: {
+                            ProgressView()
                         })
-                        .onPreferenceChange(ViewOffsetKey.self) {
-//                            print("offset >> \($0)")
-                            titleScrollOffset = $0
-                        }
-
-                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
-                        Text(artist)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
+                    .cornerRadius(15)
+                }
+                Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
+                    .font(.headline)
+                    .bold()
+                    .multilineTextAlignment(.center)
+                    .background(GeometryReader {
+                        Color.clear.preference(key: ViewOffsetKey.self,
+                                               value: $0.frame(in: .named("scroll")).origin.y)
+                    })
+                    .onPreferenceChange(ViewOffsetKey.self) {
+                        //                            print("offset >> \($0)")
+                        titleScrollOffset = $0
                     }
 
+                if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
+                    Text(artist)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                }
+
+            }
+            .padding(10)
+
+            if let desc = self.viewModel.archiveDoc?.description {
+
+                VStack() {
+                    Text(AttributedString(attString(desc: desc)))
+                        .padding(5.0)
+                        .onTapGesture {
+                            withAnimation {
+                                self.descriptionExpanded.toggle()
+                            }
+                        }
                 }
                 .padding(10)
-
-                if let desc = self.viewModel.archiveDoc?.description {
-
-                    VStack() {
-                        Text(AttributedString(attString(desc: desc)))
-                            .padding(5.0)
-                            .onTapGesture {
-                                withAnimation {
-                                    self.descriptionExpanded.toggle()
-                                }
-                            }
-                    }
-                    .padding(10)
-                    .background(Color.white)
-                    .frame(height: self.descriptionExpanded ? nil : 100)
-                    .frame(alignment:.leading)
-                }
+                .background(Color.white)
+                .frame(height: self.descriptionExpanded ? nil : 100)
+                .frame(alignment:.leading)
+            }
 
 
-                LazyVStack(spacing:2.0) {
-                    ForEach(self.viewModel.files, id: \.self) { file in
-                        self.createFileView(file)
-                            .padding(.leading, 5.0)
-                            .padding(.trailing, 5.0)
-                            .onTapGesture {
-                                self.iaPlayer.appendPlaylistItem(file)
-                                iaPlayer.playFile(file)
-                            }
-                    }
+            LazyVStack(spacing:2.0) {
+                ForEach(self.viewModel.files, id: \.self) { file in
+                    self.createFileView(file)
+                        .padding(.leading, 5.0)
+                        .padding(.trailing, 5.0)
+                        .onTapGesture {
+                            self.iaPlayer.appendPlaylistItem(file)
+                            iaPlayer.playFile(file)
+                        }
                 }
             }
-            .coordinateSpace(name: "scroll")
-            .padding(0)
-            .navigationTitle(titleScrollOffset < 0 ? viewModel.archiveDoc?.archiveTitle ?? "" : "")
-            .onAppear() {
-                self.viewModel.getArchiveDoc(identifier: self.identifier)
+        }
+        .coordinateSpace(name: "scroll")
+        .padding(0)
+        .navigationTitle(titleScrollOffset < 0 ? viewModel.archiveDoc?.archiveTitle ?? "" : "")
+        .onAppear() {
+            self.viewModel.getArchiveDoc(identifier: self.identifier)
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            Button(action: {
+            }) {
+                Image(systemName: "heart")
+                    .tint(.fairyRed)
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                Button(action: {
-                }) {
-                    Image(systemName: "heart")
-                        .tint(.fairyRed)
-                }
-            }
-            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.85), titleColor: .black)
-
+        }
+        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.85), titleColor: .black)
     }
 
     func createFileView(_ archiveFile: ArchiveFile) -> FileView? {
