@@ -41,33 +41,6 @@ struct Playlist: View {
                 .listStyle(PlainListStyle())
                 .background(Color.droopy)
                 .padding(0)
-
-                Spacer()
-
-                VStack {
-                    //                Slider(value: $iaPlayer.sliderProgress,
-                    //                       in: 0...1, onEditingChanged: { _ in
-                    //                    guard let currentItem = iaPlayer.avPlayer?.currentItem else { return }
-                    //                    if let player = iaPlayer.avPlayer {
-                    //                        let duration = CMTimeGetSeconds(currentItem.duration)
-                    //                        let sec = duration * Float64(iaPlayer.sliderProgress)
-                    //                        let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
-                    //                        player.seek(to: seakTime)
-                    //                    }
-                    //                })
-                    //                    .accentColor(.fairyCream)
-                    HStack{
-                        Text(iaPlayer.minTime ?? "")
-                            .font(.system(size:9.0))
-                            .foregroundColor(.fairyCream)
-                        Spacer()
-                        Text(iaPlayer.maxTime ?? "")
-                            .font(.system(size:9.0))
-                            .foregroundColor(.fairyCream)
-                    }
-                }
-                .frame(alignment: .bottom)
-                .frame(height:33)
             }
             .padding(10)
             .modifier(BackgroundColorModifier(backgroundColor: .droopy))
@@ -90,6 +63,7 @@ struct Playlist: View {
                     .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
                         Button("No", role: .cancel) { }
                         Button("Yes") {
+                            viewModel.items.removeAll()
                             iaPlayer.clearPlaylist()
                         }
                     }

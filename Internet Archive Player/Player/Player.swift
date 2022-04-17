@@ -18,9 +18,6 @@ class Player: NSObject, ObservableObject {
     static let shared = Player()
 
     @Published var showPlayingDetailView = false
-    @Published var minTime: String? = nil
-    @Published var maxTime: String? = nil
-//    @Published var sliderProgress: Double = 0
 
     public enum AdvanceDirection: Int {
         case forwards = 1
@@ -32,12 +29,19 @@ class Player: NSObject, ObservableObject {
     private var avPlayer: AVPlayer?
     private var observing = false
     fileprivate var observerContext = 0
+    private var playing = false
 
     var fileTitle: String?
     var fileIdentifierTitle: String?
     var fileIdentifier: String?
     var mediaArtwork : MPMediaItemArtwork?
     var itemSubscritpions: Set<AnyCancellable> = Set<AnyCancellable>()
+
+    override init() {
+        super.init()
+        NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+        self.setUpRemoteCommandCenterEvents()
+    }
 
     private let playingSubject = PassthroughSubject<Bool, Never>()
     public var playingPublisher: AnyPublisher<Bool, Never> {
@@ -66,14 +70,27 @@ class Player: NSObject, ObservableObject {
     public var sliderProgressPublisher: AnyPublisher<Double, Never> {
         sliderProgressSubject.eraseToAnyPublisher()
     }
+    private var sliderProgress: Double = 0.0
+    private var pauseSliderProgress = false
+    public func shouldPauseSliderProgress(_ shouldPause: Bool){
+        self.pauseSliderProgress = shouldPause
+    }
 
+    private let durationSubject = PassthroughSubject<Double, Never>()
+    public var durationSubjectPublisher: AnyPublisher<Double, Never> {
+        durationSubject.eraseToAnyPublisher()
+    }
 
-    private var playing = false
-
-    override init() {
-        super.init()
-        NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
-        self.setUpRemoteCommandCenterEvents()
+    public func seekTo(with sliderValue: Double) {
+        guard let currentItem = avPlayer?.currentItem else { return }
+        if let player = avPlayer {
+            let duration = CMTimeGetSeconds(currentItem.duration)
+            let sec = duration * Float64(sliderValue)
+            let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
+            player.seek(to: seakTime) { _ in
+                self.shouldPauseSliderProgress(false)
+            }
+        }
     }
 
     public func appendPlaylistItem(_ item: ArchiveFile){
@@ -163,6 +180,7 @@ class Player: NSObject, ObservableObject {
         self.observing = true
         avPlayer?.play()
         self.setPlayingInfo(playing: true)
+
     }
 
     public func didTapPlayButton() {
@@ -207,11 +225,14 @@ class Player: NSObject, ObservableObject {
         if let player = avPlayer {
             if(player.currentItem != nil) {
                 let progress = CMTimeGetSeconds(player.currentTime()) / CMTimeGetSeconds((player.currentItem?.duration)!)
-                //self.sliderProgress = progress;
-                DispatchQueue.main.async {
-                    self.sliderProgressSubject.send(progress)
+                self.sliderProgress = progress
+                if !pauseSliderProgress {
+                    DispatchQueue.main.async {
+                        self.sliderProgressSubject.send(progress)
+                        self.durationSubject.send(CMTimeGetSeconds((player.currentItem?.duration)!))
+                    }
                 }
-                updatePlayerTimes()
+
                 if(player.rate != 0.0) {
                     let delay = 0.1 * Double(NSEC_PER_SEC)
                     let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
@@ -221,19 +242,6 @@ class Player: NSObject, ObservableObject {
                 }
             }
             return
-        }
-    }
-
-    private func updatePlayerTimes() {
-
-        if let player = avPlayer {
-            let calcTime = CMTimeGetSeconds((player.currentItem?.duration)!) - CMTimeGetSeconds(player.currentTime())
-            if(!calcTime.isNaN) {
-//                DispatchQueue.main.async { [self] in
-//                    self.minTime = IAStringUtils.timeFormatted(self.elapsedSeconds())
-//                    self.maxTime = IAStringUtils.timeFormatted(Int(calcTime))
-//                }
-            }
         }
     }
 

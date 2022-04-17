@@ -32,7 +32,7 @@ struct HomeView: View {
                 Tabs()
             }
             PlayerControls()
-                .frame(height: 100, alignment: .bottom)
+                .frame(height: 130, alignment: .bottom)
         }
         .ignoresSafeArea(.keyboard)
         .environmentObject(iaPlayer)

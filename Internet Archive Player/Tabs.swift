@@ -18,7 +18,7 @@ struct Tabs: View {
 
             FavoritesView()
                 .tabItem {
-                    Label("Favorites", systemImage: "star")
+                    Label("Favorites", systemImage: "heart")
                 }
         }
         .accentColor(.fairyCream)

@@ -12,7 +12,6 @@ import Combine
 struct PlayerControls: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
-    @State var playing = false
     @State var showingPlaylist = false
 
     static var showPlayList = PassthroughSubject<Bool, Never>()
@@ -21,8 +20,28 @@ struct PlayerControls: View {
     var body: some View {
         GeometryReader{ g in
             VStack(alignment: .leading){
-                ProgressView(value: viewModel.progress, total: 1)
-                    .progressViewStyle(LinearProgressViewStyle(tint: .fairyCream))
+                Slider(value: $viewModel.progress,
+                       in: 0...1,
+                       onEditingChanged: sliderEditingChanged)
+                    .accentColor(.fairyCream)
+                    .frame(height:20)
+                    .disabled(viewModel.playingFile == nil)
+
+                HStack{
+                    Text(viewModel.minimumValue())
+                        .foregroundColor(.fairyCream)
+                        .font(.system(size:9.0))
+
+                    Spacer()
+
+                    Text(viewModel.remainingValue())
+                        .foregroundColor(.fairyCream)
+                        .font(.system(size:9.0))
+                }
+                .padding(.leading, 5)
+                .padding(.trailing, 5)
+                .frame(height:10)
+
                 HStack(alignment: .top, spacing: 5.0){
                     if let playingFile = viewModel.playingFile {
                         AsyncImage(
@@ -102,7 +121,13 @@ struct PlayerControls: View {
         }
     }
 
-
+    private func sliderEditingChanged(editingStarted: Bool) {
+        if editingStarted {
+            iaPlayer.shouldPauseSliderProgress(true)
+        } else {
+            iaPlayer.seekTo(with: viewModel.progress)
+        }
+    }
 
 
 }
@@ -113,6 +138,8 @@ extension PlayerControls {
         @Published var playing: Bool = false
         @Published var playingFile: ArchiveFile?
         @Published var progress: Double = 0.0
+        @Published var duration: Double = 0.0
+
 
         func setSubscribers(_ iaPlayer: Player) {
             iaPlayer.playingPublisher
@@ -135,7 +162,41 @@ extension PlayerControls {
                     self.progress = prog
                 }
                 .store(in: &cancellables)
+
+            iaPlayer.durationSubjectPublisher
+                .removeDuplicates()
+                .sink { dur in
+                    self.duration = dur
+                }
+                .store(in: &cancellables)
+
         }
+
+        public func minimumValue() -> String {
+            if !duration.isNaN {
+                return IAStringUtils.timeFormatted(minimumCalc)
+            }
+            return ""
+        }
+
+        public func remainingValue() -> String {
+            return IAStringUtils.timeFormatted(remainingCalc)
+        }
+
+        private var minimumCalc: Int {
+            if !duration.isNaN {
+                return Int(progress * duration)
+            }
+            return 0
+        }
+
+        private var remainingCalc : Int {
+            if !duration.isNaN {
+                return (Int(duration) - minimumCalc)
+            }
+            return 0
+        }
+
     }
 }
 
