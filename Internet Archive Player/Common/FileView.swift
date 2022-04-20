@@ -144,7 +144,7 @@ struct FileView: View {
                     .highPriorityGesture(TapGesture())
                 }
             }
-            .accentColor(textColor)
+            .tint(textColor)
             .padding(5.0)
         }
         .background(backgroundColor ?? nil)

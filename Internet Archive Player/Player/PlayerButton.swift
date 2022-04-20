@@ -20,9 +20,9 @@ enum PlayerButtonType: String {
 
 struct PlayerButton: View {
     var type: PlayerButtonType
-    var size: CGFloat?
+    var size: CGSize?
     var action: (() -> ())?
-    init(_ type: PlayerButtonType, _ size: CGFloat? = 20.0, _ action: (()->())? = nil){
+    init(_ type: PlayerButtonType, _ size: CGSize? = CGSize(width: 20.0, height: 20.0), _ action: (()->())? = nil){
         self.type = type
         self.size = size
         self.action = action
@@ -35,9 +35,9 @@ struct PlayerButton: View {
         }){
             Image(systemName: type.rawValue)
                 .resizable()
-                .frame(width: size, height: size)
+                .frame(width: size?.width, height: size?.height)
         }
-        .accentColor(.fairyCream)
+        .tint(.fairyCream)
     }
 }
 

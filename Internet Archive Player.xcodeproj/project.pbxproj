@@ -750,8 +750,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:hunterleebrown/iaAPI.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
+				branch = "new-mock-data";
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

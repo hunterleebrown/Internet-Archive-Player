@@ -22,7 +22,7 @@ struct PlayerControls: View {
                 Slider(value: $viewModel.progress,
                        in: 0...1,
                        onEditingChanged: sliderEditingChanged)
-                    .accentColor(.fairyCream)
+                    .tint(.fairyCream)
                     .frame(height:20)
                     .disabled(viewModel.playingFile == nil)
 
@@ -86,7 +86,7 @@ struct PlayerControls: View {
 
                 HStack {
                     
-                    PlayerButton(.list, 20, {
+                    PlayerButton(.list, CGSize(width: 20, height: 25), {
                         PlayerControls.showPlayList.send(true)
                     })
                     Spacer()
@@ -94,7 +94,7 @@ struct PlayerControls: View {
                         iaPlayer.advancePlayer(.backwards)
                     }
                     Spacer()
-                    PlayerButton(viewModel.playing ? .pause : .play, 44.0) {
+                    PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 44.0, height: 44.0)) {
                         iaPlayer.didTapPlayButton()
                     }
                     Spacer()
@@ -105,7 +105,7 @@ struct PlayerControls: View {
                     AirPlayButton()
                         .frame(width: 33.0, height: 33.0)
                 }
-                .accentColor(.fairyCream)
+                .tint(.fairyCream)
                 .padding(.leading)
                 .padding(.trailing)
             }

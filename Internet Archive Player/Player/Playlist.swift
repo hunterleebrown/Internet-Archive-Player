@@ -35,14 +35,14 @@ struct Playlist: View {
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                         .padding(0)
                         .listRowBackground(Color.white)
-                        .accentColor(.droopy)
+                        .tint(.droopy)
                         .tint(.droopy)
                     }
                     .onDelete(perform: self.remove)
                     .onMove(perform: self.move)
                 }
                 .listStyle(PlainListStyle())
-                .accentColor(.droopy)
+                .tint(.droopy)
                 .background(Color.white)
                 .padding(0)
             }
@@ -58,7 +58,7 @@ struct Playlist: View {
             .toolbar {
                 HStack {
                     EditButton()
-                        .accentColor(.droopy)
+                        .tint(.droopy)
 
                     Button(action: {
                         showingAlert = true

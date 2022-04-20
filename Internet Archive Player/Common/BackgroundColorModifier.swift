@@ -14,7 +14,7 @@ struct BackgroundColorModifier: ViewModifier {
             backgroundColor?.ignoresSafeArea(.all, edges: .all)
             content
         }
-        .accentColor(.black)
+        .tint(.black)
     }
 }
 

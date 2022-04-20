@@ -21,7 +21,7 @@ struct Tabs: View {
                     Label("Favorites", systemImage: "heart")
                 }
         }
-        .accentColor(.fairyCream)
+        .tint(.fairyCream)
         .tabStyle()
         .modifier(BackgroundColorModifier(backgroundColor: .droopy))
     }

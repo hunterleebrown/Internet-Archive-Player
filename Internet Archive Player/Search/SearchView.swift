@@ -82,7 +82,7 @@ struct SearchView: View {
             )
         }
         .navigationViewStyle(StackNavigationViewStyle())
-        .accentColor(Color.black)
+        .accentColor(.black)
     }
 }
 
