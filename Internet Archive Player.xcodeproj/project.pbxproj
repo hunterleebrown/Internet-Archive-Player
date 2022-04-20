@@ -151,7 +151,6 @@
 				5ADED062279B588E00FB2E6D /* Search */,
 				5ADED063279B589600FB2E6D /* Favorites */,
 				5ADED069279B602900FB2E6D /* Utils */,
-				CEF72C9B27B835E600B8AF15 /* Model */,
 				5ADED06B279B607800FB2E6D /* Resources */,
 				5ADED06F279B638F00FB2E6D /* Common */,
 				5ADED074279B8A4A00FB2E6D /* Player */,
@@ -248,13 +247,6 @@
 				CE16141A279E9EE900ED0055 /* Detail.swift */,
 			);
 			path = Detail;
-			sourceTree = "<group>";
-		};
-		CEF72C9B27B835E600B8AF15 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
