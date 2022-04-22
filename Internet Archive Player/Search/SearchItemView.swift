@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import iaAPI
+import CachedAsyncImage
 
 struct SearchItemView: View {
     var item: ArchiveMetaData
@@ -15,7 +16,7 @@ struct SearchItemView: View {
     var body: some View {
         HStack(alignment:.center, spacing: 10.0) {
 
-            AsyncImage(
+            CachedAsyncImage (
                 url: item.iconUrl,
                 content: { image in
                     image.resizable()

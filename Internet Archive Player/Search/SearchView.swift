@@ -106,10 +106,10 @@ extension SearchView {
         @Published var noDataFound: Bool = false
         @Published var archiveError: String?
         
-        let service: ArchiveService
+        let service: PlayerArchiveService
 
         init() {
-            self.service = ArchiveService()
+            self.service = PlayerArchiveService()
         }
 
         func search(query: String) {

@@ -32,6 +32,8 @@
 		5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */; };
 		5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED077279B8BA000FB2E6D /* HomeView.swift */; };
 		CE16141B279E9EE900ED0055 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16141A279E9EE900ED0055 /* Detail.swift */; };
+		CE1ACD4F2812E77900EF968A /* CachedAsyncImage in Frameworks */ = {isa = PBXBuildFile; productRef = CE1ACD4E2812E77900EF968A /* CachedAsyncImage */; };
+		CE1ACD522812FA8B00EF968A /* PlayerArchiveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1ACD512812FA8B00EF968A /* PlayerArchiveService.swift */; };
 		CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF72C9927B5D72600B8AF15 /* FileView.swift */; };
 /* End PBXBuildFile section */
 
@@ -81,6 +83,7 @@
 		5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundColorModifier.swift; sourceTree = "<group>"; };
 		5ADED077279B8BA000FB2E6D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CE16141A279E9EE900ED0055 /* Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detail.swift; sourceTree = "<group>"; };
+		CE1ACD512812FA8B00EF968A /* PlayerArchiveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerArchiveService.swift; sourceTree = "<group>"; };
 		CEF72C9927B5D72600B8AF15 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -90,6 +93,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A305F522807BF5E00735FAA /* iaAPI in Frameworks */,
+				CE1ACD4F2812E77900EF968A /* CachedAsyncImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +147,7 @@
 		5ADED037279B56EE00FB2E6D /* Internet Archive Player */ = {
 			isa = PBXGroup;
 			children = (
+				CE1ACD502812FA5F00EF968A /* Services */,
 				5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */,
 				5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */,
 				5ADED077279B8BA000FB2E6D /* HomeView.swift */,
@@ -241,6 +246,14 @@
 			path = Player;
 			sourceTree = "<group>";
 		};
+		CE1ACD502812FA5F00EF968A /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				CE1ACD512812FA8B00EF968A /* PlayerArchiveService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		CEF72C9827A24BF700B8AF15 /* Detail */ = {
 			isa = PBXGroup;
 			children = (
@@ -267,6 +280,7 @@
 			name = "Internet Archive Player";
 			packageProductDependencies = (
 				5A305F512807BF5E00735FAA /* iaAPI */,
+				CE1ACD4E2812E77900EF968A /* CachedAsyncImage */,
 			);
 			productName = "Internet Archive Player";
 			productReference = 5ADED035279B56EE00FB2E6D /* ia-player.app */;
@@ -342,6 +356,7 @@
 			mainGroup = 5ADED02C279B56EE00FB2E6D;
 			packageReferences = (
 				5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */,
+				CE1ACD4D2812E77900EF968A /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */,
 			);
 			productRefGroup = 5ADED036279B56EE00FB2E6D /* Products */;
 			projectDirPath = "";
@@ -399,6 +414,7 @@
 				5A71893F280B721400B1944B /* NavigationBarModifier.swift in Sources */,
 				5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */,
 				5ADED06E279B60F500FB2E6D /* IAMediaUtils.swift in Sources */,
+				CE1ACD522812FA8B00EF968A /* PlayerArchiveService.swift in Sources */,
 				5A4151BA27B0FEAA007A3623 /* Player.swift in Sources */,
 				5A4151B827B0FDF8007A3623 /* IAReachability.swift in Sources */,
 				CE16141B279E9EE900ED0055 /* Detail.swift in Sources */,
@@ -746,6 +762,14 @@
 				kind = branch;
 			};
 		};
+		CE1ACD4D2812E77900EF968A /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/lorenzofiamingo/swiftui-cached-async-image.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -753,6 +777,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */;
 			productName = iaAPI;
+		};
+		CE1ACD4E2812E77900EF968A /* CachedAsyncImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE1ACD4D2812E77900EF968A /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */;
+			productName = CachedAsyncImage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

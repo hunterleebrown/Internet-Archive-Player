@@ -8,6 +8,7 @@
 import SwiftUI
 import iaAPI
 import UIKit
+import CachedAsyncImage
 
 struct Detail: View {
     @EnvironmentObject var iaPlayer: Player
@@ -16,6 +17,7 @@ struct Detail: View {
     @State private var descriptionExpanded = false
     @State private var titleScrollOffset: CGFloat = .zero
     @State private var playlistAddAlert = false
+    @State private var navigationTitle = ""
     
     init(_ identifier: String) {
         self.identifier = identifier
@@ -26,14 +28,14 @@ struct Detail: View {
             ScrollView {
                 VStack(alignment: .center, spacing: 5.0) {
                     if let iconUrl = viewModel.archiveDoc?.iconUrl {
-                        AsyncImage(
+                        CachedAsyncImage (
                             url: iconUrl,
                             content: { image in
                                 image.resizable()
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: 200,
-                                           maxHeight: 200)
-                                    .background(Color.clear)
+                                    .frame(minWidth:200, maxWidth: 200,
+                                           minHeight: 200, maxHeight: 200)
+                                    .background(Color.black)                                
                             },
                             placeholder: {
                                 ProgressView()
@@ -48,9 +50,8 @@ struct Detail: View {
                             Color.clear.preference(key: ViewOffsetKey.self,
                                                    value: $0.frame(in: .named("scroll")).origin.y)
                         })
-                        .onPreferenceChange(ViewOffsetKey.self) {
-                            //                            print("offset >> \($0)")
-                            titleScrollOffset = $0
+                        .onPreferenceChange(ViewOffsetKey.self) { offset in
+                            self.titleChange(offset: offset)
                         }
                     
                     if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
@@ -79,7 +80,21 @@ struct Detail: View {
                     .frame(alignment:.leading)
                 }
                 
-                
+                HStack() {
+                    Spacer()
+                    Button(action: {
+                        playlistAddAlert = true
+                    }) {
+                        HStack(spacing: 1.0) {
+                            Text("+")
+                                .foregroundColor(.fairyRed)
+                            Image(systemName: PlayerButtonType.list.rawValue)
+                                .tint(.fairyRed)
+                        }
+                    }
+                }
+                .padding(10)
+    
                 LazyVStack(spacing:2.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
                         self.createFileView(file)
@@ -94,23 +109,13 @@ struct Detail: View {
             }
             .coordinateSpace(name: "scroll")
             .padding(0)
-            .navigationTitle(titleScrollOffset < 0 ? viewModel.archiveDoc?.archiveTitle ?? "" : "")
+            .navigationTitle(navigationTitle)
             .onAppear() {
                 self.viewModel.getArchiveDoc(identifier: self.identifier)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 HStack {
-                    Button(action: {
-                        playlistAddAlert = true
-                    }) {
-                        HStack(spacing: 1.0) {
-                            Text("-->")
-                            Image(systemName: PlayerButtonType.list.rawValue)
-                                .tint(.fairyRed)
-                        }
-                    }
-                    
                     Button(action: {
                     }) {
                         Image(systemName: "heart")
@@ -130,8 +135,14 @@ struct Detail: View {
         
     }
     
-    func createFileView(_ archiveFile: ArchiveFile) -> FileView? {
-        return FileView(archiveFile, showDownloadButton: false, ellipsisAction: {
+    private func titleChange(offset: CGFloat) {
+        withAnimation(.linear(duration:1.0)) {
+            navigationTitle = offset > 0 ? self.viewModel.archiveDoc?.archiveTitle ?? "" : ""
+        }
+    }
+    
+    func createFileView(_ archiveFile: ArchiveFile) -> FileView {
+        FileView(archiveFile, showDownloadButton: false, ellipsisAction: {
             iaPlayer.appendPlaylistItem(archiveFile)
         })
     }
@@ -158,12 +169,12 @@ struct Detail_Previews: PreviewProvider {
 
 extension Detail {
     final class ViewModel: ObservableObject {
-        let service: ArchiveService
+        let service: PlayerArchiveService
         @Published var archiveDoc: ArchiveMetaData? = nil
         @Published var files = [ArchiveFile]()
         
         init() {
-            self.service = ArchiveService()
+            self.service = PlayerArchiveService()
         }
         
         public func getArchiveDoc(identifier: String){
