@@ -758,8 +758,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:hunterleebrown/iaAPI.git";
 			requirement = {
-				branch = "new-mock-data";
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.0;
 			};
 		};
 		CE1ACD4D2812E77900EF968A /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */ = {
