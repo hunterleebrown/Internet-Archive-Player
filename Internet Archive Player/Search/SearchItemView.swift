@@ -37,12 +37,13 @@ struct SearchItemView: View {
                 .cornerRadius(15)
 
             VStack(alignment:.leading, spacing: 5.0) {
+                Spacer()
                 Text(item.archiveTitle ?? "")
                     .frame(alignment:.leading)
                     .font(.headline)
                     .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
-                if item.creator != nil {
+                if !(item.creator?.isEmpty ?? false) {
                     Text(item.creator?.joined(separator: ", ") ?? "")
                         .frame(maxWidth: .infinity, minHeight: 20.0, maxHeight: 44.0, alignment: .leading)
                         .truncationMode(.tail)
@@ -50,6 +51,7 @@ struct SearchItemView: View {
                         .foregroundColor(textColor)
                         .multilineTextAlignment(.leading)
                 }
+                Spacer()
 //                Text(item.description ?? "")
 //                    .font(.body)
 //                    .frame(alignment:.leading)
@@ -58,6 +60,7 @@ struct SearchItemView: View {
 
             }
             .frame(maxWidth: .infinity,
+                   maxHeight: 80,
                    alignment: .leading)
         }
 //        .background(Color.droopy)

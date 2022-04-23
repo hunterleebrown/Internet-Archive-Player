@@ -139,7 +139,7 @@ struct Detail: View {
     
     private func titleChange(offset: CGFloat) {
         withAnimation(.linear(duration:1.0)) {
-            navigationTitle = offset > 0 ? self.viewModel.archiveDoc?.archiveTitle ?? "" : ""
+            navigationTitle = offset < 0 ? self.viewModel.archiveDoc?.archiveTitle ?? "" : ""
         }
     }
     
