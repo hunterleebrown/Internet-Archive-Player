@@ -27,21 +27,29 @@ struct SearchItemView: View {
 
                 },
                 placeholder: {
-                    ProgressView()
+                    ProgressView("loading image")
+                        .font(.system(size:9.0))
+                        .foregroundColor(.fairyCream)
+                        .frame(maxWidth: 80,
+                               maxHeight: 80)
+                        .background(Color.fairyRed)
                 })
                 .cornerRadius(15)
 
-            VStack(alignment:.leading) {
+            VStack(alignment:.leading, spacing: 5.0) {
                 Text(item.archiveTitle ?? "")
                     .frame(alignment:.leading)
                     .font(.headline)
                     .foregroundColor(textColor)
                     .multilineTextAlignment(.leading)
-                Text(item.creator?.joined(separator: ", ") ?? "")
-                    .font(.footnote)
-                    .frame(alignment:.leading)
-                    .foregroundColor(textColor)
-                    .multilineTextAlignment(.leading)
+                if item.creator != nil {
+                    Text(item.creator?.joined(separator: ", ") ?? "")
+                        .frame(maxWidth: .infinity, minHeight: 20.0, maxHeight: 44.0, alignment: .leading)
+                        .truncationMode(.tail)
+                        .font(.footnote)
+                        .foregroundColor(textColor)
+                        .multilineTextAlignment(.leading)
+                }
 //                Text(item.description ?? "")
 //                    .font(.body)
 //                    .frame(alignment:.leading)

@@ -92,7 +92,8 @@ struct FileView: View {
                         Text(creator.joined(separator: ", "))
                             .font(.caption2)
                             .foregroundColor(textColor)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(maxWidth: .infinity, maxHeight: 44.0, alignment: .leading)
+                            .truncationMode(.tail)
                             .multilineTextAlignment(.leading)
                     }
                 }
@@ -132,7 +133,10 @@ struct FileView: View {
                         Button(action: {
                             ellipsisAction()
                         }){
+                            HStack {
+                                Image(systemName: PlayerButtonType.list.rawValue)
                             Text("Add to Playlist")
+                            }
                         }
                         .frame(width: 44, height: 44)
                     } label: {

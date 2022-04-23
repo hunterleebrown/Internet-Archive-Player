@@ -26,7 +26,7 @@ struct Playlist: View {
                         FileView(archiveFile,
                                  showImage: true,
                                  showDownloadButton: true,
-                                 backgroundColor: archiveFile == viewModel.playingFile ? .droopy : nil,
+                                 backgroundColor: archiveFile == viewModel.playingFile ? .fairyRed : nil,
                                  textColor: archiveFile == viewModel.playingFile ? .fairyCream : .droopy,
                                  fileViewMode: .playlist)
                         .onTapGesture {

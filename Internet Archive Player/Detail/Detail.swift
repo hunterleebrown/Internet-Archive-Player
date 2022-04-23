@@ -9,6 +9,7 @@ import SwiftUI
 import iaAPI
 import UIKit
 import CachedAsyncImage
+import Combine
 
 struct Detail: View {
     @EnvironmentObject var iaPlayer: Player
@@ -33,9 +34,9 @@ struct Detail: View {
                             content: { image in
                                 image.resizable()
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(minWidth:200, maxWidth: 200,
-                                           minHeight: 200, maxHeight: 200)
-                                    .background(Color.black)                                
+                                    .frame(minWidth:180, maxWidth: 180,
+                                           minHeight: 180, maxHeight: 180)
+                                    .background(Color.black)
                             },
                             placeholder: {
                                 ProgressView()
@@ -53,18 +54,18 @@ struct Detail: View {
                         .onPreferenceChange(ViewOffsetKey.self) { offset in
                             self.titleChange(offset: offset)
                         }
-                    
+
                     if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
                         Text(artist)
                             .font(.subheadline)
                             .multilineTextAlignment(.center)
                     }
-                    
+
                 }
                 .padding(10)
-                
+
                 if let desc = self.viewModel.archiveDoc?.description {
-                    
+
                     VStack() {
                         Text(AttributedString(attString(desc: desc)))
                             .padding(5.0)
@@ -79,7 +80,7 @@ struct Detail: View {
                     .frame(height: self.descriptionExpanded ? nil : 100)
                     .frame(alignment:.leading)
                 }
-                
+
                 HStack() {
                     Spacer()
                     Button(action: {
@@ -94,7 +95,7 @@ struct Detail: View {
                     }
                 }
                 .padding(10)
-    
+
                 LazyVStack(spacing:2.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
                         self.createFileView(file)
@@ -104,6 +105,7 @@ struct Detail: View {
                                 self.iaPlayer.appendPlaylistItem(file)
                                 iaPlayer.playFile(file)
                             }
+                        Divider()
                     }
                 }
             }
@@ -112,6 +114,7 @@ struct Detail: View {
             .navigationTitle(navigationTitle)
             .onAppear() {
                 self.viewModel.getArchiveDoc(identifier: self.identifier)
+                self.viewModel.setSubscribers(iaPlayer)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -122,17 +125,16 @@ struct Detail: View {
                             .tint(.fairyRed)
                     }
                 }
-                
+
+            }
+            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.85), titleColor: .black)
+            .alert("Add all files to Playlist?", isPresented: $playlistAddAlert) {
+                Button("No", role: .cancel) { }
+                Button("Yes") {
+                    viewModel.addAllFilesToPlaylist(player: iaPlayer)
+                }
             }
         }
-        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.85), titleColor: .black)
-        .alert("Add all files to Playlist?", isPresented: $playlistAddAlert) {
-            Button("No", role: .cancel) { }
-            Button("Yes") {
-                viewModel.addAllFilesToPlaylist(player: iaPlayer)
-            }
-        }
-        
     }
     
     private func titleChange(offset: CGFloat) {
@@ -142,7 +144,11 @@ struct Detail: View {
     }
     
     func createFileView(_ archiveFile: ArchiveFile) -> FileView {
-        FileView(archiveFile, showDownloadButton: false, ellipsisAction: {
+        FileView(archiveFile,
+                 showDownloadButton: false,
+                 backgroundColor: self.viewModel.playingFile == archiveFile ? .fairyRed : .white,
+                 textColor: self.viewModel.playingFile == archiveFile ? .fairyCream : .black,
+                 ellipsisAction: {
             iaPlayer.appendPlaylistItem(archiveFile)
         })
     }
@@ -172,7 +178,10 @@ extension Detail {
         let service: PlayerArchiveService
         @Published var archiveDoc: ArchiveMetaData? = nil
         @Published var files = [ArchiveFile]()
-        
+        @Published var playingFile: ArchiveFile?
+
+        private var cancellables = Set<AnyCancellable>()
+
         init() {
             self.service = PlayerArchiveService()
         }
@@ -181,13 +190,10 @@ extension Detail {
             Task { @MainActor in
                 do {
                     let doc = try await self.service.getArchiveAsync(with: identifier)
-                    
-                    withAnimation {
-                        self.archiveDoc = doc.metadata
-                        self.files = doc.non78Audio.sorted{
-                            guard let track1 = $0.track, let track2 = $1.track else { return false}
-                            return track1 < track2
-                        }
+                    self.archiveDoc = doc.metadata
+                    self.files = doc.non78Audio.sorted{
+                        guard let track1 = $0.track, let track2 = $1.track else { return false}
+                        return track1 < track2
                     }
                     
                 } catch {
@@ -200,6 +206,15 @@ extension Detail {
             files.forEach { file in
                 player.appendPlaylistItem(file)
             }
+        }
+
+        public func setSubscribers(_ player: Player) {
+            player.playingFilePublisher
+                .removeDuplicates()
+                .sink { file in
+                    self.playingFile = file
+                }
+                .store(in: &cancellables)
         }
     }
 }
