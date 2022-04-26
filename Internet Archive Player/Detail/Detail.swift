@@ -87,8 +87,8 @@ struct Detail: View {
                         playlistAddAlert = true
                     }) {
                         HStack(spacing: 1.0) {
-                            Text("+")
-                                .foregroundColor(.fairyRed)
+                            Image(systemName: "plus")
+                                .tint(.fairyRed)
                             Image(systemName: PlayerButtonType.list.rawValue)
                                 .tint(.fairyRed)
                         }
@@ -117,16 +117,14 @@ struct Detail: View {
                 self.viewModel.setSubscribers(iaPlayer)
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                HStack {
-                    Button(action: {
-                    }) {
-                        Image(systemName: "heart")
-                            .tint(.fairyRed)
-                    }
+            .navigationBarItems(trailing:
+                                    HStack {
+                Button(action: {
+                }) {
+                    Image(systemName: "heart")
+                        .tint(.fairyRed)
                 }
-
-            }
+            })
             .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.85), titleColor: .black)
             .alert("Add all files to Playlist?", isPresented: $playlistAddAlert) {
                 Button("No", role: .cancel) { }
