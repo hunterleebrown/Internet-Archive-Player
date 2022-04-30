@@ -27,47 +27,56 @@ struct Detail: View {
     var body: some View {
         VStack {
             ScrollView {
-                VStack(alignment: .center, spacing: 5.0) {
-                    if let iconUrl = viewModel.archiveDoc?.iconUrl {
-                        CachedAsyncImage (
-                            url: iconUrl,
-                            content: { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(minWidth:180, maxWidth: 180,
-                                           minHeight: 180, maxHeight: 180)
-                                    .background(Color.black)
-                            },
-                            placeholder: {
-                                ProgressView()
-                            })
-                        .cornerRadius(15)
-                    }
-                    Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
-                        .font(.headline)
-                        .bold()
-                        .multilineTextAlignment(.center)
-                        .background(GeometryReader {
-                            Color.clear.preference(key: ViewOffsetKey.self,
-                                                   value: $0.frame(in: .named("scroll")).origin.y)
-                        })
-                        .onPreferenceChange(ViewOffsetKey.self) { offset in
-                            self.titleChange(offset: offset)
+                VStack(alignment: .leading, spacing: 5.0) {
+                    HStack(alignment: .top, spacing: 5.0) {
+                        if let iconUrl = viewModel.archiveDoc?.iconUrl {
+                            CachedAsyncImage (
+                                url: iconUrl,
+                                content: { image in
+                                    image.resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(minWidth:180, maxWidth: 180,
+                                               minHeight: 180, maxHeight: 180)
+                                        .background(Color.black)
+                                },
+                                placeholder: {
+                                    Color.black
+                                })
+                            .cornerRadius(15)
                         }
+                        VStack(alignment: .leading, spacing: 5.0) {
+                            Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
+                                .font(.headline)
+                                .bold()
+                                .multilineTextAlignment(.leading)
+                                .background(GeometryReader {
+                                    Color.clear.preference(key: ViewOffsetKey.self,
+                                                           value: $0.frame(in: .named("scroll")).origin.y)
+                                })
+                                .onPreferenceChange(ViewOffsetKey.self) { offset in
+                                    self.titleChange(offset: offset)
+                                }
 
-                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
-                        Text(artist)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
+                            if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
+                                Text(artist)
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.center)
+                            }
+                            if let publisher = self.viewModel.archiveDoc?.publisher {
+                                Text(publisher.joined(separator: ", "))
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
                     }
-
                 }
                 .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 if let desc = self.viewModel.archiveDoc?.description {
 
                     VStack() {
-                        Text(AttributedString(attString(desc: desc)))
+                        Text(AttributedString(attString(desc: desc.joined(separator: ", "))))
                             .padding(5.0)
                             .onTapGesture {
                                 withAnimation {
