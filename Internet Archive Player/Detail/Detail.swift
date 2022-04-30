@@ -102,7 +102,6 @@ struct Detail: View {
                             .padding(.leading, 5.0)
                             .padding(.trailing, 5.0)
                             .onTapGesture {
-                                self.iaPlayer.appendPlaylistItem(file)
                                 iaPlayer.playFile(file)
                             }
                         Divider()
@@ -144,8 +143,8 @@ struct Detail: View {
     func createFileView(_ archiveFile: ArchiveFile) -> FileView {
         FileView(archiveFile,
                  showDownloadButton: false,
-                 backgroundColor: self.viewModel.playingFile == archiveFile ? .fairyRed : .white,
-                 textColor: self.viewModel.playingFile == archiveFile ? .fairyCream : .black,
+                 backgroundColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyRed : .white,
+                 textColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyCream : .black,
                  ellipsisAction: {
             iaPlayer.appendPlaylistItem(archiveFile)
         })
@@ -176,7 +175,7 @@ extension Detail {
         let service: PlayerArchiveService
         @Published var archiveDoc: ArchiveMetaData? = nil
         @Published var files = [ArchiveFile]()
-        @Published var playingFile: ArchiveFile?
+        @Published var playingFile: ArchiveFileEntity?
 
         private var cancellables = Set<AnyCancellable>()
 

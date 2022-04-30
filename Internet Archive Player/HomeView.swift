@@ -11,7 +11,7 @@ import iaAPI
 struct HomeView: View {
     @StateObject var iaPlayer = Player()
     @State var showPlaylist = false
-    @State var playingFile: ArchiveFile? = nil
+    @State var playingFile: ArchiveFileEntity? = nil
     @State var identifier = ""
 
     var body: some View {

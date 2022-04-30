@@ -61,6 +61,7 @@ struct SearchView: View {
                                     .padding(.trailing, 5)
                                     .padding(.bottom, 5)
                             }
+                            Divider()
                         }
                     }
                 }
@@ -76,9 +77,6 @@ struct SearchView: View {
                     .opacity(0.3)
                     .aspectRatio(contentMode: .fill)
                     .blur(radius: 05)
-//                LinearGradient(
-//                    colors: [Color.fairyRed, Color.fairyCream],
-//                    startPoint: .top, endPoint: .bottom)
             )
         }
         .navigationViewStyle(StackNavigationViewStyle())
@@ -119,7 +117,7 @@ extension SearchView {
             self.noDataFound = false
             Task { @MainActor in
                 do {
-                    self.items = try await self.service.searchAsync(query: query, format: .mp3).response.docs
+                    self.items = try await self.service.searchAsync(query: query, rows: 100, format: .mp3).response.docs
                     self.isSearching = false
                 } catch let error as ArchiveServiceError {
                     withAnimation(.easeIn(duration: 0.33)) {

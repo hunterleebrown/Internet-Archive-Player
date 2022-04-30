@@ -14,7 +14,7 @@ struct PlayerControls: View {
     @StateObject var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
 
     static var showPlayList = PassthroughSubject<Bool, Never>()
-    static var showPlayingDetails = PassthroughSubject<ArchiveFile, Never>()
+    static var showPlayingDetails = PassthroughSubject<ArchiveFileEntity, Never>()
 
     var body: some View {
         GeometryReader{ g in
@@ -72,7 +72,7 @@ struct PlayerControls: View {
                             .foregroundColor(.fairyCream)
                             .frame(maxWidth: .infinity, alignment:.leading)
                             .multilineTextAlignment(.leading)
-                        Text(viewModel.playingFile?.artist ?? viewModel.playingFile?.creator?.joined(separator: ", ") ?? "")
+                        Text(viewModel.playingFile?.artist ?? viewModel.playingFile?.creator ?? "")
                             .font(.caption2)
                             .foregroundColor(.fairyCream)
                             .frame(maxWidth:. infinity, alignment: .leading)
@@ -132,7 +132,7 @@ extension PlayerControls {
     final class ViewModel: ObservableObject {
         var cancellables = Set<AnyCancellable>()
         @Published var playing: Bool = false
-        @Published var playingFile: ArchiveFile?
+        @Published var playingFile: ArchiveFileEntity?
         @Published var progress: Double = 0.0
         @Published var duration: Double = 0.0
 
