@@ -117,7 +117,7 @@ extension SearchView {
             self.noDataFound = false
             Task { @MainActor in
                 do {
-                    self.items = try await self.service.searchAsync(query: query, rows: 100, format: .mp3).response.docs
+                    self.items = try await self.service.searchAsync(query: query, format: .mp3).response.docs
                     self.isSearching = false
                 } catch let error as ArchiveServiceError {
                     withAnimation(.easeIn(duration: 0.33)) {

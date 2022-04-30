@@ -27,70 +27,92 @@ struct Detail: View {
     var body: some View {
         VStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 5.0) {
-                    HStack(alignment: .top, spacing: 5.0) {
-                        if let iconUrl = viewModel.archiveDoc?.iconUrl {
-                            CachedAsyncImage (
-                                url: iconUrl,
-                                content: { image in
-                                    image.resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(minWidth:180, maxWidth: 180,
-                                               minHeight: 180, maxHeight: 180)
-                                        .background(Color.black)
-                                },
-                                placeholder: {
-                                    Color.black
-                                })
-                            .cornerRadius(15)
-                        }
-                        VStack(alignment: .leading, spacing: 5.0) {
-                            Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
-                                .font(.headline)
-                                .bold()
-                                .multilineTextAlignment(.leading)
-                                .background(GeometryReader {
-                                    Color.clear.preference(key: ViewOffsetKey.self,
-                                                           value: $0.frame(in: .named("scroll")).origin.y)
-                                })
-                                .onPreferenceChange(ViewOffsetKey.self) { offset in
-                                    self.titleChange(offset: offset)
-                                }
+                VStack(alignment: .center, spacing: 5.0) {
 
-                            if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.first {
-                                Text(artist)
-                                    .font(.subheadline)
-                                    .multilineTextAlignment(.center)
-                            }
-                            if let publisher = self.viewModel.archiveDoc?.publisher {
-                                Text(publisher.joined(separator: ", "))
-                                    .font(.subheadline)
-                                    .multilineTextAlignment(.center)
-                            }
+                    if let iconUrl = viewModel.archiveDoc?.iconUrl {
+                        CachedAsyncImage (
+                            url: iconUrl,
+                            content: { image in
+                                image.resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(minWidth:180, maxWidth: 180,
+                                           minHeight: 180, maxHeight: 180)
+                                    .background(Color.black)
+                            },
+                            placeholder: {
+                                Color.black
+                            })
+                        .cornerRadius(15)
+                    }
+
+                    Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .bold()
+                        .multilineTextAlignment(.center)
+                        .background(GeometryReader {
+                            Color.clear.preference(key: ViewOffsetKey.self,
+                                                   value: $0.frame(in: .named("scroll")).origin.y)
+                        })
+                        .onPreferenceChange(ViewOffsetKey.self) { offset in
+                            self.titleChange(offset: offset)
                         }
+
+                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
+                        Text(artist)
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.black)
+
+                    }
+                    if let publisher = self.viewModel.archiveDoc?.publisher {
+                        Text(publisher.joined(separator: ", "))
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.black)
                     }
                 }
                 .padding(10)
-                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Divider()
 
                 if let desc = self.viewModel.archiveDoc?.description {
 
                     VStack() {
                         Text(AttributedString(attString(desc: desc.joined(separator: ", "))))
-                            .padding(5.0)
+                            .padding(10.0)
                             .onTapGesture {
                                 withAnimation {
                                     self.descriptionExpanded.toggle()
                                 }
                             }
+
+                        Button(action: {
+                            withAnimation {
+                                self.descriptionExpanded.toggle()
+                            }
+
+                        }) {
+                            Image(systemName: self.descriptionExpanded ? "rectangle.compress.vertical" : "rectangle.expand.vertical")
+                                .tint(.fairyRed)
+                        }
+                        .frame(alignment: .center)
                     }
                     .padding(10)
-                    .background(Color.white)
+                    .background(Color.fairyCream.cornerRadius(10.0).padding(10))
+                    .frame(minWidth: 0, maxWidth:.infinity)
                     .frame(height: self.descriptionExpanded ? nil : 100)
                     .frame(alignment:.leading)
+
+
                 }
 
+
                 HStack() {
+                    Text("Files")
+                        .font(.subheadline)
+                        .bold()
+
                     Spacer()
                     Button(action: {
                         playlistAddAlert = true
@@ -104,6 +126,8 @@ struct Detail: View {
                     }
                 }
                 .padding(10)
+
+                Divider()
 
                 LazyVStack(spacing:2.0) {
                     ForEach(self.viewModel.files, id: \.self) { file in
@@ -145,15 +169,15 @@ struct Detail: View {
     
     private func titleChange(offset: CGFloat) {
         withAnimation(.linear(duration:1.0)) {
-            navigationTitle = offset < 0 ? self.viewModel.archiveDoc?.archiveTitle ?? "" : ""
+            navigationTitle = offset > 0 ? self.viewModel.archiveDoc?.archiveTitle ?? "" : ""
         }
     }
     
     func createFileView(_ archiveFile: ArchiveFile) -> FileView {
         FileView(archiveFile,
                  showDownloadButton: false,
-                 backgroundColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyRed : .white,
-                 textColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyCream : .black,
+                 backgroundColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyRed : .fairyRedAlpha,
+                 textColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyCream : .white,
                  ellipsisAction: {
             iaPlayer.appendPlaylistItem(archiveFile)
         })
