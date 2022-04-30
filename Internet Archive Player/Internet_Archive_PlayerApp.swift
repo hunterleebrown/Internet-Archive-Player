@@ -9,7 +9,8 @@ import SwiftUI
 
 @main
 struct Internet_Archive_PlayerApp: App {
-//    @StateObject var viewModel = Internet_Archive_PlayerApp.ViewModel()
+    @Environment(\.scenePhase) var scenePhase
+    let persistenceController = PersistenceController.shared
     var body: some Scene {
         WindowGroup {
             HomeView()
@@ -26,6 +27,10 @@ struct Internet_Archive_PlayerApp: App {
 
                     UINavigationBar.appearance().scrollEdgeAppearance = appearance
                 }
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+        }
+        .onChange(of: scenePhase) { _ in
+            persistenceController.save()
         }
     }
 }

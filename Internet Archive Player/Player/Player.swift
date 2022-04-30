@@ -12,6 +12,7 @@ import AVFoundation
 import AVKit
 import UIKit
 import Combine
+import CoreData
 
 class Player: NSObject, ObservableObject {
 
@@ -24,8 +25,8 @@ class Player: NSObject, ObservableObject {
         case backwards = -1
     }
 
-    private var playingFile: ArchiveFile? = nil
-    private var items: [ArchiveFile] = [ArchiveFile]()
+    private var playingFile: ArchiveFileEntity? = nil
+    @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
     private var avPlayer: AVPlayer?
     private var observing = false
     fileprivate var observerContext = 0
@@ -37,8 +38,24 @@ class Player: NSObject, ObservableObject {
     var mediaArtwork : MPMediaItemArtwork?
     var itemSubscritpions: Set<AnyCancellable> = Set<AnyCancellable>()
 
+    private let playlistFetchController: NSFetchedResultsController<ArchiveFileEntity>
+
     override init() {
+        playlistFetchController = NSFetchedResultsController(fetchRequest: ArchiveFileEntity.playlistFetchRequest,
+                                                             managedObjectContext: PersistenceController.shared.container.viewContext,
+                                                             sectionNameKeyPath: nil, cacheName: nil)
+
         super.init()
+
+        playlistFetchController.delegate = self
+
+        do {
+          try playlistFetchController.performFetch()
+          items = playlistFetchController.fetchedObjects ?? []
+        } catch {
+          print("failed to fetch items!")
+        }
+
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
         self.setUpRemoteCommandCenterEvents()
     }
@@ -48,16 +65,16 @@ class Player: NSObject, ObservableObject {
         playingSubject.eraseToAnyPublisher()
     }
 
-    private let itemsSubject = PassthroughSubject<[ArchiveFile], Never>()
-    public var itemsPublisher: AnyPublisher<[ArchiveFile], Never> {
+    private let itemsSubject = PassthroughSubject<[ArchiveFileEntity], Never>()
+    public var itemsPublisher: AnyPublisher<[ArchiveFileEntity], Never> {
         itemsSubject.eraseToAnyPublisher()
     }
     public func sendItemsPlaylist() {
         itemsSubject.send(self.items)
     }
 
-    private let playingFileSubject = PassthroughSubject<ArchiveFile, Never>()
-    public var playingFilePublisher: AnyPublisher<ArchiveFile, Never> {
+    private let playingFileSubject = PassthroughSubject<ArchiveFileEntity, Never>()
+    public var playingFilePublisher: AnyPublisher<ArchiveFileEntity, Never> {
         playingFileSubject.eraseToAnyPublisher()
     }
     public func sendPlayingFileForPlaylist() {
@@ -94,31 +111,38 @@ class Player: NSObject, ObservableObject {
     }
 
     public func appendPlaylistItem(_ item: ArchiveFile){
-        if !self.items.contains(item) {
-            DispatchQueue.main.async {
-                self.items.append(item)
-            }
+        let entity = item.archiveFileEntity()
+        if !self.items.contains(entity) {
             self.updatePlaylistSubscribers()
+            PersistenceController.shared.save()
         }
     }
 
-    public func getPlaylist() -> [ArchiveFile] {
+    public func getPlaylist() -> [ArchiveFileEntity] {
         return self.items
     }
 
     public func clearPlaylist() {
-        DispatchQueue.main.async {
-            self.items.removeAll()
+        for item in items {
+            PersistenceController.shared.delete(item, false)
         }
+        PersistenceController.shared.save()
         self.updatePlaylistSubscribers()
     }
 
     public func removePlaylistItem(at offsets: IndexSet){
-        DispatchQueue.main.async {
-            self.items.remove(atOffsets: offsets)
-        }
+        self.removePlayListEntities(at: offsets)
         self.updatePlaylistSubscribers()
     }
+
+    private func removePlayListEntities(at offsets: IndexSet) {
+        for index in offsets {
+            let archiveFileEntity = items[index]
+            PersistenceController.shared.delete(archiveFileEntity, false)
+        }
+        PersistenceController.shared.save()
+    }
+
 
     public func rearrangePlaylist(fromOffsets source: IndexSet, toOffset destination: Int) {
         self.items.move(fromOffsets: source, toOffset: destination)
@@ -144,13 +168,20 @@ class Player: NSObject, ObservableObject {
     }
 
     public func playFile(_ archiveFile: ArchiveFile){
-        self.fileTitle = archiveFile.title ?? archiveFile.name
-        self.fileIdentifierTitle = archiveFile.archiveTitle
-        self.fileIdentifier = archiveFile.identifier
-        self.playingFile = archiveFile
-        self.playingFileSubject.send(archiveFile)
-        self.loadAndPlay(archiveFile.url!)
+        let entity = archiveFile.archiveFileEntity()
+        PersistenceController.shared.save()
+        playFile(entity)
     }
+
+    public func playFile(_ archiveFileEntity: ArchiveFileEntity){
+        self.fileTitle = archiveFileEntity.title ?? archiveFileEntity.name
+        self.fileIdentifierTitle = archiveFileEntity.archiveTitle
+        self.fileIdentifier = archiveFileEntity.identifier
+        self.playingFile = archiveFileEntity
+        self.playingFileSubject.send(archiveFileEntity)
+        self.loadAndPlay(archiveFileEntity.url!)
+    }
+
 
     public func advancePlayer(_ advanceDirection: AdvanceDirection) {
         if let playingFile = self.playingFile, let index = items.firstIndex(of: playingFile) {
@@ -354,4 +385,14 @@ class Player: NSObject, ObservableObject {
         }
     }
 
+}
+
+extension Player: NSFetchedResultsControllerDelegate {
+  func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    guard let playlistItems = controller.fetchedObjects as? [ArchiveFileEntity]
+      else { return }
+      DispatchQueue.main.async {
+          self.items = playlistItems
+      }
+  }
 }

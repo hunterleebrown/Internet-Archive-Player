@@ -9,14 +9,8 @@ import Foundation
 import SwiftUI
 import iaAPI
 
-enum FileViewMode {
-    case detail
-    case playlist
-}
-
-
-struct FileView: View {
-    var archiveFile: ArchiveFile
+struct EntityFileView: View {
+    var archiveFile: ArchiveFileEntity
     var textColor = Color.white
     var backgroundColor: Color? = Color.gray
     var showImage: Bool = false
@@ -24,7 +18,7 @@ struct FileView: View {
     var fileViewMode: FileViewMode = .detail
     var ellipsisAction: (()->())? = nil
 
-    init(_ archiveFile: ArchiveFile,
+    init(_ archiveFile: ArchiveFileEntity,
          showImage: Bool = false,
          showDownloadButton: Bool = true,
          backgroundColor: Color? = Color.fairyRedAlpha,
@@ -64,9 +58,7 @@ struct FileView: View {
 
             Spacer()
             VStack() {
-                let title = archiveFile.displayTitle
-
-                Text(title)
+                Text(archiveFile.displayTitle)
                     .font(.caption)
                     .foregroundColor(textColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -88,7 +80,7 @@ struct FileView: View {
                     }
 
                     if let creator = archiveFile.creator {
-                        Text(creator.joined(separator: ", "))
+                        Text(creator)
                             .font(.caption2)
                             .foregroundColor(textColor)
                             .frame(maxWidth: .infinity, maxHeight: 44.0, alignment: .leading)
@@ -104,7 +96,7 @@ struct FileView: View {
             Spacer()
             HStack() {
                 VStack(alignment:.leading) {
-                    Text(archiveFile.format?.rawValue ?? "")
+                    Text(archiveFile.format ?? "")
                         .font(.caption2)
                         .foregroundColor(textColor)
                     Text("\(archiveFile.calculatedSize ?? "\"\"") mb")
@@ -152,39 +144,5 @@ struct FileView: View {
         }
         .background(backgroundColor ?? nil)
         .cornerRadius(5.0)
-    }
-    
-    private func fileTitle(_ iaFile: ArchiveFile?) -> String {
-        return iaFile?.title ?? iaFile?.name ?? ""
-    }
-    
-}
-
-extension ArchiveFile {
-    public var displayLength: String? {
-
-        if let l = length {
-            return IAStringUtils.timeFormatter(timeString: l)
-        }
-        return nil
-    }
-
-    public var calculatedSize: String? {
-
-        if let s = size {
-            if let rawSize = Int(s) {
-                return IAStringUtils.sizeString(size: rawSize)
-            }
-        }
-        return nil
-    }
-
-    public var iconUrl: URL {
-        let itemImageUrl = "https://archive.org/services/img/\(identifier!)"
-        return URL(string: itemImageUrl)!
-    }
-
-    public var displayTitle: String {
-        return title ?? name ?? ""
     }
 }

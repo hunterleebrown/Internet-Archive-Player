@@ -22,12 +22,12 @@ struct Playlist: View {
         NavigationView {
             VStack(alignment:.leading, spacing: 0){
                 List{
-                    ForEach(viewModel.items, id: \.self) { archiveFile in
-                        FileView(archiveFile,
+                    ForEach(iaPlayer.items, id: \.self) { archiveFile in
+                        EntityFileView(archiveFile,
                                  showImage: true,
                                  showDownloadButton: true,
-                                 backgroundColor: archiveFile == viewModel.playingFile ? .fairyRed : nil,
-                                 textColor: archiveFile == viewModel.playingFile ? .fairyCream : .droopy,
+                                 backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRed : nil,
+                                 textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .droopy,
                                  fileViewMode: .playlist)
                         .onTapGesture {
                             iaPlayer.playFile(archiveFile)
@@ -69,7 +69,6 @@ struct Playlist: View {
                     .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
                         Button("No", role: .cancel) { }
                         Button("Yes") {
-                            viewModel.items.removeAll()
                             iaPlayer.clearPlaylist()
                         }
                     }
@@ -87,19 +86,16 @@ struct Playlist: View {
 
     private func remove(at offsets: IndexSet) {
         self.iaPlayer.removePlaylistItem(at: offsets)
-        viewModel.items.remove(atOffsets: offsets)
     }
 
     private func move(fromOffsets source: IndexSet, toOffset destination: Int) {
-        self.viewModel.items.move(fromOffsets: source, toOffset: destination)
         self.iaPlayer.rearrangePlaylist(fromOffsets: source, toOffset: destination)
     }
 }
 
 extension Playlist {
     final class ViewModel: ObservableObject {
-        @Published var playingFile: ArchiveFile? = nil
-        @Published var items: [ArchiveFile] = []
+        @Published var playingFile: ArchiveFileEntity? = nil
 
         var cancellables = Set<AnyCancellable>()
 
@@ -107,12 +103,6 @@ extension Playlist {
             iaPlayer.playingFilePublisher
                 .sink { file in
                     self.playingFile = file
-                }
-                .store(in: &cancellables)
-
-            iaPlayer.itemsPublisher
-                .sink { files in
-                    self.items = files
                 }
                 .store(in: &cancellables)
         }
