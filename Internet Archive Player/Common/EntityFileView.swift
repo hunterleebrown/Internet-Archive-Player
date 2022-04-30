@@ -50,7 +50,9 @@ struct EntityFileView: View {
 
                     },
                     placeholder: {
-                        ProgressView()
+                        Color(.black)
+                            .frame(maxWidth: 44,
+                                   maxHeight: 44)
                     })
                     .cornerRadius(5)
                     .padding(5)
@@ -59,6 +61,7 @@ struct EntityFileView: View {
             Spacer()
             VStack() {
                 Text(archiveFile.displayTitle)
+                    .bold()
                     .font(.caption)
                     .foregroundColor(textColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -83,8 +86,7 @@ struct EntityFileView: View {
                         Text(creator)
                             .font(.caption2)
                             .foregroundColor(textColor)
-                            .frame(maxWidth: .infinity, maxHeight: 44.0, alignment: .leading)
-                            .truncationMode(.tail)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
                     }
                 }

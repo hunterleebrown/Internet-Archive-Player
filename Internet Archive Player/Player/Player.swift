@@ -298,12 +298,33 @@ class Player: NSObject, ObservableObject {
 
     private func setPlayingInfo(playing:Bool) {
 
-        if let identifier = self.playingFile?.identifier {
 
-            if playing {
-                UIApplication.shared.beginReceivingRemoteControlEvents()
-            }
-            
+        if playing {
+            UIApplication.shared.beginReceivingRemoteControlEvents()
+        }
+
+        let playBackRate = playing ? 1.0 : 0.0
+
+
+        var songInfo : [String : AnyObject] = [
+            MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
+            MPMediaItemPropertyAlbumTitle: self.fileIdentifierTitle! as AnyObject,
+            MPMediaItemPropertyPlaybackDuration : NSNumber(value: CMTimeGetSeconds((self.avPlayer?.currentItem?.duration)!) as Double),
+            MPNowPlayingInfoPropertyPlaybackRate: playBackRate as AnyObject,
+        ]
+
+        songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
+        songInfo[MPMediaItemPropertyArtist] = self.playingFile?.artist as AnyObject
+//        if let image = await getImage() {
+//            songInfo[MPMediaItemPropertyArtwork] = image
+//        }
+
+
+
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
+
+//        if let identifier = self.playingFile?.identifier {
+
 
 //            imageView.af.setImage(
 //                withURL: url!,
@@ -348,9 +369,18 @@ class Player: NSObject, ObservableObject {
 //                        break
 //                    }
 //                }
-        }
+//        }
     }
 
+    private func getImage() async -> UIImage? {
+
+        if let iconUrl = self.playingFile?.iconUrl {
+            async let (data, _) = try! await URLSession.shared.data(from: iconUrl)
+            return await UIImage(data: data)
+        }
+
+        return nil
+    }
 
 
     private func setUpRemoteCommandCenterEvents() {

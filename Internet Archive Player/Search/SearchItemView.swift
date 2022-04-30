@@ -14,57 +14,72 @@ struct SearchItemView: View {
     var item: ArchiveMetaData
     var textColor: Color = .droopy
     var body: some View {
-        HStack(alignment:.center, spacing: 10.0) {
+        HStack(alignment:.top, spacing: 5.0) {
 
-            CachedAsyncImage (
+            CachedAsyncImage(
                 url: item.iconUrl,
                 content: { image in
                     image.resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: 80,
-                               maxHeight: 80)
+                        .frame(maxWidth: 44,
+                               maxHeight: 44)
                         .background(Color.black)
 
                 },
                 placeholder: {
-                    ProgressView("loading image")
-                        .font(.system(size:9.0))
-                        .foregroundColor(.fairyCream)
-                        .frame(maxWidth: 80,
-                               maxHeight: 80)
-                        .background(Color.fairyRed)
+                    Color(.black)
+                        .frame(maxWidth: 44,
+                               maxHeight: 44)
                 })
-                .cornerRadius(15)
+            .cornerRadius(5)
+            .frame(width: 44, height: 44, alignment: .leading)
 
-            VStack(alignment:.leading, spacing: 5.0) {
-                Spacer()
+            Image(systemName: item.mediatype == .audio ||  item.mediatype == .etree ? "hifispeaker" : "questionmark")
+                .frame(width: 22.0, height: 22.0, alignment: .center)
+                .tint(.black)
+
+            VStack(alignment:.leading, spacing: 2.0) {
                 Text(item.archiveTitle ?? "")
-                    .frame(alignment:.leading)
-                    .font(.headline)
+                    .bold()
+                    .font(.caption)
                     .foregroundColor(textColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .multilineTextAlignment(.leading)
-                if !(item.creator?.isEmpty ?? false) {
-                    Text(item.creator?.joined(separator: ", ") ?? "")
-                        .frame(maxWidth: .infinity, minHeight: 20.0, maxHeight: 44.0, alignment: .leading)
-                        .truncationMode(.tail)
-                        .font(.footnote)
-                        .foregroundColor(textColor)
-                        .multilineTextAlignment(.leading)
-                }
-                Spacer()
-//                Text(item.description ?? "")
-//                    .font(.body)
-//                    .frame(alignment:.leading)
-//                    .foregroundColor(textColor)
-//                    .multilineTextAlignment(.leading)
 
+                if let publisher = item.publisher, !publisher.isEmpty {
+                    HStack(alignment: .top, spacing: 5.0) {
+                        Text("Publisher: ")
+                            .font(.caption2)
+                            .foregroundColor(textColor)
+                            .bold()
+                        Text(publisher.joined(separator: ", "))
+                            .font(.caption2)
+                            .foregroundColor(textColor)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+
+                if !(item.creator?.isEmpty ?? false) {
+                    HStack(alignment: .top, spacing: 5.0) {
+//                        Text("Creator: ")
+//                            .font(.caption2)
+//                            .foregroundColor(textColor)
+//                            .bold()
+
+                        Text(item.creator?.joined(separator: ", ") ?? "")
+                            .font(.caption2)
+                            .foregroundColor(textColor)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
             }
             .frame(maxWidth: .infinity,
-                   maxHeight: 80,
                    alignment: .leading)
+            .padding(.trailing, 10.0)
         }
 //        .background(Color.droopy)
-        .frame(maxWidth: .infinity,
-               minHeight: 90)
+        .frame(maxWidth: .infinity)
     }
 }
