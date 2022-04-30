@@ -8,7 +8,6 @@
 import SwiftUI
 import iaAPI
 import UIKit
-import CachedAsyncImage
 import Combine
 
 struct Detail: View {
@@ -30,7 +29,7 @@ struct Detail: View {
                 VStack(alignment: .center, spacing: 5.0) {
 
                     if let iconUrl = viewModel.archiveDoc?.iconUrl {
-                        CachedAsyncImage (
+                        AsyncImage (
                             url: iconUrl,
                             content: { image in
                                 image.resizable()

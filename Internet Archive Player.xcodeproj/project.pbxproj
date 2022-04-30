@@ -36,7 +36,6 @@
 		5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */; };
 		5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED077279B8BA000FB2E6D /* HomeView.swift */; };
 		CE16141B279E9EE900ED0055 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16141A279E9EE900ED0055 /* Detail.swift */; };
-		CE1ACD4F2812E77900EF968A /* CachedAsyncImage in Frameworks */ = {isa = PBXBuildFile; productRef = CE1ACD4E2812E77900EF968A /* CachedAsyncImage */; };
 		CE1ACD522812FA8B00EF968A /* PlayerArchiveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1ACD512812FA8B00EF968A /* PlayerArchiveService.swift */; };
 		CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF72C9927B5D72600B8AF15 /* FileView.swift */; };
 /* End PBXBuildFile section */
@@ -102,7 +101,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A305F522807BF5E00735FAA /* iaAPI in Frameworks */,
-				CE1ACD4F2812E77900EF968A /* CachedAsyncImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,7 +299,6 @@
 			name = "Internet Archive Player";
 			packageProductDependencies = (
 				5A305F512807BF5E00735FAA /* iaAPI */,
-				CE1ACD4E2812E77900EF968A /* CachedAsyncImage */,
 			);
 			productName = "Internet Archive Player";
 			productReference = 5ADED035279B56EE00FB2E6D /* ia-player.app */;
@@ -377,7 +374,6 @@
 			mainGroup = 5ADED02C279B56EE00FB2E6D;
 			packageReferences = (
 				5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */,
-				CE1ACD4D2812E77900EF968A /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */,
 			);
 			productRefGroup = 5ADED036279B56EE00FB2E6D /* Products */;
 			projectDirPath = "";
@@ -787,14 +783,6 @@
 				minimumVersion = 2.1.0;
 			};
 		};
-		CE1ACD4D2812E77900EF968A /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/lorenzofiamingo/swiftui-cached-async-image.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -802,11 +790,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */;
 			productName = iaAPI;
-		};
-		CE1ACD4E2812E77900EF968A /* CachedAsyncImage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CE1ACD4D2812E77900EF968A /* XCRemoteSwiftPackageReference "swiftui-cached-async-image" */;
-			productName = CachedAsyncImage;
 		};
 /* End XCSwiftPackageProductDependency section */
 
