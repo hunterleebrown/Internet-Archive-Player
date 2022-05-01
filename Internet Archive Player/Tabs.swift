@@ -20,6 +20,11 @@ struct Tabs: View {
                 .tabItem {
                     Label("Favorites", systemImage: "heart")
                 }
+            Playlist()
+                .tabItem {
+                    Label("Playlist", systemImage: "list.bullet.rectangle.portrait")
+                }
+
         }
         .tint(.fairyCream)
         .tabStyle()

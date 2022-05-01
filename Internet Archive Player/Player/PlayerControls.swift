@@ -13,7 +13,6 @@ struct PlayerControls: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
 
-    static var showPlayList = PassthroughSubject<Bool, Never>()
     static var showPlayingDetails = PassthroughSubject<ArchiveFileEntity, Never>()
 
     var body: some View {
@@ -79,6 +78,9 @@ struct PlayerControls: View {
                             .multilineTextAlignment(.leading)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+
+                    AirPlayButton()
+                        .frame(width: 33.0, height: 33.0)
                 }
                 .frame(height: 44.0)
                 .padding(.leading, 5.0)
@@ -86,9 +88,6 @@ struct PlayerControls: View {
 
                 HStack {
                     
-                    PlayerButton(.list, CGSize(width: 20, height: 25), {
-                        PlayerControls.showPlayList.send(true)
-                    })
                     Spacer()
                     PlayerButton(.backwards) {
                         iaPlayer.advancePlayer(.backwards)
@@ -102,8 +101,7 @@ struct PlayerControls: View {
                         iaPlayer.advancePlayer(.forwards)
                     }
                     Spacer()
-                    AirPlayButton()
-                        .frame(width: 33.0, height: 33.0)
+
                 }
                 .tint(.fairyCream)
                 .padding(.leading)

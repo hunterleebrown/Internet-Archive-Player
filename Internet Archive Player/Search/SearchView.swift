@@ -20,7 +20,7 @@ struct SearchView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing:0) {
+            VStack(spacing:10) {
                 HStack(spacing: 5.0) {
                     TextField("Search The Internet Archive",
                               text: $viewModel.searchText,
@@ -35,8 +35,7 @@ struct SearchView: View {
                     }
                 }
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.leading, 5)
-                .padding(.trailing, 5)
+                .padding(5)
 
                 if viewModel.noDataFound {
                     VStack(spacing:0) {
@@ -49,7 +48,6 @@ struct SearchView: View {
                     }
                     .padding(5.0)
                     .transition(.move(edge: .leading))
-
                 }
 
                 ScrollView {
@@ -69,8 +67,9 @@ struct SearchView: View {
                 .padding(0)
             }
             .frame(alignment: .leading)
-            .navigationTitle("")
-            .navigationBarHidden(true)
+            .navigationTitle("Search")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .black)
             .background(
                 Image("petabox")
                     .resizable()

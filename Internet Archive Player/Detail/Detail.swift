@@ -18,9 +18,11 @@ struct Detail: View {
     @State private var titleScrollOffset: CGFloat = .zero
     @State private var playlistAddAlert = false
     @State private var navigationTitle = ""
+    @State private var isPresented = false
     
-    init(_ identifier: String) {
+    init(_ identifier: String, isPresented: Bool = false) {
         self.identifier = identifier
+        self.isPresented = isPresented
     }
     
     var body: some View {
@@ -77,32 +79,8 @@ struct Detail: View {
 
                 if let desc = self.viewModel.archiveDoc?.description {
 
-                    VStack() {
-                        Text(AttributedString(attString(desc: desc.joined(separator: ", "))))
-                            .padding(10.0)
-                            .onTapGesture {
-                                withAnimation {
-                                    self.descriptionExpanded.toggle()
-                                }
-                            }
-
-                        Button(action: {
-                            withAnimation {
-                                self.descriptionExpanded.toggle()
-                            }
-
-                        }) {
-                            Image(systemName: self.descriptionExpanded ? "rectangle.compress.vertical" : "rectangle.expand.vertical")
-                                .tint(.fairyRed)
-                        }
-                        .frame(alignment: .center)
-                    }
-                    .padding(10)
-                    .background(Color.fairyCream.cornerRadius(10.0).padding(10))
-                    .frame(minWidth: 0, maxWidth:.infinity)
-                    .frame(height: self.descriptionExpanded ? nil : 100)
-                    .frame(alignment:.leading)
-
+                    Text(AttributedString(attString(desc: desc.joined(separator: ", "))))
+                        .padding(10.0)
 
                 }
 
@@ -149,14 +127,13 @@ struct Detail: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing:
-                                    HStack {
-                Button(action: {
-                }) {
-                    Image(systemName: "heart")
-                        .tint(.fairyRed)
-                }
-            })
-            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.85), titleColor: .black)
+                                    Button(action: {
+            }) {
+                Image(systemName: "heart")
+                    .tint(.fairyRed)
+            }
+            )
+            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .black)
             .alert("Add all files to Playlist?", isPresented: $playlistAddAlert) {
                 Button("No", role: .cancel) { }
                 Button("Yes") {
@@ -164,6 +141,13 @@ struct Detail: View {
                 }
             }
         }
+        .background(
+            Image("petabox")
+                .resizable()
+                .opacity(0.3)
+                .aspectRatio(contentMode: .fill)
+                .blur(radius: 05)
+            )
     }
     
     private func titleChange(offset: CGFloat) {

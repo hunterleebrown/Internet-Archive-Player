@@ -36,7 +36,6 @@ struct Playlist: View {
                         .padding(0)
                         .listRowBackground(Color.white)
                         .tint(.droopy)
-                        .tint(.droopy)
                     }
                     .onDelete(perform: self.remove)
                     .onMove(perform: self.move)
@@ -48,15 +47,13 @@ struct Playlist: View {
             }
             .padding(10)
             .modifier(BackgroundColorModifier(backgroundColor: .white))
-            .navigationTitle("Playlist")
-            .navigationBarColor(backgroundColor: .white, titleColor: IAColors.droopy)
             .onAppear() {
                 viewModel.setUpSubscribers(iaPlayer)
                 iaPlayer.sendPlayingFileForPlaylist()
                 iaPlayer.sendItemsPlaylist()
             }
             .toolbar {
-                HStack {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     EditButton()
                         .tint(.droopy)
 
@@ -72,15 +69,11 @@ struct Playlist: View {
                             iaPlayer.clearPlaylist()
                         }
                     }
-
-                    Button( action: {
-                        PlayerControls.showPlayList.send(false)
-                    }){
-                        Image(systemName: "xmark")
-                            .foregroundColor(.droopy)
-                    }
                 }
             }
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Playlist")
+            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .black)
         }
     }
 

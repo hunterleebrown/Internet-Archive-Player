@@ -10,7 +10,6 @@ import iaAPI
 
 struct HomeView: View {
     @StateObject var iaPlayer = Player()
-    @State var showPlaylist = false
     @State var playingFile: ArchiveFileEntity? = nil
     @State var identifier = ""
 
@@ -20,25 +19,16 @@ struct HomeView: View {
             PlayerControls()
                 .frame(height: 130, alignment: .bottom)
         }
-        .sheet(isPresented: $showPlaylist, content: {
-            Playlist()
-        })
         .sheet(item: $playingFile, content: { file in
-            Detail(file.identifier!)
+            Detail(file.identifier!, isPresented: true)
         })
         .ignoresSafeArea(.keyboard)
         .environmentObject(iaPlayer)
-        .onReceive(PlayerControls.showPlayList) { shouldShow in
-            withAnimation {
-                self.showPlaylist = shouldShow
-            }
-        }
         .onReceive(PlayerControls.showPlayingDetails) { file in
             withAnimation {
                 playingFile = file
             }
         }
-
     }
 }
 

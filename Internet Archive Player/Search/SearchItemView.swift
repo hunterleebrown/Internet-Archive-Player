@@ -61,12 +61,7 @@ struct SearchItemView: View {
 
                 if !(item.creator?.isEmpty ?? false) {
                     HStack(alignment: .top, spacing: 5.0) {
-//                        Text("Creator: ")
-//                            .font(.caption2)
-//                            .foregroundColor(textColor)
-//                            .bold()
-
-                        Text(item.creator?.joined(separator: ", ") ?? "")
+                        Text(getCreators())
                             .font(.caption2)
                             .foregroundColor(textColor)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -78,7 +73,18 @@ struct SearchItemView: View {
                    alignment: .leading)
             .padding(.trailing, 10.0)
         }
-//        .background(Color.droopy)
         .frame(maxWidth: .infinity)
+    }
+
+    private func getCreators() -> String {
+        if let creators = item.creator {
+            if creators.count > 1 {
+                return item.creator?[0...1].joined(separator: ", ") ?? ""
+            } else {
+                return item.creator?.first ?? ""
+            }
+        }
+
+        return ""
     }
 }

@@ -73,22 +73,6 @@ struct EntityFileView: View {
                         .foregroundColor(textColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .multilineTextAlignment(.leading)
-
-                    if let artist = archiveFile.artist {
-                        Text(artist)
-                            .font(.caption2)
-                            .foregroundColor(textColor)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    }
-
-                    if let creator = archiveFile.creator {
-                        Text(creator)
-                            .font(.caption2)
-                            .foregroundColor(textColor)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    }
                 }
 
 
@@ -121,14 +105,13 @@ struct EntityFileView: View {
                     .frame(width: 44, height: 44)
                 }
 
-                if let ellipsisAction = ellipsisAction {
                     Menu {
                         Button(action: {
-                            ellipsisAction()
+                            PlayerControls.showPlayingDetails.send(archiveFile)
                         }){
                             HStack {
-                                Image(systemName: PlayerButtonType.list.rawValue)
-                            Text("Add to Playlist")
+                                Image(systemName: "info.circle")
+                            Text("Archive Details")
                             }
                         }
                         .frame(width: 44, height: 44)
@@ -139,7 +122,6 @@ struct EntityFileView: View {
                             .frame(width: 44, height: 44)
                     }
                     .highPriorityGesture(TapGesture())
-                }
             }
             .tint(textColor)
             .padding(5.0)
