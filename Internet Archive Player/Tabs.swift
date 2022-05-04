@@ -26,7 +26,7 @@ struct Tabs: View {
                 }
 
         }
-        .tint(.fairyCream)
+        .accentColor(.fairyCream)
         .tabStyle()
         .modifier(BackgroundColorModifier(backgroundColor: .droopy))
     }

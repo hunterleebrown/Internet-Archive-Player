@@ -59,7 +59,7 @@ struct EntityFileView: View {
             }
 
             Spacer()
-            VStack() {
+            VStack(alignment: .leading, spacing: 0) {
                 Text(archiveFile.displayTitle)
                     .bold()
                     .font(.caption)
@@ -75,53 +75,52 @@ struct EntityFileView: View {
                         .multilineTextAlignment(.leading)
                 }
 
-
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(5.0)
-            Spacer()
-            HStack() {
-                VStack(alignment:.leading) {
+                HStack(alignment: .top, spacing: 5) {
                     Text(archiveFile.format ?? "")
                         .font(.caption2)
                         .foregroundColor(textColor)
-                    Text("\(archiveFile.calculatedSize ?? "\"\"") mb")
+                        .bold()
+                    Text("· \(archiveFile.calculatedSize ?? "\"\"") mb")
                         .font(.caption2)
                         .foregroundColor(textColor)
-                    Text(archiveFile.displayLength ?? "")
+                        .bold()
+                    Text("· \(archiveFile.displayLength ?? "")")
                         .font(.caption2)
                         .foregroundColor(textColor)
+                        .bold()
                 }
 
-                if (showDownloadButton) {
+            }
+            .padding(5.0)
+            Spacer()
+            HStack() {
+                Menu {
+                    if (showDownloadButton) {
 
-                    Button(action: {
-                    }) {
-                        Image(systemName: "icloud.and.arrow.down")
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 44, height: 44)
-                            .foregroundColor(textColor)
-                    }
-                    .frame(width: 44, height: 44)
-                }
-
-                    Menu {
                         Button(action: {
-                            PlayerControls.showPlayingDetails.send(archiveFile)
-                        }){
-                            HStack {
-                                Image(systemName: "info.circle")
-                            Text("Archive Details")
-                            }
+                        }) {
+                            Image(systemName: "icloud.and.arrow.down")
+                                .aspectRatio(contentMode: .fill)
+                                .foregroundColor(textColor)
+                            Text("Download")
                         }
                         .frame(width: 44, height: 44)
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .foregroundColor(textColor)
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 44, height: 44)
                     }
-                    .highPriorityGesture(TapGesture())
+
+                    Button(action: {
+                        PlayerControls.showPlayingDetails.send(archiveFile)
+                    }){
+                        HStack {
+                            Image(systemName: "info.circle")
+                            Text("Archive Details")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundColor(textColor)
+                        .aspectRatio(contentMode: .fill)
+                }
+                .highPriorityGesture(TapGesture())
             }
             .tint(textColor)
             .padding(5.0)

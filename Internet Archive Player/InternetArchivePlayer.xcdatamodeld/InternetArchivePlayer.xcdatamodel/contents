@@ -13,8 +13,15 @@
         <attribute name="title" optional="YES" attributeType="String"/>
         <attribute name="track" optional="YES" attributeType="String"/>
         <attribute name="url" optional="YES" attributeType="URI"/>
+        <relationship name="playlist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PlaylistEntity" inverseName="files" inverseEntity="PlaylistEntity"/>
+    </entity>
+    <entity name="PlaylistEntity" representedClassName="PlaylistEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="files" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="ArchiveFileEntity" inverseName="playlist" inverseEntity="ArchiveFileEntity"/>
     </entity>
     <elements>
-        <element name="ArchiveFileEntity" positionX="-63" positionY="-18" width="128" height="209"/>
+        <element name="ArchiveFileEntity" positionX="-63" positionY="-18" width="128" height="224"/>
+        <element name="PlaylistEntity" positionX="-63" positionY="72" width="128" height="74"/>
     </elements>
 </model>

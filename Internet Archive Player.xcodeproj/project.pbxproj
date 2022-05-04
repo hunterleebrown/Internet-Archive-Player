@@ -18,6 +18,7 @@
 		5AC10D5D281C98B200119C4E /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC10D5C281C98B200119C4E /* Persistence.swift */; };
 		5AC5B2B2281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5B2B1281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift */; };
 		5AC5B2B4281CA4B000CDE937 /* EntityFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5B2B3281CA4B000CDE937 /* EntityFileView.swift */; };
+		5AC5DBA4281F7C36004D64DB /* PlaylistEntity+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */; };
 		5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC51279CCB7000495070 /* PlayerControls.swift */; };
 		5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC53279CCED100495070 /* PlayerButton.swift */; };
 		5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC55279CDE2100495070 /* AirPlayButton.swift */; };
@@ -70,6 +71,7 @@
 		5AC10D5E281C98FC00119C4E /* InternetArchivePlayer 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "InternetArchivePlayer 2.xcdatamodel"; sourceTree = "<group>"; };
 		5AC5B2B1281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveFile+ArchiveFileEntity.swift"; sourceTree = "<group>"; };
 		5AC5B2B3281CA4B000CDE937 /* EntityFileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EntityFileView.swift; sourceTree = "<group>"; };
+		5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlaylistEntity+Extension.swift"; sourceTree = "<group>"; };
 		5AD6BC51279CCB7000495070 /* PlayerControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerControls.swift; sourceTree = "<group>"; };
 		5AD6BC53279CCED100495070 /* PlayerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButton.swift; sourceTree = "<group>"; };
 		5AD6BC55279CDE2100495070 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 			isa = PBXGroup;
 			children = (
 				5AC5B2B1281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift */,
+				5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */,
 			);
 			path = "Model Extensions";
 			sourceTree = "<group>";
@@ -418,6 +421,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5AC5DBA4281F7C36004D64DB /* PlaylistEntity+Extension.swift in Sources */,
 				5AD6BC58279CF31400495070 /* Playlist.swift in Sources */,
 				5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */,
 				5A4151BD27B3645E007A3623 /* Inject.swift in Sources */,

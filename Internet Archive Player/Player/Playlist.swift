@@ -20,37 +20,28 @@ struct Playlist: View {
 
     var body: some View {
         NavigationView {
-            VStack(alignment:.leading, spacing: 0){
-                List{
-                    ForEach(iaPlayer.items, id: \.self) { archiveFile in
-                        EntityFileView(archiveFile,
-                                 showImage: true,
-                                 showDownloadButton: true,
-                                 backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRed : nil,
-                                 textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .droopy,
-                                 fileViewMode: .playlist)
-                        .onTapGesture {
-                            iaPlayer.playFile(archiveFile)
-                        }
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        .padding(0)
-                        .listRowBackground(Color.white)
-                        .tint(.droopy)
+            List{
+                ForEach(iaPlayer.items, id: \.self) { archiveFile in
+                    EntityFileView(archiveFile,
+                                   showImage: true,
+                                   showDownloadButton: true,
+                                   backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRed : nil,
+                                   textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .black,
+                                   fileViewMode: .playlist)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .onTapGesture {
+                        iaPlayer.playFile(archiveFile)
                     }
-                    .onDelete(perform: self.remove)
-                    .onMove(perform: self.move)
+                    .padding(10)
                 }
-                .listStyle(PlainListStyle())
-                .tint(.droopy)
-                .background(Color.white)
-                .padding(0)
+                .onDelete(perform: self.remove)
+                .onMove(perform: self.move)
             }
-            .padding(10)
+            .listStyle(PlainListStyle())
             .modifier(BackgroundColorModifier(backgroundColor: .white))
             .onAppear() {
                 viewModel.setUpSubscribers(iaPlayer)
                 iaPlayer.sendPlayingFileForPlaylist()
-                iaPlayer.sendItemsPlaylist()
             }
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -61,7 +52,7 @@ struct Playlist: View {
                         showingAlert = true
                     }) {
                         Image(systemName: "trash")
-                        .foregroundColor(.droopy)
+                            .foregroundColor(.droopy)
                     }
                     .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
                         Button("No", role: .cancel) { }
@@ -71,9 +62,8 @@ struct Playlist: View {
                     }
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("Playlist")
             .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .black)
+            .navigationTitle("Playlist")
         }
     }
 

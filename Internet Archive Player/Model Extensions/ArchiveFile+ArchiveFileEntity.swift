@@ -64,7 +64,7 @@ extension ArchiveFileEntity {
 }
 
 extension ArchiveFileEntity {
-  static var playlistFetchRequest: NSFetchRequest<ArchiveFileEntity> {
+  static var archiveFileFetchRequest: NSFetchRequest<ArchiveFileEntity> {
     let request: NSFetchRequest<ArchiveFileEntity> = ArchiveFileEntity.fetchRequest()
 //    request.predicate = NSPredicate(format: "dueDate < %@", Date.nextWeek() as CVarArg)
     request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]

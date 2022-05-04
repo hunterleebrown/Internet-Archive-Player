@@ -17,7 +17,6 @@ struct Detail: View {
     @State private var descriptionExpanded = false
     @State private var titleScrollOffset: CGFloat = .zero
     @State private var playlistAddAlert = false
-    @State private var navigationTitle = ""
     @State private var isPresented = false
     
     init(_ identifier: String, isPresented: Bool = false) {
@@ -51,14 +50,6 @@ struct Detail: View {
                         .foregroundColor(.black)
                         .bold()
                         .multilineTextAlignment(.center)
-                        .background(GeometryReader {
-                            Color.clear.preference(key: ViewOffsetKey.self,
-                                                   value: $0.frame(in: .named("scroll")).origin.y)
-                        })
-                        .onPreferenceChange(ViewOffsetKey.self) { offset in
-                            self.titleChange(offset: offset)
-                        }
-
                     if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
                         Text(artist)
                             .font(.subheadline)
@@ -118,21 +109,18 @@ struct Detail: View {
                     }
                 }
             }
-            .coordinateSpace(name: "scroll")
             .padding(0)
-            .navigationTitle(navigationTitle)
+            .navigationTitle("Archive")
             .onAppear() {
                 self.viewModel.getArchiveDoc(identifier: self.identifier)
                 self.viewModel.setSubscribers(iaPlayer)
             }
-            .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing:
                                     Button(action: {
             }) {
                 Image(systemName: "heart")
                     .tint(.fairyRed)
-            }
-            )
+            })
             .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .black)
             .alert("Add all files to Playlist?", isPresented: $playlistAddAlert) {
                 Button("No", role: .cancel) { }
@@ -149,13 +137,7 @@ struct Detail: View {
                 .blur(radius: 05)
             )
     }
-    
-    private func titleChange(offset: CGFloat) {
-        withAnimation(.linear(duration:1.0)) {
-            navigationTitle = offset < 0 ? self.viewModel.archiveDoc?.archiveTitle ?? "" : ""
-        }
-    }
-    
+
     func createFileView(_ archiveFile: ArchiveFile) -> FileView {
         FileView(archiveFile,
                  showDownloadButton: false,
@@ -229,13 +211,5 @@ extension Detail {
                 }
                 .store(in: &cancellables)
         }
-    }
-}
-
-struct ViewOffsetKey: PreferenceKey {
-    typealias Value = CGFloat
-    static var defaultValue = CGFloat.zero
-    static func reduce(value: inout Value, nextValue: () -> Value) {
-        value += nextValue()
     }
 }

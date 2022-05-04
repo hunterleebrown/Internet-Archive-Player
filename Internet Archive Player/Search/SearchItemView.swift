@@ -71,7 +71,6 @@ struct SearchItemView: View {
             }
             .frame(maxWidth: .infinity,
                    alignment: .leading)
-            .padding(.trailing, 10.0)
         }
         .frame(maxWidth: .infinity)
     }
