@@ -36,7 +36,7 @@ class AirPLayViewController: UIViewController {
         button.setImage(boldSearch, for: .normal)
         button.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
 //        button.backgroundColor = .red
-        button.tintColor = isDarkMode ? .fairyCream : .fairyCream
+        button.tintColor = .fairyRed //isDarkMode ? .fairyCream : .fairyCream
 
         button.addTarget(self, action: #selector(self.showAirPlayMenu(_:)), for: .touchUpInside)
         self.view.addSubview(button)

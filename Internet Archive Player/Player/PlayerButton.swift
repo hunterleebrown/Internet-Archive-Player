@@ -37,7 +37,7 @@ struct PlayerButton: View {
                 .resizable()
                 .frame(width: size?.width, height: size?.height)
         }
-        .tint(.fairyCream)
+        .tint(.fairyRed)
     }
 }
 

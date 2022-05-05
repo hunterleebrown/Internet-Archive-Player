@@ -60,14 +60,12 @@ struct SearchView: View {
                     .aspectRatio(contentMode: .fill)
                     .blur(radius: 05)
             )
-            .tint(.black)
             .frame(maxWidth: .infinity)
-
             .listStyle(PlainListStyle())
             .navigationTitle("Search")
-            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .black)
+            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
         }
-        .accentColor(.black)
+        .navigationViewStyle(.stack)
     }
 }
 

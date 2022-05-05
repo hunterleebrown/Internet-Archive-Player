@@ -14,20 +14,11 @@ struct Internet_Archive_PlayerApp: App {
     var body: some Scene {
         WindowGroup {
             HomeView()
-                .onAppear() {
-                    let appearance = UINavigationBarAppearance()
-                    let style = NSMutableParagraphStyle()
-                    style.alignment = .center
-                    let attrs: [NSAttributedString.Key: Any] = [
-                        .font: UIFont.systemFont(ofSize: 20, weight: .bold),
-                        .paragraphStyle: style
-                    ]
-
-                    appearance.largeTitleTextAttributes = attrs
-
-                    UINavigationBar.appearance().scrollEdgeAppearance = appearance
-                }
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .onAppear() {
+                    UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).backgroundColor = .white
+                    UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).tintColor = .black
+                }
         }
         .onChange(of: scenePhase) { _ in
             persistenceController.save()

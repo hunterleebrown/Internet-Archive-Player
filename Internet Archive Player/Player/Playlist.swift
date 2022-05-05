@@ -25,7 +25,7 @@ struct Playlist: View {
                     EntityFileView(archiveFile,
                                    showImage: true,
                                    showDownloadButton: true,
-                                   backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRed : nil,
+                                   backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
                                    textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .black,
                                    fileViewMode: .playlist)
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -46,13 +46,13 @@ struct Playlist: View {
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     EditButton()
-                        .tint(.droopy)
+                        .tint(.fairyRed)
 
                     Button(action: {
                         showingAlert = true
                     }) {
                         Image(systemName: "trash")
-                            .foregroundColor(.droopy)
+                            .foregroundColor(.fairyRed)
                     }
                     .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
                         Button("No", role: .cancel) { }
@@ -62,9 +62,11 @@ struct Playlist: View {
                     }
                 }
             }
-            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .black)
+            .navigationBarColor(backgroundColor: .white, titleColor: .fairyRed)
             .navigationTitle("Playlist")
         }
+        .navigationViewStyle(.stack)
+        .tint(.fairyRed)
     }
 
     private func remove(at offsets: IndexSet) {

@@ -16,102 +16,82 @@ struct PlayerControls: View {
     static var showPlayingDetails = PassthroughSubject<ArchiveFileEntity, Never>()
 
     var body: some View {
-        GeometryReader{ g in
-            VStack(alignment: .leading){
-                Slider(value: $viewModel.progress,
-                       in: 0...1,
-                       onEditingChanged: sliderEditingChanged)
-                    .tint(.fairyCream)
-                    .frame(height:20)
-                    .disabled(viewModel.playingFile == nil)
+        VStack(alignment: .leading, spacing: 0.0){
+            Slider(value: $viewModel.progress,
+                   in: 0...1,
+                   onEditingChanged: sliderEditingChanged)
+            .tint(.fairyRed)
+            .disabled(viewModel.playingFile == nil)
 
-                HStack{
-                    Text(viewModel.minimumValue())
-                        .foregroundColor(.fairyCream)
-                        .font(.system(size:9.0))
+            HStack(alignment: .center, spacing: 5.0){
+                Text(viewModel.minimumValue)
+                    .foregroundColor(.fairyRed)
+                    .font(.system(size:9.0))
+                    .frame(width: 44.0)
 
-                    Spacer()
-
-                    Text(viewModel.remainingValue())
-                        .foregroundColor(.fairyCream)
-                        .font(.system(size:9.0))
+                Spacer()
+                if let file = viewModel.playingFile {
+                    Button {
+                        PlayerControls.showPlayingDetails.send(file)
+                    } label: {
+                        VStack(alignment: .center, spacing:2.0){
+                            Text(viewModel.playingFile?.displayTitle ?? "")
+                                .font(.caption)
+                                .bold()
+                                .foregroundColor(.fairyRed)
+                                .frame(maxWidth: .infinity, alignment:.center)
+                                .multilineTextAlignment(.leading)
+                            Text(viewModel.playingFile?.artist ?? viewModel.playingFile?.creator ?? "")
+                                .font(.caption2)
+                                .foregroundColor(.fairyRed)
+                                .frame(maxWidth:. infinity, alignment: .center)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(5)
+                        .overlay(
+                              RoundedRectangle(cornerRadius: 10)
+                                  .stroke(Color.fairyRed, lineWidth: 1)
+                          )
+                    }
+                    .frame(maxHeight: 33.0)
+                    .padding(5)
                 }
-                .padding(.leading, 5)
-                .padding(.trailing, 5)
-                .frame(height:10)
+                Spacer()
 
-                HStack(alignment: .top, spacing: 5.0){
-                    if let playingFile = viewModel.playingFile {
-                        AsyncImage(
-                            url: playingFile.iconUrl,
-                            content: { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: 44,
-                                           maxHeight: 44)
-                                    .background(Color.black)
-
-                            },
-                            placeholder: {
-                                ProgressView()
-                            })
-                            .cornerRadius(5)
-                            .frame(maxWidth: 44,
-                                   maxHeight: 44)
-                            .onTapGesture {
-                                if let file = viewModel.playingFile {
-                                    PlayerControls.showPlayingDetails.send(file)
-                                }
-                            }
-                    }
-
-                    VStack(alignment: .leading, spacing:2.0){
-                        Text(viewModel.playingFile?.displayTitle ?? "")
-                            .font(.caption)
-                            .foregroundColor(.fairyCream)
-                            .frame(maxWidth: .infinity, alignment:.leading)
-                            .multilineTextAlignment(.leading)
-                        Text(viewModel.playingFile?.artist ?? viewModel.playingFile?.creator ?? "")
-                            .font(.caption2)
-                            .foregroundColor(.fairyCream)
-                            .frame(maxWidth:. infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    AirPlayButton()
-                        .frame(width: 33.0, height: 33.0)
-                }
-                .frame(height: 44.0)
-                .padding(.leading, 5.0)
-                .padding(.trailing, 5.0)
-
-                HStack {
-                    
-                    Spacer()
-                    PlayerButton(.backwards) {
-                        iaPlayer.advancePlayer(.backwards)
-                    }
-                    Spacer()
-                    PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 44.0, height: 44.0)) {
-                        iaPlayer.didTapPlayButton()
-                    }
-                    Spacer()
-                    PlayerButton(.forwards) {
-                        iaPlayer.advancePlayer(.forwards)
-                    }
-                    Spacer()
-
-                }
-                .tint(.fairyCream)
-                .padding(.leading)
-                .padding(.trailing)
+                Text(viewModel.remainingValue)
+                    .foregroundColor(.fairyRed)
+                    .font(.system(size:9.0))
+                    .frame(width: 44.0)
             }
-            .padding(.top, 5.0)
-            .modifier(BackgroundColorModifier(backgroundColor: .fairyRed))
-            .onAppear() {
-                viewModel.setSubscribers(iaPlayer)
+            .padding(.vertical, 10.0)
+
+            HStack(alignment: .center, spacing: 10.0) {
+
+                Spacer()
+                    .frame(width: 33.0, height: 33.0)
+
+
+                PlayerButton(.backwards) {
+                    iaPlayer.advancePlayer(.backwards)
+                }
+                Spacer()
+                PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 44.0, height: 44.0)) {
+                    iaPlayer.didTapPlayButton()
+                }
+                Spacer()
+                PlayerButton(.forwards) {
+                    iaPlayer.advancePlayer(.forwards)
+                }
+
+                AirPlayButton()
+                    .frame(width: 33.0, height: 33.0)
             }
+            .tint(.fairyCream)
+            .padding(.leading)
+            .padding(.trailing)
+        }
+        .onAppear() {
+            viewModel.setSubscribers(iaPlayer)
         }
     }
 
@@ -166,14 +146,14 @@ extension PlayerControls {
 
         }
 
-        public func minimumValue() -> String {
+        var minimumValue: String {
             if !duration.isNaN {
                 return IAStringUtils.timeFormatted(minimumCalc)
             }
-            return ""
+            return "00:00"
         }
 
-        public func remainingValue() -> String {
+        var remainingValue: String {
             return IAStringUtils.timeFormatted(remainingCalc)
         }
 
@@ -195,7 +175,9 @@ extension PlayerControls {
 }
 
 struct PlayerControls_Previews: PreviewProvider {
+
     static var previews: some View {
         PlayerControls()
+            .environmentObject(Player())
     }
 }

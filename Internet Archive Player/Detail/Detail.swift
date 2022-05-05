@@ -129,13 +129,6 @@ struct Detail: View {
                 }
             }
         }
-        .background(
-            Image("petabox")
-                .resizable()
-                .opacity(0.3)
-                .aspectRatio(contentMode: .fill)
-                .blur(radius: 05)
-            )
     }
 
     func createFileView(_ archiveFile: ArchiveFile) -> FileView {

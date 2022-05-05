@@ -119,6 +119,7 @@ struct EntityFileView: View {
                     Image(systemName: "ellipsis")
                         .foregroundColor(textColor)
                         .aspectRatio(contentMode: .fill)
+                        .frame(width: 33, height: 33)
                 }
                 .highPriorityGesture(TapGesture())
             }

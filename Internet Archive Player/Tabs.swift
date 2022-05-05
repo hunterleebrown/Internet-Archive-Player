@@ -26,9 +26,7 @@ struct Tabs: View {
                 }
 
         }
-        .accentColor(.fairyCream)
-        .tabStyle()
-        .modifier(BackgroundColorModifier(backgroundColor: .droopy))
+//        .tabStyle()
     }
 }
 
