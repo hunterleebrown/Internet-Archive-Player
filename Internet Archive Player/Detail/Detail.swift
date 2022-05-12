@@ -25,62 +25,55 @@ struct Detail: View {
     }
     
     var body: some View {
-        VStack {
-            ScrollView {
-                VStack(alignment: .center, spacing: 5.0) {
-
-                    if let iconUrl = viewModel.archiveDoc?.iconUrl {
-                        AsyncImage (
-                            url: iconUrl,
-                            content: { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(minWidth:180, maxWidth: 180,
-                                           minHeight: 180, maxHeight: 180)
-                                    .background(Color.black)
-                            },
-                            placeholder: {
-                                Color.black
-                            })
-                        .cornerRadius(15)
-                    }
-
-                    Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
-                        .font(.headline)
-                        .foregroundColor(.black)
-                        .bold()
-                        .multilineTextAlignment(.center)
-                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
-                        Text(artist)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.black)
-
-                    }
-                    if let publisher = self.viewModel.archiveDoc?.publisher {
-                        Text(publisher.joined(separator: ", "))
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.black)
-                    }
+        List {
+            VStack(alignment: .center, spacing: 5.0) {
+                if let iconUrl = viewModel.archiveDoc?.iconUrl {
+                    AsyncImage (
+                        url: iconUrl,
+                        content: { image in
+                            image.resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(minWidth:180, maxWidth: 180,
+                                       minHeight: 180, maxHeight: 180)
+                                .background(Color.black)
+                        },
+                        placeholder: {
+                            Color.black
+                        })
+                    .cornerRadius(15)
                 }
-                .padding(10)
 
-                Divider()
+                Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
+                    .font(.headline)
+                    .foregroundColor(.black)
+                    .bold()
+                    .multilineTextAlignment(.center)
+                if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
+                    Text(artist)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.black)
+
+                }
+
+                if let publisher = self.viewModel.archiveDoc?.publisher {
+                    Text(publisher.joined(separator: ", "))
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.black)
+                }
 
                 if let desc = self.viewModel.archiveDoc?.description {
-
                     Text(AttributedString(attString(desc: desc.joined(separator: ", "))))
                         .padding(10.0)
-
+                        .frame(maxWidth: .infinity)
                 }
-
 
                 HStack() {
                     Text("Files")
                         .font(.subheadline)
                         .bold()
-
+                        .foregroundColor(.fairyRed)
                     Spacer()
                     Button(action: {
                         playlistAddAlert = true
@@ -92,41 +85,40 @@ struct Detail: View {
                                 .tint(.fairyRed)
                         }
                     }
+                    .tint(.fairyRed)
                 }
                 .padding(10)
 
-                Divider()
-
-                LazyVStack(spacing:2.0) {
-                    ForEach(self.viewModel.files, id: \.self) { file in
-                        self.createFileView(file)
-                            .padding(.leading, 5.0)
-                            .padding(.trailing, 5.0)
-                            .onTapGesture {
-                                iaPlayer.playFile(file)
-                            }
-                        Divider()
-                    }
+                ForEach(self.viewModel.files, id: \.self) { file in
+                    self.createFileView(file)
+                        .padding(.leading, 5.0)
+                        .padding(.trailing, 5.0)
+                        .onTapGesture {
+                            iaPlayer.playFile(file)
+                        }
                 }
             }
-            .padding(0)
-            .navigationTitle("Archive")
-            .onAppear() {
-                self.viewModel.getArchiveDoc(identifier: self.identifier)
-                self.viewModel.setSubscribers(iaPlayer)
-            }
-            .navigationBarItems(trailing:
-                                    Button(action: {
-            }) {
-                Image(systemName: "heart")
-                    .tint(.fairyRed)
-            })
-            .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .black)
-            .alert("Add all files to Playlist?", isPresented: $playlistAddAlert) {
-                Button("No", role: .cancel) { }
-                Button("Yes") {
-                    viewModel.addAllFilesToPlaylist(player: iaPlayer)
-                }
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .listRowSeparator(.hidden)
+            .padding(10)
+        }
+        .listStyle(PlainListStyle())
+        .navigationTitle("Archive")
+        .onAppear() {
+            self.viewModel.getArchiveDoc(identifier: self.identifier)
+            self.viewModel.setSubscribers(iaPlayer)
+        }
+        .navigationBarItems(trailing:
+                                Button(action: {
+        }) {
+            Image(systemName: "heart")
+                .tint(.fairyRed)
+        })
+        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
+        .alert("Add all files to Playlist?", isPresented: $playlistAddAlert) {
+            Button("No", role: .cancel) { }
+            Button("Yes") {
+                viewModel.addAllFilesToPlaylist(player: iaPlayer)
             }
         }
     }

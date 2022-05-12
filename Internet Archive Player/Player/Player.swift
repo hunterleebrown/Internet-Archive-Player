@@ -140,6 +140,15 @@ class Player: NSObject, ObservableObject {
         guard let playlist = mainPlaylist else { return }
         for index in offsets {
             let archiveFileEntity = items[index]
+
+            if archiveFileEntity.isLocalFile(), let workingUrl = archiveFileEntity.workingUrl {
+                do {
+                    try Downloader.removeFile(at: workingUrl)
+                } catch let error {
+                    print(error.localizedDescription)
+                }
+            }
+
             playlist.removeFromFiles(archiveFileEntity)
             PersistenceController.shared.delete(archiveFileEntity, false)
         }
@@ -178,12 +187,20 @@ class Player: NSObject, ObservableObject {
 
     // This should only be called by the playlist
     public func playFile(_ archiveFileEntity: ArchiveFileEntity){
+
+        if archiveFileEntity.isLocalFile() {
+            guard archiveFileEntity.doesLocalFileExist() else {
+                // Alert user the local file doesn't exist, do they want to play it online?
+                return
+            }
+        }
+
         self.fileTitle = archiveFileEntity.title ?? archiveFileEntity.name
         self.fileIdentifierTitle = archiveFileEntity.archiveTitle
         self.fileIdentifier = archiveFileEntity.identifier
         self.playingFile = archiveFileEntity
         self.playingFileSubject.send(archiveFileEntity)
-        self.loadAndPlay(archiveFileEntity.url!)
+        self.loadAndPlay(archiveFileEntity.workingUrl!)
     }
 
 
@@ -214,7 +231,7 @@ class Player: NSObject, ObservableObject {
         }
 
         self.setActiveAudioSession()
-
+        print(playUrl.absoluteString)
         avPlayer = AVPlayer(url: playUrl)
         avPlayer?.addObserver(self, forKeyPath: "rate", options:.new, context: &observerContext)
         self.observing = true
@@ -255,6 +272,18 @@ class Player: NSObject, ObservableObject {
                     self.playing  = player.rate > 0.0
                     self.playingSubject.send(player.rate > 0.0)
                     self.monitorPlayback()
+                }
+            }
+
+            if player == object as? AVPlayer && keyPath == #keyPath(AVPlayer.currentItem.status) {
+                let newStatus: AVPlayerItem.Status
+                if let newStatusAsNumber = change?[NSKeyValueChangeKey.newKey] as? NSNumber {
+                    newStatus = AVPlayerItem.Status(rawValue: newStatusAsNumber.intValue)!
+                } else {
+                    newStatus = .unknown
+                }
+                if newStatus == .failed {
+                    NSLog("Error: \(String(describing: self.avPlayer?.currentItem?.error?.localizedDescription)), error: \(String(describing: self.avPlayer?.currentItem?.error))")
                 }
             }
         }

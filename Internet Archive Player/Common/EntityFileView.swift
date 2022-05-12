@@ -89,6 +89,11 @@ struct EntityFileView: View {
                         .foregroundColor(textColor)
                         .bold()
                 }
+                Text(archiveFile.workingUrl?.absoluteString ?? "")
+                    .font(.caption2)
+                    .foregroundColor(textColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
 
             }
             .padding(5.0)
@@ -96,8 +101,8 @@ struct EntityFileView: View {
             HStack() {
                 Menu {
                     if (showDownloadButton) {
-
                         Button(action: {
+                            archiveFile.download()
                         }) {
                             Image(systemName: "icloud.and.arrow.down")
                                 .aspectRatio(contentMode: .fill)

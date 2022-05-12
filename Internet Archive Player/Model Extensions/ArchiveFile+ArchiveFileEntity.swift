@@ -61,6 +61,42 @@ extension ArchiveFileEntity {
     public var displayTitle: String {
         return title ?? name ?? ""
     }
+
+    public func download() {
+        let downloader = Downloader(self)
+        do {
+            try downloader.downloadFile()
+        } catch let error as Error {
+            print(error.localizedDescription)
+        }
+    }
+
+    public var onlineUrl: URL?  {
+        guard let identifier = identifier, let fileName = name else { return nil }
+        let urlString = "https://archive.org/download/\(identifier)/\(fileName)"
+
+        if let encodedUrlString =  urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed) {
+            return URL(string: encodedUrlString)
+        }
+
+        return nil
+    }
+
+    public func isLocalFile() -> Bool {
+        guard let url = self.url, url.absoluteString.contains("file:///") else { return false }
+        return true
+    }
+
+    public func doesLocalFileExist() -> Bool {
+        guard isLocalFile(), let url = self.workingUrl else { return false }
+        return FileManager.default.fileExists(atPath: url.path)
+    }
+
+    public var workingUrl: URL? {
+        guard isLocalFile(), let identifier = identifier, let lastPathComponent = url?.lastPathComponent else  { return onlineUrl }
+        return Downloader.directory().appendingPathComponent(identifier).appendingPathComponent(lastPathComponent)
+    }
+
 }
 
 extension ArchiveFileEntity {
@@ -72,3 +108,4 @@ extension ArchiveFileEntity {
     return request
   }
 }
+

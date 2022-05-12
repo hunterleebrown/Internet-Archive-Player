@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A012CAE282B54C800785420 /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A012CAD282B54C800785420 /* Downloader.swift */; };
 		5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2FACD227A10FB200D02945 /* SearchItemView.swift */; };
 		5A305F522807BF5E00735FAA /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 5A305F512807BF5E00735FAA /* iaAPI */; };
 		5A4151B827B0FDF8007A3623 /* IAReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B727B0FDF8007A3623 /* IAReachability.swift */; };
@@ -59,6 +60,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5A012CAD282B54C800785420 /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
 		5A2FACD227A10FB200D02945 /* SearchItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchItemView.swift; sourceTree = "<group>"; };
 		5A4151B727B0FDF8007A3623 /* IAReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAReachability.swift; sourceTree = "<group>"; };
 		5A4151B927B0FEAA007A3623 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
@@ -123,6 +125,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A012CAC282B54B900785420 /* Downloader */ = {
+			isa = PBXGroup;
+			children = (
+				5A012CAD282B54C800785420 /* Downloader.swift */,
+			);
+			path = Downloader;
+			sourceTree = "<group>";
+		};
 		5A4151BB27B3644E007A3623 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
@@ -165,6 +175,7 @@
 		5ADED037279B56EE00FB2E6D /* Internet Archive Player */ = {
 			isa = PBXGroup;
 			children = (
+				5A012CAC282B54B900785420 /* Downloader */,
 				5AC5B2B0281C9F7A00CDE937 /* Model Extensions */,
 				CE1ACD502812FA5F00EF968A /* Services */,
 				5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */,
@@ -429,6 +440,7 @@
 				5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */,
 				5ADED068279B5D0200FB2E6D /* FavoritesView.swift in Sources */,
 				5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */,
+				5A012CAE282B54C800785420 /* Downloader.swift in Sources */,
 				5ADED03B279B56EE00FB2E6D /* Tabs.swift in Sources */,
 				CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */,
 				5AC5B2B2281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift in Sources */,
