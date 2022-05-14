@@ -13,7 +13,6 @@ extension ArchiveFile {
 
     func archiveFileEntity() -> ArchiveFileEntity {
         let archiveFileEntity = ArchiveFileEntity(context: PersistenceController.shared.container.viewContext)
-        archiveFileEntity.id = self.id
         archiveFileEntity.identifier = self.identifier
         archiveFileEntity.artist = self.artist
         archiveFileEntity.creator = self.creator?.joined(separator: ",")
@@ -62,8 +61,8 @@ extension ArchiveFileEntity {
         return title ?? name ?? ""
     }
 
-    public func download() {
-        let downloader = Downloader(self)
+    public func download(delegate: FileViewDownloadDelegate) {
+        let downloader = Downloader(self, delegate: delegate)
         do {
             try downloader.downloadFile()
         } catch let error as Error {
@@ -73,13 +72,7 @@ extension ArchiveFileEntity {
 
     public var onlineUrl: URL?  {
         guard let identifier = identifier, let fileName = name else { return nil }
-        let urlString = "https://archive.org/download/\(identifier)/\(fileName)"
-
-        if let encodedUrlString =  urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed) {
-            return URL(string: encodedUrlString)
-        }
-
-        return nil
+        return URL(string: "https://archive.org/download")?.appendingPathComponent(identifier).appendingPathComponent(fileName)
     }
 
     public func isLocalFile() -> Bool {

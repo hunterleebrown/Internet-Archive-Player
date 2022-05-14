@@ -158,7 +158,7 @@ extension PlayerControls {
         }
 
         private var minimumCalc: Int {
-            if !duration.isNaN {
+            if !duration.isNaN && !progress.isNaN{
                 return Int(progress * duration)
             }
             return 0

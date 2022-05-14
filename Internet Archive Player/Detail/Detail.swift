@@ -16,9 +16,11 @@ struct Detail: View {
     private var identifier: String
     @State private var descriptionExpanded = false
     @State private var titleScrollOffset: CGFloat = .zero
-    @State private var playlistAddAlert = false
+    @State private var playlistAddAllAlert = false
     @State private var isPresented = false
-    
+
+    @State var playlistErrorAlertShowing: Bool = false
+
     init(_ identifier: String, isPresented: Bool = false) {
         self.identifier = identifier
         self.isPresented = isPresented
@@ -76,7 +78,7 @@ struct Detail: View {
                         .foregroundColor(.fairyRed)
                     Spacer()
                     Button(action: {
-                        playlistAddAlert = true
+                        playlistAddAllAlert = true
                     }) {
                         HStack(spacing: 1.0) {
                             Image(systemName: "plus")
@@ -115,11 +117,14 @@ struct Detail: View {
                 .tint(.fairyRed)
         })
         .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
-        .alert("Add all files to Playlist?", isPresented: $playlistAddAlert) {
+        .alert("Add all files to Playlist?", isPresented: $playlistAddAllAlert) {
             Button("No", role: .cancel) { }
             Button("Yes") {
                 viewModel.addAllFilesToPlaylist(player: iaPlayer)
             }
+        }
+        .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
+            Button("Okay", role: .cancel) { }
         }
     }
 
@@ -129,7 +134,13 @@ struct Detail: View {
                  backgroundColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyRed : .fairyRedAlpha,
                  textColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyCream : .white,
                  ellipsisAction: {
-            iaPlayer.appendPlaylistItem(archiveFile)
+            do  {
+                try iaPlayer.appendPlaylistItem(archiveFile)
+            } catch PlayerError.alreadyOnPlaylist {
+//                self.playlistErrorAlertShowing = true
+            } catch {
+                
+            }
         })
     }
     
@@ -184,7 +195,13 @@ extension Detail {
         
         public func addAllFilesToPlaylist(player: Player) {
             files.forEach { file in
-                player.appendPlaylistItem(file)
+                do {
+                    try player.appendPlaylistItem(file)
+                } catch PlayerError.alreadyOnPlaylist {
+
+                } catch {
+                    
+                }
             }
         }
 

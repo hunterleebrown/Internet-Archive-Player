@@ -24,7 +24,6 @@ struct Playlist: View {
                 ForEach(iaPlayer.items, id: \.self) { archiveFile in
                     EntityFileView(archiveFile,
                                    showImage: true,
-                                   showDownloadButton: true,
                                    backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
                                    textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .black,
                                    fileViewMode: .playlist)

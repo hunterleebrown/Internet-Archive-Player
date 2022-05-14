@@ -9,18 +9,25 @@ import Foundation
 import SwiftUI
 import iaAPI
 
+public protocol FileViewDownloadDelegate {
+    var downloadProgress: Double { get set }
+}
+
+
 struct EntityFileView: View {
+
+    @StateObject var viewModel: EntityFileView.ViewModel = EntityFileView.ViewModel()
+
     var archiveFile: ArchiveFileEntity
     var textColor = Color.white
     var backgroundColor: Color? = Color.gray
     var showImage: Bool = false
-    var showDownloadButton = true
+    @State var showDownloadButton = true
     var fileViewMode: FileViewMode = .detail
     var ellipsisAction: (()->())? = nil
 
     init(_ archiveFile: ArchiveFileEntity,
          showImage: Bool = false,
-         showDownloadButton: Bool = true,
          backgroundColor: Color? = Color.fairyRedAlpha,
          textColor: Color = Color.fairyCream,
          fileViewMode: FileViewMode = .detail,
@@ -28,7 +35,6 @@ struct EntityFileView: View {
 
         self.archiveFile = archiveFile
         self.showImage = showImage
-        self.showDownloadButton = showDownloadButton
         self.backgroundColor = backgroundColor
         self.textColor = textColor
         self.ellipsisAction = ellipsisAction
@@ -75,7 +81,7 @@ struct EntityFileView: View {
                         .multilineTextAlignment(.leading)
                 }
 
-                HStack(alignment: .top, spacing: 5) {
+                HStack(alignment: .center, spacing: 5) {
                     Text(archiveFile.format ?? "")
                         .font(.caption2)
                         .foregroundColor(textColor)
@@ -88,13 +94,22 @@ struct EntityFileView: View {
                         .font(.caption2)
                         .foregroundColor(textColor)
                         .bold()
+                    Image(systemName: showDownloadButton ? "cloud" : "arrow.down.square.fill")
+                        .font(.caption2)
+                    Text(showDownloadButton ? "can be streamed" : "is a local file")
+                        .font(.caption2)
+                        .foregroundColor(textColor)
                 }
-                Text(archiveFile.workingUrl?.absoluteString ?? "")
-                    .font(.caption2)
-                    .foregroundColor(textColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .multilineTextAlignment(.leading)
 
+
+
+                if viewModel.downloadProgress > 0 &&
+                    viewModel.downloadProgress < 1 &&
+                    !archiveFile.isLocalFile() {
+                    ProgressView("Downloading", value: viewModel.downloadProgress, total:1)
+                        .tint(.fairyRed)
+                        .font(.caption2)
+                }
             }
             .padding(5.0)
             Spacer()
@@ -102,7 +117,7 @@ struct EntityFileView: View {
                 Menu {
                     if (showDownloadButton) {
                         Button(action: {
-                            archiveFile.download()
+                            archiveFile.download(delegate: viewModel)
                         }) {
                             Image(systemName: "icloud.and.arrow.down")
                                 .aspectRatio(contentMode: .fill)
@@ -133,5 +148,18 @@ struct EntityFileView: View {
         }
         .background(backgroundColor ?? nil)
         .cornerRadius(5.0)
+        .onReceive(Downloader.downloadedSubject) { file in
+            guard file.id == archiveFile.id else { return }
+            showDownloadButton = false
+        }
+        .onAppear() {
+            showDownloadButton = !archiveFile.isLocalFile()
+        }
+    }
+}
+
+extension EntityFileView {
+    public class ViewModel: ObservableObject, FileViewDownloadDelegate {
+        @Published var downloadProgress = 0.0
     }
 }

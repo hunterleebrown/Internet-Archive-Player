@@ -14,6 +14,20 @@ import UIKit
 import Combine
 import CoreData
 
+enum PlayerError: Error {
+    case alreadyOnPlaylist
+}
+
+extension PlayerError: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .alreadyOnPlaylist:
+            return "Item is already on the playlist."
+        }
+    }
+}
+
+
 class Player: NSObject, ObservableObject {
 
     static let shared = Player()
@@ -112,13 +126,15 @@ class Player: NSObject, ObservableObject {
         }
     }
 
-    public func appendPlaylistItem(_ item: ArchiveFile){
+    public func appendPlaylistItem(_ item: ArchiveFile) throws {
         guard let playlist = mainPlaylist else { return }
         let archiveFileEntity = item.archiveFileEntity()
-        if !self.items.contains(archiveFileEntity) {
-            playlist.addToFiles(archiveFileEntity)
-            PersistenceController.shared.save()
-        }
+
+        let sameValues = self.items.filter {$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString }
+        guard sameValues.isEmpty else { throw PlayerError.alreadyOnPlaylist }
+
+        playlist.addToFiles(archiveFileEntity)
+        PersistenceController.shared.save()
     }
 
     public func getPlaylist() -> [ArchiveFileEntity] {
@@ -126,7 +142,10 @@ class Player: NSObject, ObservableObject {
     }
 
     public func clearPlaylist() {
+        guard let playlist = mainPlaylist else { return }
         for item in items {
+            self.deleteLocalFile(item: item)
+            playlist.removeFromFiles(item)
             PersistenceController.shared.delete(item, false)
         }
         PersistenceController.shared.save()
@@ -136,19 +155,22 @@ class Player: NSObject, ObservableObject {
         self.removePlayListEntities(at: offsets)
     }
 
+
+    private func deleteLocalFile(item: ArchiveFileEntity) {
+        if item.isLocalFile(), let workingUrl = item.workingUrl {
+            do {
+                try Downloader.removeFile(at: workingUrl)
+            } catch let error {
+                print(error.localizedDescription)
+            }
+        }
+    }
+
     private func removePlayListEntities(at offsets: IndexSet) {
         guard let playlist = mainPlaylist else { return }
         for index in offsets {
             let archiveFileEntity = items[index]
-
-            if archiveFileEntity.isLocalFile(), let workingUrl = archiveFileEntity.workingUrl {
-                do {
-                    try Downloader.removeFile(at: workingUrl)
-                } catch let error {
-                    print(error.localizedDescription)
-                }
-            }
-
+            self.deleteLocalFile(item: archiveFileEntity)
             playlist.removeFromFiles(archiveFileEntity)
             PersistenceController.shared.delete(archiveFileEntity, false)
         }

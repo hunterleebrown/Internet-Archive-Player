@@ -40,6 +40,9 @@ extension FavoritesView {
         @Published var totalDownloadSize: Int = 0
 
         func updateFiles() {
+            self.paths.removeAll()
+            self.totalFiles = 0
+            self.totalDownloadSize = 0
             do {
                 let itemDirs = try FileManager.default.contentsOfDirectory(atPath: Downloader.directory().path)
                 for dir in itemDirs {

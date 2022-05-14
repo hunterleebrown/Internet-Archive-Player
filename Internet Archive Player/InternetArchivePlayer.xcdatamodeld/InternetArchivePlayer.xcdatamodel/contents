@@ -5,7 +5,6 @@
         <attribute name="artist" optional="YES" attributeType="String"/>
         <attribute name="creator" optional="YES" attributeType="String"/>
         <attribute name="format" optional="YES" attributeType="String"/>
-        <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="identifier" optional="YES" attributeType="String"/>
         <attribute name="length" optional="YES" attributeType="String"/>
         <attribute name="name" optional="YES" attributeType="String"/>
@@ -21,7 +20,7 @@
         <relationship name="files" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="ArchiveFileEntity" inverseName="playlist" inverseEntity="ArchiveFileEntity"/>
     </entity>
     <elements>
-        <element name="ArchiveFileEntity" positionX="-63" positionY="-18" width="128" height="224"/>
+        <element name="ArchiveFileEntity" positionX="-63" positionY="-18" width="128" height="209"/>
         <element name="PlaylistEntity" positionX="-63" positionY="72" width="128" height="74"/>
     </elements>
 </model>

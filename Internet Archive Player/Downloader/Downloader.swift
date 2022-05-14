@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 enum DownloaderError: Error  {
     case fileAlreadyExits
@@ -34,12 +35,14 @@ extension DownloaderError: CustomStringConvertible {
 
 class Downloader: NSObject {
 
+    static var downloadedSubject = PassthroughSubject<(ArchiveFileEntity), Never>()
+
     private lazy var percentFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .percent
         formatter.minimumIntegerDigits = 1
         formatter.maximumIntegerDigits = 3
-        formatter.maximumFractionDigits = 2
+        formatter.maximumFractionDigits = 0
         return formatter
     }()
 
@@ -59,9 +62,11 @@ class Downloader: NSObject {
 
     private let file: ArchiveFileEntity
     private var downloadTask: URLSessionDownloadTask?
+    private var delegate: FileViewDownloadDelegate?
 
-    init(_ file: ArchiveFileEntity) {
+    init(_ file: ArchiveFileEntity, delegate: FileViewDownloadDelegate) {
         self.file = file
+        self.delegate = delegate
     }
 
 
@@ -94,7 +99,6 @@ class Downloader: NSObject {
         return true
     }
 
-
     private var downloadDirectory: URL? {
         guard let fileComponent = self.file.url?.lastPathComponent, let identifier = file.identifier else { return nil }
         return Downloader.directory().appendingPathComponent(identifier)
@@ -109,6 +113,7 @@ class Downloader: NSObject {
         if isFileDownloaded() {
             file.url = downloadUrl
             PersistenceController.shared.save()
+            Downloader.downloadedSubject.send(file)
         } else {
             throw DownloaderError.fileAlreadyExits
         }
@@ -162,12 +167,10 @@ extension Downloader: URLSessionDownloadDelegate {
 
         if downloadTask == self.downloadTask {
             let calculatedProgress = Float(totalBytesWritten) / Float(totalBytesExpectedToWrite)
-
             print("Downloading: \(self.percentFormatter.string(from: NSNumber(value: calculatedProgress)))")
-
-            //            DispatchQueue.main.async {
-            //
-            //            }
+            DispatchQueue.main.async {
+                self.delegate?.downloadProgress = Double(calculatedProgress)
+            }
         }
     }
 }
