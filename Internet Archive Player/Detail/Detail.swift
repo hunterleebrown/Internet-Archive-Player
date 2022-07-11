@@ -91,14 +91,42 @@ struct Detail: View {
                 }
                 .padding(10)
 
-                ForEach(self.viewModel.files, id: \.self) { file in
-                    self.createFileView(file)
-                        .padding(.leading, 5.0)
-                        .padding(.trailing, 5.0)
-                        .onTapGesture {
-                            iaPlayer.playFile(file)
+                VStack(alignment: .leading) {
+                    if self.viewModel.audioFiles.count > 0 {
+                        Text("Audio")
+                            .font(.subheadline)
+                            .bold()
+                            .foregroundColor(.fairyRed)
+                            .padding(.horizontal, 10)
+
+                        ForEach(self.viewModel.audioFiles, id: \.self) { file in
+                            self.createFileView(file)
+                                .padding(.leading, 5.0)
+                                .padding(.trailing, 5.0)
+                                .onTapGesture {
+                                    iaPlayer.playFile(file)
+                                }
                         }
+                    }
+
+                    if self.viewModel.movieFiles.count > 0 {
+                        Text("Movies")
+                            .font(.subheadline)
+                            .bold()
+                            .foregroundColor(.fairyRed)
+                            .padding(.horizontal, 10)
+
+                        ForEach(self.viewModel.movieFiles, id: \.self) { file in
+                            self.createFileView(file)
+                                .padding(.leading, 5.0)
+                                .padding(.trailing, 5.0)
+                                .onTapGesture {
+                                    iaPlayer.playFile(file)
+                                }
+                        }
+                    }
                 }
+
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             .listRowSeparator(.hidden)
@@ -137,7 +165,7 @@ struct Detail: View {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
-//                self.playlistErrorAlertShowing = true
+                //                self.playlistErrorAlertShowing = true
             } catch {
                 
             }
@@ -168,7 +196,9 @@ extension Detail {
     final class ViewModel: ObservableObject {
         let service: PlayerArchiveService
         @Published var archiveDoc: ArchiveMetaData? = nil
-        @Published var files = [ArchiveFile]()
+        @Published var audioFiles = [ArchiveFile]()
+        @Published var movieFiles = [ArchiveFile]()
+
         @Published var playingFile: ArchiveFileEntity?
 
         private var cancellables = Set<AnyCancellable>()
@@ -182,10 +212,12 @@ extension Detail {
                 do {
                     let doc = try await self.service.getArchiveAsync(with: identifier)
                     self.archiveDoc = doc.metadata
-                    self.files = doc.non78Audio.sorted{
+                    self.audioFiles = doc.non78Audio.sorted{
                         guard let track1 = $0.track, let track2 = $1.track else { return false}
                         return track1 < track2
                     }
+
+                    self.movieFiles = doc.files.filter{ $0.format == .h264HD }
                     
                 } catch {
                     print(error)
@@ -194,7 +226,7 @@ extension Detail {
         }
         
         public func addAllFilesToPlaylist(player: Player) {
-            files.forEach { file in
+            audioFiles.forEach { file in
                 do {
                     try player.appendPlaylistItem(file)
                 } catch PlayerError.alreadyOnPlaylist {
