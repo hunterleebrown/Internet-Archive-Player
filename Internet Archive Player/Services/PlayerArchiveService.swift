@@ -11,6 +11,6 @@ import iaAPI
 
 class PlayerArchiveService: ArchiveService {
     override init(_ serviceType: ArchiveServiceType = .live) {
-        super.init()
+        super.init(serviceType)
     }
 }

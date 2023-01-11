@@ -140,14 +140,18 @@ extension PlayerControls {
             iaPlayer.sliderProgressPublisher
                 .removeDuplicates()
                 .sink { prog in
-                    self.progress = prog
+                    DispatchQueue.main.async {
+                        self.progress = prog
+                    }
                 }
                 .store(in: &cancellables)
 
             iaPlayer.durationSubjectPublisher
                 .removeDuplicates()
                 .sink { dur in
-                    self.duration = dur
+                    DispatchQueue.main.async {
+                        self.duration = dur
+                    }
                 }
                 .store(in: &cancellables)
 
