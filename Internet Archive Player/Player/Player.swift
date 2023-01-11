@@ -40,9 +40,9 @@ class Player: NSObject, ObservableObject {
     }
 
     private var mainPlaylist: PlaylistEntity? = nil
-    private var playingFile: ArchiveFileEntity? = nil
+    public var playingFile: ArchiveFileEntity? = nil
     @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
-    private var avPlayer: AVPlayer?
+    public var avPlayer: AVPlayer?
     private var observing = false
     fileprivate var observerContext = 0
     private var playing = false
@@ -259,6 +259,13 @@ class Player: NSObject, ObservableObject {
         self.observing = true
         avPlayer?.play()
         self.setPlayingInfo(playing: true)
+
+        print("Playing File: ")
+        dump(playingFile?.format)
+
+        if playingFile?.format != "VBR MP3" {
+            PlayerControls.showVideo.send(true)
+        }
 
     }
 

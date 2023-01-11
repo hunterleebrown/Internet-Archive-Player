@@ -113,7 +113,9 @@ class Downloader: NSObject {
         if isFileDownloaded() {
             file.url = downloadUrl
             PersistenceController.shared.save()
-            Downloader.downloadedSubject.send(file)
+            DispatchQueue.main.async {
+                Downloader.downloadedSubject.send(self.file)
+            }
         } else {
             throw DownloaderError.fileAlreadyExits
         }

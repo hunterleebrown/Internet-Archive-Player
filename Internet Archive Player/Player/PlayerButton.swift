@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import AVKit
 
 enum PlayerButtonType: String {
+    case video = "video"
     case play = "play"
     case backwards = "backward.end"
     case forwards = "forward.end"

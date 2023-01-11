@@ -8,12 +8,14 @@
 import SwiftUI
 import iaAPI
 import Combine
+import AVKit
 
 struct PlayerControls: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
 
     static var showPlayingDetails = PassthroughSubject<ArchiveFileEntity, Never>()
+    static var showVideo = PassthroughSubject<Bool, Never>()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0.0){
@@ -67,6 +69,10 @@ struct PlayerControls: View {
 
             HStack(alignment: .center, spacing: 10.0) {
 
+                PlayerButton(.video, CGSize(width: 30, height: 20)) {
+                    PlayerControls.showVideo.send(true)
+                }
+
                 Spacer()
                     .frame(width: 33.0, height: 33.0)
 
@@ -90,6 +96,7 @@ struct PlayerControls: View {
             .padding(.leading)
             .padding(.trailing)
         }
+        .background(Color.white)
         .onAppear() {
             viewModel.setSubscribers(iaPlayer)
         }
@@ -133,14 +140,18 @@ extension PlayerControls {
             iaPlayer.sliderProgressPublisher
                 .removeDuplicates()
                 .sink { prog in
-                    self.progress = prog
+                    DispatchQueue.main.async {
+                        self.progress = prog
+                    }
                 }
                 .store(in: &cancellables)
 
             iaPlayer.durationSubjectPublisher
                 .removeDuplicates()
                 .sink { dur in
-                    self.duration = dur
+                    DispatchQueue.main.async {
+                        self.duration = dur
+                    }
                 }
                 .store(in: &cancellables)
 
@@ -179,5 +190,20 @@ struct PlayerControls_Previews: PreviewProvider {
     static var previews: some View {
         PlayerControls()
             .environmentObject(Player())
+    }
+}
+
+struct CustomVideoPlayer: UIViewControllerRepresentable {
+
+    let player: AVPlayer?
+
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let controller = AVPlayerViewController()
+//        controller.player = player
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+        uiViewController.player = player
     }
 }

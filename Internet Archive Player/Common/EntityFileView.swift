@@ -115,7 +115,7 @@ struct EntityFileView: View {
             Spacer()
             HStack() {
                 Menu {
-                    if (showDownloadButton) {
+                    if (showDownloadButton && archiveFile.format == "VBR MP3") {
                         Button(action: {
                             archiveFile.download(delegate: viewModel)
                         }) {

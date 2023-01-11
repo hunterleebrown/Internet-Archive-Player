@@ -7,6 +7,7 @@
 
 import SwiftUI
 import iaAPI
+import AVKit
 
 struct HomeView: View {
     @StateObject var iaPlayer = Player()
@@ -15,39 +16,77 @@ struct HomeView: View {
     @State var playerControlsCapacity: Double = 0
     @State var playerControlsHeight: CGFloat = 0.0
     @State var showPlayerControls: Bool = true
+    @State var showVideoPlayer: Bool = false
 
     var body: some View {
-        VStack(alignment:.center, spacing: 0) {
-            Tabs()
-            Button(action: {
-                withAnimation {
-                    showPlayerControls.toggle()
-                }
+        ZStack(alignment: .leading) {
+            ZStack(){
+                //VideoPlayer(player: iaPlayer.avPlayer)
+                CustomVideoPlayer(player: iaPlayer.avPlayer)
+                VStack(alignment: .leading) {
+                    HStack {
+                        Button{
+                            showVideoPlayer = false
+                        } label: {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.white)
+                                .padding(10)
+                        }
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(.white, lineWidth: 2)
+                                .opacity(0.85)
+                        )
+                        .frame(width: 44.0, height: 44.0, alignment: .center)
+                        .padding(.leading, 20)
+                        .padding(.top, 100)
+                        Spacer()
+                    }
+                    .opacity(0.85)
 
-            }, label: {
-                HStack(alignment: .center, spacing: 5.0) {
-                    Text(expandeButtonText)
-                        .font(.caption)
-                        .foregroundColor(.fairyRed)
-                    Image(systemName: expandImageString)
+                    Spacer()
                 }
-            })
-            .frame(alignment: .center)
-            .padding(5)
-
-            PlayerControls()
-                .frame(height: playerHeight, alignment: .bottom)
-                .opacity(playerOpacity)
-        }
-        .sheet(item: $playingFile, content: { file in
-            Detail(file.identifier!, isPresented: true)
-        })
-        .ignoresSafeArea(.keyboard)
-        .environmentObject(iaPlayer)
-        .onReceive(PlayerControls.showPlayingDetails) { file in
-            withAnimation {
-                playingFile = file
             }
+            .ignoresSafeArea()
+            .zIndex(showVideoPlayer ? 1 : 0)
+
+            VStack(alignment:.center, spacing: 0) {
+                Tabs()
+                Button(action: {
+                    withAnimation {
+                        showPlayerControls.toggle()
+                    }
+
+                }, label: {
+                    HStack(alignment: .center, spacing: 5.0) {
+                        Text(expandeButtonText)
+                            .font(.caption)
+                            .foregroundColor(.fairyRed)
+                        Image(systemName: expandImageString)
+                    }
+                })
+                .frame(alignment: .center)
+                .padding(5)
+
+                PlayerControls()
+                    .frame(height: playerHeight, alignment: .bottom)
+                    .opacity(playerOpacity)
+            }
+            .background(Color.white)
+            .zIndex(showVideoPlayer ? 0 : 1)
+            .sheet(item: $playingFile, content: { file in
+                Detail(file.identifier!, isPresented: true)
+            })
+            .ignoresSafeArea(.keyboard)
+            .environmentObject(iaPlayer)
+            .onReceive(PlayerControls.showPlayingDetails) { file in
+                withAnimation {
+                    playingFile = file
+                }
+            }
+        }
+        .onReceive(PlayerControls.showVideo) { show in
+            showVideoPlayer = show
         }
     }
 
@@ -60,7 +99,6 @@ struct HomeView: View {
     }
 
     private var expandeButtonText: String {
-//        showPlayerControls ? "rectangle.compress.vertical" : "rectangle.expand.vertical"
         showPlayerControls ? "Hide Controls" : "Show Controls"
     }
     private var expandImageString: String {

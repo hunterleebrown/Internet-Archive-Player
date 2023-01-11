@@ -33,7 +33,7 @@ struct SearchItemView: View {
             .cornerRadius(5)
             .frame(width: 44, height: 44, alignment: .leading)
 
-            Image(systemName: item.mediatype == .audio ||  item.mediatype == .etree ? "hifispeaker" : "questionmark")
+            Image(systemName: item.mediatype == .audio ||  item.mediatype == .etree ? "hifispeaker" : item.mediatype == .movies ? "video" : "questionmark")
                 .frame(width: 22.0, height: 22.0, alignment: .center)
                 .tint(.black)
 
