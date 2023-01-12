@@ -2,7 +2,7 @@
 //  IAPlayer.swift
 //  Internet Archive Player
 //
-//  Created by Hunter Lee Brown on 2/6/22. And let's hope it works!
+//  Created by Hunter Lee Brown on 2/6/22. And let's hope it works With Gusto!
 //
 
 import Foundation
