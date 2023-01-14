@@ -14,7 +14,7 @@ struct BackgroundColorModifier: ViewModifier {
             backgroundColor?.ignoresSafeArea(.all, edges: .all)
             content
         }
-        .tint(.black)
+//        .tint(.black)
     }
 }
 

@@ -47,14 +47,14 @@ struct Detail: View {
 
                 Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                     .font(.headline)
-                    .foregroundColor(.black)
+//                    .foregroundColor(.black)
                     .bold()
                     .multilineTextAlignment(.center)
                 if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
                     Text(artist)
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.black)
+//                        .foregroundColor(.black)
 
                 }
 
@@ -62,13 +62,14 @@ struct Detail: View {
                     Text(publisher.joined(separator: ", "))
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(.black)
+//                        .foregroundColor(.black)
                 }
 
                 if let desc = self.viewModel.archiveDoc?.description {
                     Text(AttributedString(attString(desc: desc.joined(separator: ", "))))
                         .padding(10.0)
                         .frame(maxWidth: .infinity)
+                        .background(Color.white)
                 }
 
                 HStack() {
@@ -144,7 +145,7 @@ struct Detail: View {
             Image(systemName: "heart")
                 .tint(.fairyRed)
         })
-        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
+//        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
         .alert("Add all files to Playlist?", isPresented: $playlistAddAllAlert) {
             Button("No", role: .cancel) { }
             Button("Yes") {
