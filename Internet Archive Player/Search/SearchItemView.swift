@@ -41,7 +41,7 @@ struct SearchItemView: View {
                 Text(item.archiveTitle ?? "")
                     .bold()
                     .font(.caption)
-                    .foregroundColor(textColor)
+//                    .foregroundColor(textColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .multilineTextAlignment(.leading)
 
@@ -49,11 +49,11 @@ struct SearchItemView: View {
                     HStack(alignment: .top, spacing: 5.0) {
                         Text("Publisher: ")
                             .font(.caption2)
-                            .foregroundColor(textColor)
+//                            .foregroundColor(textColor)
                             .bold()
                         Text(publisher.joined(separator: ", "))
                             .font(.caption2)
-                            .foregroundColor(textColor)
+//                            .foregroundColor(textColor)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
                     }
@@ -63,7 +63,7 @@ struct SearchItemView: View {
                     HStack(alignment: .top, spacing: 5.0) {
                         Text(getCreators())
                             .font(.caption2)
-                            .foregroundColor(textColor)
+//                            .foregroundColor(textColor)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
                     }

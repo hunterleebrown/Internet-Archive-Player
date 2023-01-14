@@ -96,7 +96,7 @@ struct PlayerControls: View {
             .padding(.leading)
             .padding(.trailing)
         }
-        .background(Color.white)
+        .background(Color("playerBackground"))
         .onAppear() {
             viewModel.setSubscribers(iaPlayer)
         }

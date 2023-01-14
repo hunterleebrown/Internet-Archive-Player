@@ -13,7 +13,6 @@ struct HomeView: View {
     @StateObject var iaPlayer = Player()
     @State var playingFile: ArchiveFileEntity? = nil
     @State var identifier = ""
-    @State var playerControlsCapacity: Double = 0
     @State var playerControlsHeight: CGFloat = 0.0
     @State var showPlayerControls: Bool = true
     @State var showVideoPlayer: Bool = false
@@ -42,7 +41,7 @@ struct HomeView: View {
                         .padding(.top, 100)
                         Spacer()
                     }
-                    .opacity(0.85)
+                    .opacity(1.0)
 
                     Spacer()
                 }
@@ -72,7 +71,7 @@ struct HomeView: View {
                     .frame(height: playerHeight, alignment: .bottom)
                     .opacity(playerOpacity)
             }
-            .background(Color.white)
+            .background(Color("playerBackground"))
             .zIndex(showVideoPlayer ? 0 : 1)
             .sheet(item: $playingFile, content: { file in
                 Detail(file.identifier!, isPresented: true)

@@ -25,7 +25,7 @@ struct Playlist: View {
                     EntityFileView(archiveFile,
                                    showImage: true,
                                    backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
-                                   textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .black,
+                                   textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
                                    fileViewMode: .playlist)
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .onTapGesture {
@@ -37,7 +37,7 @@ struct Playlist: View {
                 .onMove(perform: self.move)
             }
             .listStyle(PlainListStyle())
-            .modifier(BackgroundColorModifier(backgroundColor: .white))
+            .modifier(BackgroundColorModifier(backgroundColor: Color("playerBackground")))
             .onAppear() {
                 viewModel.setUpSubscribers(iaPlayer)
                 iaPlayer.sendPlayingFileForPlaylist()
@@ -61,7 +61,7 @@ struct Playlist: View {
                     }
                 }
             }
-            .navigationBarColor(backgroundColor: .white, titleColor: .fairyRed)
+            .navigationBarColor(backgroundColor: Color("playerBackground"), titleColor: .fairyRed)
             .navigationTitle("Playlist")
         }
         .navigationViewStyle(.stack)
