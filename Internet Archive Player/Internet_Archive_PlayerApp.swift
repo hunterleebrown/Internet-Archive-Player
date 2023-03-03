@@ -15,10 +15,6 @@ struct Internet_Archive_PlayerApp: App {
         WindowGroup {
             HomeView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                .onAppear() {
-                    UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).backgroundColor = .white
-                    UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).tintColor = .black
-                }
         }
         .onChange(of: scenePhase) { _ in
             persistenceController.save()

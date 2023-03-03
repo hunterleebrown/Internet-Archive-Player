@@ -35,24 +35,24 @@ extension View {
 
         onAppear {
 
-            let offColor = UIColor.lightGray
-            let itemAppearance = UITabBarItemAppearance()
-            itemAppearance.normal.iconColor = offColor
-
-            itemAppearance.normal.titleTextAttributes = [
-                .foregroundColor: offColor
-            ]
-
-            let appearance = UITabBarAppearance()
-            appearance.configureWithDefaultBackground()
-            appearance.stackedLayoutAppearance = itemAppearance
-            appearance.inlineLayoutAppearance = itemAppearance
-            appearance.compactInlineLayoutAppearance = itemAppearance
-            appearance.configureWithDefaultBackground()
-            appearance.backgroundColor = IAColors.fairyRed
-
-            UITabBar.appearance().standardAppearance = appearance
-            UITabBar.appearance().scrollEdgeAppearance = appearance
+//            let offColor = UIColor.lightGray
+//            let itemAppearance = UITabBarItemAppearance()
+//            itemAppearance.normal.iconColor = offColor
+//
+//            itemAppearance.normal.titleTextAttributes = [
+//                .foregroundColor: offColor
+//            ]
+//
+//            let appearance = UITabBarAppearance()
+//            appearance.configureWithDefaultBackground()
+//            appearance.stackedLayoutAppearance = itemAppearance
+//            appearance.inlineLayoutAppearance = itemAppearance
+//            appearance.compactInlineLayoutAppearance = itemAppearance
+//            appearance.configureWithDefaultBackground()
+//            appearance.backgroundColor = IAColors.fairyRed
+//
+//            UITabBar.appearance().standardAppearance = appearance
+//            UITabBar.appearance().scrollEdgeAppearance = appearance
 
 
         }
