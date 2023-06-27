@@ -69,9 +69,21 @@ struct PlayerControls: View {
 
             HStack(alignment: .center, spacing: 10.0) {
 
-                PlayerButton(.video, CGSize(width: 30, height: 20)) {
-                    PlayerControls.showVideo.send(true)
-                }
+//                PlayerButton(.video, CGSize(width: 30, height: 20)) {
+//                    PlayerControls.showVideo.send(true)
+//                }
+
+//                CustomVideoPlayer(player: iaPlayer.avPlayer)
+//                    .frame(width: 60, height: 40)
+//                    .onTapGesture {
+//                        PlayerControls.showVideo.send(true)
+//                    }
+
+                VideoPlayer(player: iaPlayer.avPlayer)
+                    .frame(width: 60, height: 40)
+                    .onTapGesture {
+                        PlayerControls.showVideo.send(true)
+                    }
 
                 Spacer()
                     .frame(width: 33.0, height: 33.0)
