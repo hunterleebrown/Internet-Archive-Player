@@ -47,22 +47,18 @@ struct Detail: View {
 
                 Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                     .font(.headline)
-//                    .foregroundColor(.black)
                     .bold()
                     .multilineTextAlignment(.center)
                 if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
                     Text(artist)
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
-//                        .foregroundColor(.black)
-
                 }
 
                 if let publisher = self.viewModel.archiveDoc?.publisher {
                     Text(publisher.joined(separator: ", "))
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
-//                        .foregroundColor(.black)
                 }
 
                 if let desc = self.viewModel.archiveDoc?.description {
@@ -92,7 +88,7 @@ struct Detail: View {
                 }
                 .padding(10)
 
-                VStack(alignment: .leading) {
+                LazyVStack(alignment: .leading) {
                     if self.viewModel.audioFiles.count > 0 {
                         Text("Audio")
                             .font(.subheadline)
@@ -100,7 +96,7 @@ struct Detail: View {
                             .foregroundColor(.fairyRed)
                             .padding(.horizontal, 10)
 
-                        ForEach(self.viewModel.audioFiles, id: \.self) { file in
+                        ForEach(self.viewModel.sortedAudioFiles(), id: \.self) { file in
                             self.createFileView(file)
                                 .padding(.leading, 5.0)
                                 .padding(.trailing, 5.0)
@@ -245,6 +241,15 @@ extension Detail {
                     self.playingFile = file
                 }
                 .store(in: &cancellables)
+        }
+
+        public func sortedAudioFiles() -> [ArchiveFile] {
+            return audioFiles.sorted { lf, rf in
+                if let lTrack = Int(lf.track ?? ""), let rTrack = Int(rf.track ?? "") {
+                    return lTrack < rTrack
+                }
+                return false
+            }
         }
     }
 }

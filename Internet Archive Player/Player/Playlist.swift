@@ -42,27 +42,27 @@ struct Playlist: View {
                 viewModel.setUpSubscribers(iaPlayer)
                 iaPlayer.sendPlayingFileForPlaylist()
             }
-            .toolbar {
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    EditButton()
-                        .tint(.fairyRed)
-
-                    Button(action: {
-                        showingAlert = true
-                    }) {
-                        Image(systemName: "trash")
-                            .foregroundColor(.fairyRed)
-                    }
-                    .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
-                        Button("No", role: .cancel) { }
-                        Button("Yes") {
-                            iaPlayer.clearPlaylist()
-                        }
-                    }
-                }
-            }
+//            .toolbar {
+//                ToolbarItemGroup(placement: .navigationBarTrailing) {
+//                    EditButton()
+//                        .tint(.fairyRed)
+//
+//                    Button(action: {
+//                        showingAlert = true
+//                    }) {
+//                        Image(systemName: "trash")
+//                            .foregroundColor(.fairyRed)
+//                    }
+//                    .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
+//                        Button("No", role: .cancel) { }
+//                        Button("Yes") {
+//                            iaPlayer.clearPlaylist()
+//                        }
+//                    }
+//                }
+//            }
             .navigationBarColor(backgroundColor: Color("playerBackground"), titleColor: .fairyRed)
-            .navigationTitle("Playlist")
+//            .navigationTitle("Playlist")
         }
         .navigationViewStyle(.stack)
         .tint(.fairyRed)

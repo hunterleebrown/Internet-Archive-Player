@@ -42,6 +42,9 @@ struct SearchView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 20)
+                .onChange(of: viewModel.mediaType) { newValue in
+                    viewModel.search(query: viewModel.searchText, loadMore: false)
+                }
 
                 List{
                     ForEach(viewModel.items, id: \.self) { doc in

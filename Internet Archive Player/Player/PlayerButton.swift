@@ -17,6 +17,8 @@ enum PlayerButtonType: String {
     case expand = "arrow.up.left.and.arrow.down.right"
     case list = "list.bullet.rectangle.portrait"
     case listFill = "list.bullet.rectangle.portrait.fill"
+    case tv = "tv.circle"
+    case magnifyingGlass = "magnifyingGlass"
 
 }
 

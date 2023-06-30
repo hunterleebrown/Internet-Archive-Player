@@ -69,9 +69,9 @@ struct PlayerControls: View {
 
             HStack(alignment: .center, spacing: 10.0) {
 
-//                PlayerButton(.video, CGSize(width: 30, height: 20)) {
-//                    PlayerControls.showVideo.send(true)
-//                }
+                PlayerButton(.tv, CGSize(width: 30, height: 30)) {
+                    PlayerControls.showVideo.send(true)
+                }
 
 //                CustomVideoPlayer(player: iaPlayer.avPlayer)
 //                    .frame(width: 60, height: 40)
@@ -79,28 +79,32 @@ struct PlayerControls: View {
 //                        PlayerControls.showVideo.send(true)
 //                    }
 
-                VideoPlayer(player: iaPlayer.avPlayer)
-                    .frame(width: 60, height: 40)
-                    .onTapGesture {
-                        PlayerControls.showVideo.send(true)
-                    }
+//                VideoPlayer(player: iaPlayer.avPlayer)
+//                    .frame(width: 60, height: 40)
+//                    .onTapGesture {
+//                        PlayerControls.showVideo.send(true)
+//                    }
 
                 Spacer()
-                    .frame(width: 33.0, height: 33.0)
-
 
                 PlayerButton(.backwards) {
                     iaPlayer.advancePlayer(.backwards)
                 }
+
                 Spacer()
+
                 PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 44.0, height: 44.0)) {
                     iaPlayer.didTapPlayButton()
                 }
+
                 Spacer()
+
                 PlayerButton(.forwards) {
                     iaPlayer.advancePlayer(.forwards)
                 }
 
+                Spacer()
+                
                 AirPlayButton()
                     .frame(width: 33.0, height: 33.0)
             }
@@ -217,5 +221,6 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
         uiViewController.player = player
+        uiViewController.view.layer.cornerRadius = 10.0
     }
 }

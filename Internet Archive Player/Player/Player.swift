@@ -56,9 +56,11 @@ class Player: NSObject, ObservableObject {
     private let playlistFetchController: NSFetchedResultsController<PlaylistEntity>
 
     override init() {
-        playlistFetchController = NSFetchedResultsController(fetchRequest: PlaylistEntity.playlistFetchRequest,
-                                                             managedObjectContext: PersistenceController.shared.container.viewContext,
-                                                             sectionNameKeyPath: nil, cacheName: nil)
+        playlistFetchController =
+        NSFetchedResultsController(fetchRequest:  PlaylistEntity.playlistFetchRequest,
+                                   managedObjectContext: PersistenceController.shared.container.viewContext,
+                                   sectionNameKeyPath: nil,
+                                   cacheName: nil)
         super.init()
         playlistFetchController.delegate = self
 
