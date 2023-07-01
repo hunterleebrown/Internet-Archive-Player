@@ -214,7 +214,7 @@ extension Detail {
                         return track1 < track2
                     }
 
-                    self.movieFiles = doc.files.filter{ $0.format == .h264HD }
+                    self.movieFiles = doc.files.filter{ $0.format == .h264 }
                     
                 } catch {
                     print(error)
