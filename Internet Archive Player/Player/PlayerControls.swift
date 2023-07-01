@@ -109,8 +109,7 @@ struct PlayerControls: View {
                     .frame(width: 33.0, height: 33.0)
             }
             .tint(.fairyCream)
-            .padding(.leading)
-            .padding(.trailing)
+            .padding(10)
         }
         .background(Color("playerBackground"))
         .onAppear() {

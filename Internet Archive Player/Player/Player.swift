@@ -370,15 +370,20 @@ class Player: NSObject, ObservableObject {
         let playBackRate = playing ? 1.0 : 0.0
 
 
+        var artist = self.playingFile?.artist ?? ""
+        var fileTitle = self.fileTitle ?? ""
+
         var songInfo : [String : AnyObject] = [
             MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
             MPMediaItemPropertyAlbumTitle: self.fileIdentifierTitle! as AnyObject,
             MPMediaItemPropertyPlaybackDuration : NSNumber(value: CMTimeGetSeconds((self.avPlayer?.currentItem?.duration)!) as Double),
             MPNowPlayingInfoPropertyPlaybackRate: playBackRate as AnyObject,
+            MPMediaItemPropertyTitle: fileTitle as AnyObject,
+            MPMediaItemPropertyArtist: artist as AnyObject
         ]
 
-        songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
-        songInfo[MPMediaItemPropertyArtist] = self.playingFile?.artist as AnyObject
+//        songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
+//        songInfo[MPMediaItemPropertyArtist] = self.playingFile?.artist ?? "" as AnyObject
 //        if let image = await getImage() {
 //            songInfo[MPMediaItemPropertyArtwork] = image
 //        }

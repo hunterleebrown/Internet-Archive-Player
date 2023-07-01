@@ -31,7 +31,6 @@ struct BetterHome: View {
             }
             Playlist()
             Spacer()
-            PlayerControls()
                 .navigationTitle("Playlist")
                 .toolbar {
 
@@ -71,7 +70,7 @@ struct BetterHome: View {
 
                 }
                 .sheet(isPresented: $presentingSearch) {
-                   SearchView()
+                    SearchView()
                 }
                 .sheet(isPresented: $presentingFavorites) {
                     FavoritesView()
@@ -87,6 +86,9 @@ struct BetterHome: View {
                 .onReceive(PlayerControls.showVideo) { show in
                     showVideoPlayer.toggle()
                 }
+            PlayerControls()
+                .padding(10)
+
         }
         .environmentObject(iaPlayer)
     }

@@ -19,53 +19,31 @@ struct Playlist: View {
     @State private var showingAlert = false
 
     var body: some View {
-        NavigationView {
-            List{
-                ForEach(iaPlayer.items, id: \.self) { archiveFile in
-                    EntityFileView(archiveFile,
-                                   showImage: true,
-                                   backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
-                                   textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
-                                   fileViewMode: .playlist)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .onTapGesture {
-                        iaPlayer.playFile(archiveFile)
-                    }
-                    .padding(10)
+        List{
+            ForEach(iaPlayer.items, id: \.self) { archiveFile in
+                EntityFileView(archiveFile,
+                               showImage: true,
+                               backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
+                               textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
+                               fileViewMode: .playlist)
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .onTapGesture {
+                    iaPlayer.playFile(archiveFile)
                 }
-                .onDelete(perform: self.remove)
-                .onMove(perform: self.move)
+                .padding(10)
             }
-            .listStyle(PlainListStyle())
-            .modifier(BackgroundColorModifier(backgroundColor: Color("playerBackground")))
-            .onAppear() {
-                viewModel.setUpSubscribers(iaPlayer)
-                iaPlayer.sendPlayingFileForPlaylist()
-            }
-//            .toolbar {
-//                ToolbarItemGroup(placement: .navigationBarTrailing) {
-//                    EditButton()
-//                        .tint(.fairyRed)
-//
-//                    Button(action: {
-//                        showingAlert = true
-//                    }) {
-//                        Image(systemName: "trash")
-//                            .foregroundColor(.fairyRed)
-//                    }
-//                    .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
-//                        Button("No", role: .cancel) { }
-//                        Button("Yes") {
-//                            iaPlayer.clearPlaylist()
-//                        }
-//                    }
-//                }
-//            }
-            .navigationBarColor(backgroundColor: Color("playerBackground"), titleColor: .fairyRed)
-//            .navigationTitle("Playlist")
+            .onDelete(perform: self.remove)
+            .onMove(perform: self.move)
         }
-        .navigationViewStyle(.stack)
+        .listStyle(PlainListStyle())
+        .modifier(BackgroundColorModifier(backgroundColor: Color("playerBackground")))
+        .onAppear() {
+            viewModel.setUpSubscribers(iaPlayer)
+            iaPlayer.sendPlayingFileForPlaylist()
+        }
+        .navigationBarColor(backgroundColor: Color("playerBackground"), titleColor: .fairyRed)
         .tint(.fairyRed)
+
     }
 
     private func remove(at offsets: IndexSet) {
