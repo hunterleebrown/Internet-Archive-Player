@@ -42,6 +42,9 @@ struct SearchView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 20)
+                .onChange(of: viewModel.mediaType) { newValue in
+                    viewModel.search(query: viewModel.searchText, loadMore: false)
+                }
 
                 List{
                     ForEach(viewModel.items, id: \.self) { doc in
@@ -74,7 +77,7 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity)
                 .listStyle(PlainListStyle())
                 .navigationTitle("Search")
-                .navigationBarColor(backgroundColor: Color("playerBackground"), titleColor: .fairyRed)
+                .navigationBarColor(backgroundColor: nil, titleColor: .fairyRed)
             }
         }
         .navigationViewStyle(.stack)

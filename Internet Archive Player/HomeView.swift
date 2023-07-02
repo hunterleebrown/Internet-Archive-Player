@@ -24,6 +24,7 @@ struct HomeView: View {
             if showVideoPlayer {
                 CustomVideoPlayer(player: iaPlayer.avPlayer)
                     .frame(width: .infinity, height: 200)
+                    .padding(5)
             }
             Tabs()
             Button(action: {
