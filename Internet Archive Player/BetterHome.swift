@@ -21,14 +21,9 @@ struct BetterHome: View {
     @State private var showingAlert = false
     @State var showVideoPlayer: Bool = false
 
-
     var body: some View {
         NavigationStack {
-            if showVideoPlayer {
-                CustomVideoPlayer(player: iaPlayer.avPlayer)
-                    .frame(width: .infinity, height: 200)
-                    .padding(5)
-            }
+
             Playlist()
             Spacer()
                 .navigationTitle("Playlist")
@@ -78,6 +73,11 @@ struct BetterHome: View {
                 .sheet(item: $playingFile, content: { file in
                     Detail(file.identifier!, isPresented: true)
                 })
+                .sheet(isPresented: $showVideoPlayer, content: {
+                    CustomVideoPlayer(player: iaPlayer.avPlayer)
+                        .background(Color.black)
+                })
+
                 .onReceive(PlayerControls.showPlayingDetails) { file in
                     withAnimation {
                         playingFile = file

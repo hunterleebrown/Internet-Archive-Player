@@ -14,6 +14,7 @@
 		5A4151BA27B0FEAA007A3623 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B927B0FEAA007A3623 /* Player.swift */; };
 		5A4151BD27B3645E007A3623 /* Inject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BC27B3645E007A3623 /* Inject.swift */; };
 		5A4151BF27B364B4007A3623 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BE27B364B4007A3623 /* ServiceContainer.swift */; };
+		5A4F2D592A50781D00DCDF95 /* UIImageView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D582A50781D00DCDF95 /* UIImageView+Extension.swift */; };
 		5A71893F280B721400B1944B /* NavigationBarModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A71893E280B721400B1944B /* NavigationBarModifier.swift */; };
 		5AA391A52A4F4C8A00C65A48 /* BetterHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA391A42A4F4C8A00C65A48 /* BetterHome.swift */; };
 		5AC10D5B281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5AC10D59281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld */; };
@@ -67,6 +68,7 @@
 		5A4151B927B0FEAA007A3623 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		5A4151BC27B3645E007A3623 /* Inject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inject.swift; sourceTree = "<group>"; };
 		5A4151BE27B364B4007A3623 /* ServiceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceContainer.swift; sourceTree = "<group>"; };
+		5A4F2D582A50781D00DCDF95 /* UIImageView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Extension.swift"; sourceTree = "<group>"; };
 		5A71893E280B721400B1944B /* NavigationBarModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBarModifier.swift; sourceTree = "<group>"; };
 		5AA391A42A4F4C8A00C65A48 /* BetterHome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetterHome.swift; sourceTree = "<group>"; };
 		5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Internet-Archive-Player-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -245,6 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */,
+				5A4F2D582A50781D00DCDF95 /* UIImageView+Extension.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -437,6 +440,7 @@
 			files = (
 				5AC5DBA4281F7C36004D64DB /* PlaylistEntity+Extension.swift in Sources */,
 				5AD6BC58279CF31400495070 /* Playlist.swift in Sources */,
+				5A4F2D592A50781D00DCDF95 /* UIImageView+Extension.swift in Sources */,
 				5ADED078279B8BA000FB2E6D /* HomeView.swift in Sources */,
 				5A4151BD27B3645E007A3623 /* Inject.swift in Sources */,
 				5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */,

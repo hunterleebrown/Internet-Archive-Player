@@ -73,18 +73,6 @@ struct PlayerControls: View {
                     PlayerControls.showVideo.send(true)
                 }
 
-//                CustomVideoPlayer(player: iaPlayer.avPlayer)
-//                    .frame(width: 60, height: 40)
-//                    .onTapGesture {
-//                        PlayerControls.showVideo.send(true)
-//                    }
-
-//                VideoPlayer(player: iaPlayer.avPlayer)
-//                    .frame(width: 60, height: 40)
-//                    .onTapGesture {
-//                        PlayerControls.showVideo.send(true)
-//                    }
-
                 Spacer()
 
                 PlayerButton(.backwards) {
@@ -111,7 +99,7 @@ struct PlayerControls: View {
             .tint(.fairyCream)
             .padding(10)
         }
-        .background(Color("playerBackground"))
+//        .background(Color("playerBackground"))
         .onAppear() {
             viewModel.setSubscribers(iaPlayer)
         }
@@ -211,6 +199,7 @@ struct PlayerControls_Previews: PreviewProvider {
 struct CustomVideoPlayer: UIViewControllerRepresentable {
 
     let player: AVPlayer?
+    @EnvironmentObject var iaPlayer: Player
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
@@ -221,5 +210,23 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
         uiViewController.player = player
         uiViewController.view.layer.cornerRadius = 10.0
+
+//        if let ident = iaPlayer.playingFile?.identifier, let url = IAMediaUtils.imageUrlFrom(ident) {
+//            var imageView = UIImageView()
+//            imageView.translatesAutoresizingMaskIntoConstraints = false
+//            imageView.contentMode = .scaleAspectFit
+//            imageView.load(url: url)
+//            uiViewController.contentOverlayView?.addSubview(imageView)
+//
+//            if let overview = uiViewController.contentOverlayView {
+//                NSLayoutConstraint.activate([
+//                    imageView.leadingAnchor.constraint(equalTo: overview.leadingAnchor),
+//                    imageView.trailingAnchor.constraint(equalTo: overview.trailingAnchor),
+//                    imageView.topAnchor.constraint(equalTo: overview.topAnchor),
+//                    imageView.bottomAnchor.constraint(equalTo: overview.bottomAnchor)
+//                ])
+//
+//            }
+//        }
     }
 }

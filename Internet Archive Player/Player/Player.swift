@@ -42,7 +42,7 @@ class Player: NSObject, ObservableObject {
     private var mainPlaylist: PlaylistEntity? = nil
     public var playingFile: ArchiveFileEntity? = nil
     @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
-    public var avPlayer: AVPlayer?
+    @Published public var avPlayer: AVPlayer?
     private var observing = false
     fileprivate var observerContext = 0
     private var playing = false
