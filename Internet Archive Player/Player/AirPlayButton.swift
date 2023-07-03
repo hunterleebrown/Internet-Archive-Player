@@ -27,7 +27,7 @@ class AirPLayViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let isDarkMode = self.traitCollection.userInterfaceStyle == .dark
+        _ = self.traitCollection.userInterfaceStyle == .dark
 
         let button = UIButton()
         let boldConfig = UIImage.SymbolConfiguration(scale: .large)

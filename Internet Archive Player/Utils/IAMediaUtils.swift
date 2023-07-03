@@ -446,6 +446,6 @@ struct IAMediaUtils
             return IAFileFormat.other
         }
     }
-    
+
 
 }
