@@ -48,7 +48,8 @@ struct Detail: View {
                 Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                     .font(.headline)
                     .bold()
-                    .multilineTextAlignment(.center)
+//                    .multilineTextAlignment(.center)
+
                 if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
                     Text(artist)
                         .font(.subheadline)
@@ -61,11 +62,12 @@ struct Detail: View {
                         .multilineTextAlignment(.center)
                 }
 
-                if let desc = self.viewModel.archiveDoc?.description {
-                    Text(AttributedString(attString(desc: desc.joined(separator: ", "))))
+                if let desc = self.viewModel.archiveDoc?.descriptionHtml {
+                    Text(AttributedString(desc))
                         .padding(10.0)
                         .frame(maxWidth: .infinity)
                         .background(Color.white)
+                        .cornerRadius(5)
                 }
 
                 HStack() {
@@ -167,18 +169,6 @@ struct Detail: View {
                 
             }
         })
-    }
-    
-    func attString(desc: String) -> NSAttributedString {
-        if let data = desc.data(using: .unicode) {
-            return try! NSAttributedString(
-                data: data,
-                options: [
-                    .documentType: NSAttributedString.DocumentType.html,
-                ],
-                documentAttributes: nil)
-        }
-        return NSAttributedString()
     }
 }
 
