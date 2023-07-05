@@ -11,7 +11,7 @@ struct FavoritesView: View {
     @StateObject var viewModel = FavoritesView.ViewModel()
     var body: some View {
         List {
-            ForEach(self.viewModel.paths, id: \.self) { file in
+            ForEach(self.viewModel.files, id: \.self) { file in
                 Text(file)
                     .font(.caption2)
             }
@@ -36,11 +36,13 @@ struct FavoritesView_Previews: PreviewProvider {
 extension FavoritesView {
     class ViewModel: ObservableObject {
         @Published var paths: [String] = []
+        @Published var files: [String] = []
         @Published var totalFiles: Int = 0
         @Published var totalDownloadSize: Int = 0
 
         func updateFiles() {
             self.paths.removeAll()
+            self.files.removeAll()
             self.totalFiles = 0
             self.totalDownloadSize = 0
             do {
@@ -64,9 +66,14 @@ extension FavoritesView {
                             if let fileSize = attributes[FileAttributeKey.size] as? Int {
                                 totalDownloadSize = totalDownloadSize + fileSize
                             }
+                            self.files.append("\(file)")
                         }
                     }
                 }
+
+                print("paths: ")
+                dump(self.paths)
+
             } catch {
                 print("ERROR IN FILE FETCH -- or no contentsOfDirectoryAtPath  \(error)")
             }

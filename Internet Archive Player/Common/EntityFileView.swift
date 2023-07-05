@@ -94,9 +94,9 @@ struct EntityFileView: View {
                         .font(.caption2)
                         .foregroundColor(textColor)
                         .bold()
-                    Image(systemName: showDownloadButton ? "cloud" : "arrow.down.square.fill")
+                    Image(systemName: showDownloadButton ? "cloud" : "iphone")
                         .font(.caption2)
-                    Text(showDownloadButton ? "can be streamed" : "is a local file")
+                    Text(showDownloadButton ? "online" : "downloaded")
                         .font(.caption2)
                         .foregroundColor(textColor)
                 }

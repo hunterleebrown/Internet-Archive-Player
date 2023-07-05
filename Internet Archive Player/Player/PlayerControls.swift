@@ -69,11 +69,8 @@ struct PlayerControls: View {
 
             HStack(alignment: .center, spacing: 10.0) {
 
-                PlayerButton(.tv, CGSize(width: 30, height: 30)) {
-                    PlayerControls.showVideo.send(true)
-                }
-
                 Spacer()
+                    .frame(width: 33.0)
 
                 PlayerButton(.backwards) {
                     iaPlayer.advancePlayer(.backwards)
@@ -95,11 +92,11 @@ struct PlayerControls: View {
                 
                 AirPlayButton()
                     .frame(width: 33.0, height: 33.0)
+
             }
             .tint(.fairyCream)
             .padding(10)
         }
-//        .background(Color("playerBackground"))
         .onAppear() {
             viewModel.setSubscribers(iaPlayer)
         }
@@ -198,35 +195,18 @@ struct PlayerControls_Previews: PreviewProvider {
 
 struct CustomVideoPlayer: UIViewControllerRepresentable {
 
-    let player: AVPlayer?
     @EnvironmentObject var iaPlayer: Player
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
-//        controller.player = player
         return controller
     }
 
     func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-        uiViewController.player = player
-        uiViewController.view.layer.cornerRadius = 10.0
+        uiViewController.player = iaPlayer.avPlayer
+    }
 
-//        if let ident = iaPlayer.playingFile?.identifier, let url = IAMediaUtils.imageUrlFrom(ident) {
-//            var imageView = UIImageView()
-//            imageView.translatesAutoresizingMaskIntoConstraints = false
-//            imageView.contentMode = .scaleAspectFit
-//            imageView.load(url: url)
-//            uiViewController.contentOverlayView?.addSubview(imageView)
-//
-//            if let overview = uiViewController.contentOverlayView {
-//                NSLayoutConstraint.activate([
-//                    imageView.leadingAnchor.constraint(equalTo: overview.leadingAnchor),
-//                    imageView.trailingAnchor.constraint(equalTo: overview.trailingAnchor),
-//                    imageView.topAnchor.constraint(equalTo: overview.topAnchor),
-//                    imageView.bottomAnchor.constraint(equalTo: overview.bottomAnchor)
-//                ])
-//
-//            }
-//        }
+    static func dismantleUIViewController(_ uiViewController: AVPlayerViewController, coordinator: ()) {
+        Player.shared.avPlayer = nil
     }
 }

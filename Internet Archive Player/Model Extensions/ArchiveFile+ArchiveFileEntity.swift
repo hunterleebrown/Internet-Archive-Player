@@ -61,6 +61,10 @@ extension ArchiveFileEntity {
         return title ?? name ?? ""
     }
 
+    public var displayArtist: String {
+        return artist ?? creator ?? ""
+    }
+
     public func download(delegate: FileViewDownloadDelegate) {
         let downloader = Downloader(self, delegate: delegate)
         do {

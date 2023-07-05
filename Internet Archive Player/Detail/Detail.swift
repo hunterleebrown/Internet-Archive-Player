@@ -76,9 +76,18 @@ struct Detail: View {
                         .bold()
                         .foregroundColor(.fairyRed)
                     Spacer()
-                    Button(action: {
-                        playlistAddAllAlert = true
-                    }) {
+
+                    Menu {
+                        Button(action: {
+                            viewModel.addAllFilesToPlaylist(player: iaPlayer)
+                        }){
+                            HStack {
+                                Image(systemName: PlayerButtonType.list.rawValue)
+                                Text("Add all to playlist")
+                            }
+                        }
+                        .frame(width: 44, height: 44)
+                    } label: {
                         HStack(spacing: 1.0) {
                             Image(systemName: "plus")
                                 .tint(.fairyRed)
@@ -86,7 +95,7 @@ struct Detail: View {
                                 .tint(.fairyRed)
                         }
                     }
-                    .tint(.fairyRed)
+                    .highPriorityGesture(TapGesture())
                 }
                 .padding(10)
 
@@ -103,6 +112,12 @@ struct Detail: View {
                                 .padding(.leading, 5.0)
                                 .padding(.trailing, 5.0)
                                 .onTapGesture {
+                                    do  {
+                                        try iaPlayer.checkDupes(archiveFile: file)
+                                    } catch PlayerError.alreadyOnPlaylist {
+                                        self.playlistErrorAlertShowing = true
+                                        return
+                                    } catch {}
                                     iaPlayer.playFile(file)
                                 }
                         }
@@ -120,6 +135,12 @@ struct Detail: View {
                                 .padding(.leading, 5.0)
                                 .padding(.trailing, 5.0)
                                 .onTapGesture {
+                                    do  {
+                                        try iaPlayer.checkDupes(archiveFile: file)
+                                    } catch PlayerError.alreadyOnPlaylist {
+                                        self.playlistErrorAlertShowing = true
+                                        return
+                                    } catch {}
                                     iaPlayer.playFile(file)
                                 }
                         }
@@ -144,12 +165,12 @@ struct Detail: View {
                 .tint(.fairyRed)
         })
 //        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
-        .alert("Add all files to Playlist?", isPresented: $playlistAddAllAlert) {
-            Button("No", role: .cancel) { }
-            Button("Yes") {
-                viewModel.addAllFilesToPlaylist(player: iaPlayer)
-            }
-        }
+//        .alert("Add all files to Playlist?", isPresented: $playlistAddAllAlert) {
+//            Button("No", role: .cancel) { }
+//            Button("Yes") {
+//                viewModel.addAllFilesToPlaylist(player: iaPlayer)
+//            }
+//        }
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
@@ -164,7 +185,7 @@ struct Detail: View {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
-                //                self.playlistErrorAlertShowing = true
+                self.playlistErrorAlertShowing = true
             } catch {
                 
             }

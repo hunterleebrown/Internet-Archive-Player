@@ -22,7 +22,7 @@ struct HomeView: View {
 
         VStack(alignment:.center, spacing: 0) {
             if showVideoPlayer {
-                CustomVideoPlayer(player: iaPlayer.avPlayer)
+                CustomVideoPlayer()
                     .frame(width: .infinity, height: 200)
                     .padding(5)
             }
