@@ -69,9 +69,6 @@ struct PlayerControls: View {
 
             HStack(alignment: .center, spacing: 10.0) {
 
-                Spacer()
-                    .frame(width: 33.0)
-
                 PlayerButton(.backwards) {
                     iaPlayer.advancePlayer(.backwards)
                 }

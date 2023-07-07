@@ -16,6 +16,7 @@ import CoreData
 
 enum PlayerError: Error {
     case alreadyOnPlaylist
+    case alreadyOnFavorites
 }
 
 extension PlayerError: CustomStringConvertible {
@@ -23,10 +24,11 @@ extension PlayerError: CustomStringConvertible {
         switch self {
         case .alreadyOnPlaylist:
             return "Item is already on the playlist."
+        case .alreadyOnFavorites:
+            return "Items is already favorited."
         }
     }
 }
-
 
 class Player: NSObject, ObservableObject {
 
@@ -39,7 +41,9 @@ class Player: NSObject, ObservableObject {
         case backwards = -1
     }
 
-    private var mainPlaylist: PlaylistEntity? = nil
+    var mainPlaylist: PlaylistEntity? = nil
+    var favoritesPlaylist: PlaylistEntity? = nil
+
     public var playingFile: ArchiveFileEntity? = nil {
         didSet {
             self.loadNowPlayingMediaArtwork()
@@ -57,6 +61,8 @@ class Player: NSObject, ObservableObject {
     private var playingMediaType: MPNowPlayingInfoMediaType? = nil
 
     @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
+    @Published var favoriteItems: [ArchiveFileEntity] = [ArchiveFileEntity]()
+
     @Published public var avPlayer: AVPlayer?
 
 //    let controller = AVPlayerViewController()
@@ -75,6 +81,8 @@ class Player: NSObject, ObservableObject {
     let presentingController = AVPlayerViewController()
 
     private let playlistFetchController: NSFetchedResultsController<PlaylistEntity>
+    private let favoritesFetchController: NSFetchedResultsController<PlaylistEntity>
+
 
     override init() {
         playlistFetchController =
@@ -82,12 +90,18 @@ class Player: NSObject, ObservableObject {
                                    managedObjectContext: PersistenceController.shared.container.viewContext,
                                    sectionNameKeyPath: nil,
                                    cacheName: nil)
+
+        favoritesFetchController =
+        NSFetchedResultsController(fetchRequest:  PlaylistEntity.favoritesFetchRequest,
+                                   managedObjectContext: PersistenceController.shared.container.viewContext,
+                                   sectionNameKeyPath: nil,
+                                   cacheName: nil)
         super.init()
         playlistFetchController.delegate = self
+        favoritesFetchController.delegate = self
 
         do {
           try playlistFetchController.performFetch()
-          //items = playlistFetchController.fetchedObjects ?? []
             if let playlist = playlistFetchController.fetchedObjects?.first {
                 mainPlaylist = playlist
                 if let files = mainPlaylist?.files?.array as? [ArchiveFileEntity] {
@@ -98,9 +112,24 @@ class Player: NSObject, ObservableObject {
                 mainPlaylist?.name = "main"
                 PersistenceController.shared.save()
             }
-
         } catch {
           print("failed to fetch items!")
+        }
+
+        do {
+          try favoritesFetchController.performFetch()
+            if let favoritesList = favoritesFetchController.fetchedObjects?.first {
+                favoritesPlaylist = favoritesList
+                if let files = favoritesPlaylist?.files?.array as? [ArchiveFileEntity] {
+                    favoriteItems = files
+                }
+            } else {
+                favoritesPlaylist = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
+                favoritesPlaylist?.name = "favorites"
+                PersistenceController.shared.save()
+            }
+        } catch {
+          print("failed to fetch favorite items!")
         }
 
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
@@ -150,11 +179,26 @@ class Player: NSObject, ObservableObject {
     }
 
     public func appendPlaylistItem(_ item: ArchiveFile) throws {
-        guard let playlist = mainPlaylist else { return }
         let archiveFileEntity = item.archiveFileEntity()
+        try? self.appendPlaylistItem(archiveFileEntity: archiveFileEntity)
+    }
+
+    public func appendPlaylistItem(archiveFileEntity: ArchiveFileEntity) throws {
+        guard let playlist = mainPlaylist else { return }
 
         let sameValues = self.items.filter {$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString }
         guard sameValues.isEmpty else { throw PlayerError.alreadyOnPlaylist }
+
+        playlist.addToFiles(archiveFileEntity)
+        PersistenceController.shared.save()
+    }
+
+    public func appendFavoriteItem(_ item: ArchiveFile) throws {
+        guard let playlist = favoritesPlaylist else { return }
+        let archiveFileEntity = item.archiveFileEntity()
+
+        let sameValues = self.favoriteItems.filter {$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString }
+        guard sameValues.isEmpty else { throw PlayerError.alreadyOnFavorites }
 
         playlist.addToFiles(archiveFileEntity)
         PersistenceController.shared.save()
@@ -179,8 +223,8 @@ class Player: NSObject, ObservableObject {
         PersistenceController.shared.save()
     }
 
-    public func removePlaylistItem(at offsets: IndexSet){
-        self.removePlayListEntities(at: offsets)
+    public func removeListItem(list: PlaylistEntity?, at offsets: IndexSet){
+        self.removePlayListEntities(list: list, at: offsets)
     }
 
 
@@ -194,10 +238,10 @@ class Player: NSObject, ObservableObject {
         }
     }
 
-    private func removePlayListEntities(at offsets: IndexSet) {
-        guard let playlist = mainPlaylist else { return }
+    private func removePlayListEntities(list: PlaylistEntity?, at offsets: IndexSet) {
+        guard let playlist = list else { return }
         for index in offsets {
-            let archiveFileEntity = items[index]
+            let archiveFileEntity = playlist.name == "main" ? items[index] : favoriteItems[index]
             self.deleteLocalFile(item: archiveFileEntity)
             playlist.removeFromFiles(archiveFileEntity)
             PersistenceController.shared.delete(archiveFileEntity, false)
@@ -206,11 +250,8 @@ class Player: NSObject, ObservableObject {
     }
 
 
-    public func rearrangePlaylist(fromOffsets source: IndexSet, toOffset destination: Int) {
-        guard let playlist = mainPlaylist else { return }
-//        playlist.
-//        //self.items.move(fromOffsets: source, toOffset: destination)
-
+    public func rearrangeList(list: PlaylistEntity?, fromOffsets source: IndexSet, toOffset destination: Int) {
+        guard let playlist = list else { return }
         playlist.moveObject(indexes: source, toIndex: destination)
         PersistenceController.shared.save()
     }
@@ -510,7 +551,17 @@ extension Player: NSFetchedResultsControllerDelegate {
       else { return }
       DispatchQueue.main.async {
           if let files = playlist.files?.array as? [ArchiveFileEntity] {
-              self.items = files
+
+              switch playlist.name {
+              case "main":
+                  self.items = files
+              case "favorites":
+                  self.favoriteItems = files
+              case .none:
+                  print("no playlist name")
+              case .some(_):
+                  print("some what?")
+              }
           }
       }
   }

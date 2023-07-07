@@ -100,7 +100,7 @@ class Downloader: NSObject {
     }
 
     private var downloadDirectory: URL? {
-        guard let fileComponent = self.file.url?.lastPathComponent, let identifier = file.identifier else { return nil }
+        guard self.file.url?.lastPathComponent != nil, let identifier = file.identifier else { return nil }
         return Downloader.directory().appendingPathComponent(identifier)
     }
 
@@ -136,11 +136,11 @@ extension Downloader: URLSessionDownloadDelegate {
            // * downloadTask.response should be an HTTPURLResponse with statusCode in 200..<299
 
            do {
-               let documentsURL = try
-                   FileManager.default.url(for: .documentDirectory,
-                                           in: .userDomainMask,
-                                           appropriateFor: nil,
-                                           create: false)
+//               let documentsURL = try
+//                   FileManager.default.url(for: .documentDirectory,
+//                                           in: .userDomainMask,
+//                                           appropriateFor: nil,
+//                                           create: false)
 
 
                if let destinationUrl = downloadUrl {

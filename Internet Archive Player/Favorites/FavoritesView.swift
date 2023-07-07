@@ -9,10 +9,12 @@ import SwiftUI
 
 struct FavoritesView: View {
     @StateObject var viewModel = FavoritesView.ViewModel()
+    @EnvironmentObject var iaPlayer: Player
+
     var body: some View {
         List {
-            ForEach(self.viewModel.files, id: \.self) { file in
-                Text(file)
+            ForEach(iaPlayer.favoriteItems, id: \.self) { file in
+                Text(file.displayTitle)
                     .font(.caption2)
             }
             Divider()
@@ -22,7 +24,7 @@ struct FavoritesView: View {
         }
         .modifier(BackgroundColorModifier(backgroundColor: Color.gray))
         .onAppear() {
-            viewModel.updateFiles()
+//            viewModel.updateFiles()
         }
     }
 }

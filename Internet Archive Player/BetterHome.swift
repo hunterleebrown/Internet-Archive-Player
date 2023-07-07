@@ -28,7 +28,6 @@ struct BetterHome: View {
             GeometryReader { geo in
                 VStack {
                     Playlist()
-                    //                Spacer()
                         .navigationTitle("Playlist")
                         .toolbar {
 
@@ -71,7 +70,7 @@ struct BetterHome: View {
                             SearchView()
                         }
                         .sheet(isPresented: $presentingFavorites) {
-                            FavoritesView()
+                            NewFavoritesView()
                         }
                         .sheet(item: $playingFile, content: { file in
                             Detail(file.identifier!, isPresented: true)

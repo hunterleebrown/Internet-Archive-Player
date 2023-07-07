@@ -20,6 +20,8 @@ struct Detail: View {
     @State private var isPresented = false
 
     @State var playlistErrorAlertShowing: Bool = false
+    @State var favoritesErrorAlertShowing: Bool = false
+
 
     init(_ identifier: String, isPresented: Bool = false) {
         self.identifier = identifier
@@ -174,6 +176,9 @@ struct Detail: View {
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
+        .alert(PlayerError.alreadyOnFavorites.description, isPresented: $favoritesErrorAlertShowing) {
+            Button("Okay", role: .cancel) { }
+        }
     }
 
     func createFileView(_ archiveFile: ArchiveFile) -> FileView {
@@ -181,15 +186,36 @@ struct Detail: View {
                  showDownloadButton: false,
                  backgroundColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyRed : .fairyRedAlpha,
                  textColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyCream : .white,
-                 ellipsisAction: {
+                 ellipsisAction: self.menuActions(archiveFile: archiveFile) )
+    }
+
+    private func menuActions(archiveFile: ArchiveFile) -> [MenuAction] {
+        var actions = [MenuAction]()
+
+        let playlist = MenuAction(name: "Add to playlist", action:  {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
                 self.playlistErrorAlertShowing = true
             } catch {
-                
+
             }
-        })
+        }, imageName: "list.bullet.rectangle.portrait")
+
+        let favorites = MenuAction(name: "Add to favorites", action:  {
+            do  {
+                try iaPlayer.appendFavoriteItem(archiveFile)
+            } catch PlayerError.alreadyOnFavorites {
+                self.favoritesErrorAlertShowing = true
+            } catch {
+
+            }
+        }, imageName: "heart")
+
+        actions.append(playlist)
+        actions.append(favorites)
+
+        return actions
     }
 }
 

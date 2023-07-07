@@ -18,6 +18,14 @@ extension PlaylistEntity {
       return request
     }
 
+    static var favoritesFetchRequest: NSFetchRequest<PlaylistEntity> {
+      let request: NSFetchRequest<PlaylistEntity> = PlaylistEntity.fetchRequest()
+      request.predicate = NSPredicate(format: "name == %@", "favorites")
+      request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+
+      return request
+    }
+
     private var mutableSubItems: NSMutableOrderedSet {
         return mutableOrderedSetValue(forKey: "files")
     }
