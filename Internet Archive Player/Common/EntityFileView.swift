@@ -24,14 +24,14 @@ struct EntityFileView: View {
     var showImage: Bool = false
     @State var showDownloadButton = true
     var fileViewMode: FileViewMode = .detail
-    var ellipsisAction: (()->())? = nil
+    var ellipsisAction: [MenuAction] = [MenuAction]()
 
     init(_ archiveFile: ArchiveFileEntity,
          showImage: Bool = false,
          backgroundColor: Color? = Color.fairyRedAlpha,
          textColor: Color = Color.fairyCream,
          fileViewMode: FileViewMode = .detail,
-         ellipsisAction: (()->())? = nil){
+         ellipsisAction: [MenuAction] = [MenuAction]()){
 
         self.archiveFile = archiveFile
         self.showImage = showImage
@@ -94,9 +94,9 @@ struct EntityFileView: View {
                         .font(.caption2)
                         .foregroundColor(textColor)
                         .bold()
-                    Image(systemName: showDownloadButton ? "cloud" : "arrow.down.square.fill")
+                    Image(systemName: showDownloadButton ? "cloud" : "iphone")
                         .font(.caption2)
-                    Text(showDownloadButton ? "can be streamed" : "is a local file")
+                    Text(showDownloadButton ? "online" : "downloaded")
                         .font(.caption2)
                         .foregroundColor(textColor)
                 }
@@ -114,34 +114,81 @@ struct EntityFileView: View {
             .padding(5.0)
             Spacer()
             HStack() {
-                Menu {
-                    if (showDownloadButton && archiveFile.format == "VBR MP3") {
-                        Button(action: {
-                            archiveFile.download(delegate: viewModel)
-                        }) {
-                            Image(systemName: "icloud.and.arrow.down")
-                                .aspectRatio(contentMode: .fill)
-                                .foregroundColor(textColor)
-                            Text("Download")
-                        }
-                        .frame(width: 44, height: 44)
-                    }
 
-                    Button(action: {
-                        PlayerControls.showPlayingDetails.send(archiveFile)
-                    }){
-                        HStack {
-                            Image(systemName: "info.circle")
-                            Text("Archive Details")
+                    Menu {
+
+                        ForEach(self.ellipsisAction, id: \.self) { menuItem in
+                            Button(action: {
+                                menuItem.action()
+                            }){
+                                HStack {
+                                    if let imageName = menuItem.imageName {
+                                        Image(systemName: imageName)
+                                            .aspectRatio(contentMode: .fill)
+                                            .foregroundColor(textColor)
+                                    }
+                                    Text(menuItem.name)
+                                }
+                            }
+                            .frame(width: 44, height: 44)
+
                         }
+
+                        if (showDownloadButton && archiveFile.format == "VBR MP3") {
+                            Button(action: {
+                                archiveFile.download(delegate: viewModel)
+                            }) {
+                                Image(systemName: "icloud.and.arrow.down")
+                                    .aspectRatio(contentMode: .fill)
+                                    .foregroundColor(textColor)
+                                Text("Download")
+                            }
+                            .frame(width: 44, height: 44)
+                        }
+
+
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .foregroundColor(textColor)
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 44, height: 44)
                     }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .foregroundColor(textColor)
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 33, height: 33)
-                }
-                .highPriorityGesture(TapGesture())
+                    .highPriorityGesture(TapGesture())
+
+
+//                Menu {
+//                    if (showDownloadButton && archiveFile.format == "VBR MP3") {
+//                        Button(action: {
+//                            archiveFile.download(delegate: viewModel)
+//                        }) {
+//                            Image(systemName: "icloud.and.arrow.down")
+//                                .aspectRatio(contentMode: .fill)
+//                                .foregroundColor(textColor)
+//                            Text("Download")
+//                        }
+//                        .frame(width: 44, height: 44)
+//                    }
+//
+//                    Button(action: {
+//
+//                        PlayerControls.showPlayingDetails.send(archiveFile)
+//
+//                    }){
+//                        HStack {
+//                            Image(systemName: "info.circle")
+//                            Text("Archive Details")
+//                        }
+//                    }
+//
+//
+//
+//                } label: {
+//                    Image(systemName: "ellipsis")
+//                        .foregroundColor(textColor)
+//                        .aspectRatio(contentMode: .fill)
+//                        .frame(width: 33, height: 33)
+//                }
+//                .highPriorityGesture(TapGesture())
             }
             .tint(textColor)
             .padding(5.0)

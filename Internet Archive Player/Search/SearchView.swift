@@ -77,7 +77,7 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity)
                 .listStyle(PlainListStyle())
                 .navigationTitle("Search")
-                .navigationBarColor(backgroundColor: nil, titleColor: .fairyRed)
+                .navigationBarColor(backgroundColor: Color("playerbackground"), titleColor: .fairyRed)
             }
         }
         .navigationViewStyle(.stack)

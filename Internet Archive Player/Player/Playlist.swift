@@ -25,7 +25,8 @@ struct Playlist: View {
                                showImage: true,
                                backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
                                textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
-                               fileViewMode: .playlist)
+                               fileViewMode: .playlist,
+                               ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .onTapGesture {
                     iaPlayer.playFile(archiveFile)
@@ -47,11 +48,23 @@ struct Playlist: View {
     }
 
     private func remove(at offsets: IndexSet) {
-        self.iaPlayer.removePlaylistItem(at: offsets)
+        self.iaPlayer.removeListItem(list: iaPlayer.mainPlaylist, at: offsets)
     }
 
     private func move(fromOffsets source: IndexSet, toOffset destination: Int) {
-        self.iaPlayer.rearrangePlaylist(fromOffsets: source, toOffset: destination)
+        self.iaPlayer.rearrangeList(list: iaPlayer.mainPlaylist, fromOffsets: source, toOffset: destination)
+    }
+
+    private func menuItems(archiveFileEntity: ArchiveFileEntity) -> [MenuAction] {
+        var items = [MenuAction]()
+
+        let details = MenuAction(name: "Archive details", action:  {
+            PlayerControls.showPlayingDetails.send(archiveFileEntity)
+        }, imageName: "info.circle")
+
+        items.append(details)
+
+        return items
     }
 }
 

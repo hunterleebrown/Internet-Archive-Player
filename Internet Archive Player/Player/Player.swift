@@ -16,6 +16,7 @@ import CoreData
 
 enum PlayerError: Error {
     case alreadyOnPlaylist
+    case alreadyOnFavorites
 }
 
 extension PlayerError: CustomStringConvertible {
@@ -23,10 +24,11 @@ extension PlayerError: CustomStringConvertible {
         switch self {
         case .alreadyOnPlaylist:
             return "Item is already on the playlist."
+        case .alreadyOnFavorites:
+            return "Items is already favorited."
         }
     }
 }
-
 
 class Player: NSObject, ObservableObject {
 
@@ -39,21 +41,48 @@ class Player: NSObject, ObservableObject {
         case backwards = -1
     }
 
-    private var mainPlaylist: PlaylistEntity? = nil
-    public var playingFile: ArchiveFileEntity? = nil
+    var mainPlaylist: PlaylistEntity? = nil
+    var favoritesPlaylist: PlaylistEntity? = nil
+
+    public var playingFile: ArchiveFileEntity? = nil {
+        didSet {
+            self.loadNowPlayingMediaArtwork()
+            switch playingFile?.format {
+            case "h.264":
+                self.playingMediaType = MPNowPlayingInfoMediaType(rawValue: 2)
+            case "VBR MP3":
+                self.playingMediaType = MPNowPlayingInfoMediaType(rawValue: 1)
+            default:
+                self.playingMediaType = MPNowPlayingInfoMediaType(rawValue: 0)
+            }
+        }
+    }
+
+    private var playingMediaType: MPNowPlayingInfoMediaType? = nil
+
     @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
+    @Published var favoriteItems: [ArchiveFileEntity] = [ArchiveFileEntity]()
+
     @Published public var avPlayer: AVPlayer?
+
+//    let controller = AVPlayerViewController()
+
     private var observing = false
     fileprivate var observerContext = 0
     private var playing = false
 
+    private var playingImage: MPMediaItemArtwork?
+
     var fileTitle: String?
     var fileIdentifierTitle: String?
     var fileIdentifier: String?
-    var mediaArtwork : MPMediaItemArtwork?
     var itemSubscritpions: Set<AnyCancellable> = Set<AnyCancellable>()
 
+    let presentingController = AVPlayerViewController()
+
     private let playlistFetchController: NSFetchedResultsController<PlaylistEntity>
+    private let favoritesFetchController: NSFetchedResultsController<PlaylistEntity>
+
 
     override init() {
         playlistFetchController =
@@ -61,12 +90,18 @@ class Player: NSObject, ObservableObject {
                                    managedObjectContext: PersistenceController.shared.container.viewContext,
                                    sectionNameKeyPath: nil,
                                    cacheName: nil)
+
+        favoritesFetchController =
+        NSFetchedResultsController(fetchRequest:  PlaylistEntity.favoritesFetchRequest,
+                                   managedObjectContext: PersistenceController.shared.container.viewContext,
+                                   sectionNameKeyPath: nil,
+                                   cacheName: nil)
         super.init()
         playlistFetchController.delegate = self
+        favoritesFetchController.delegate = self
 
         do {
           try playlistFetchController.performFetch()
-          //items = playlistFetchController.fetchedObjects ?? []
             if let playlist = playlistFetchController.fetchedObjects?.first {
                 mainPlaylist = playlist
                 if let files = mainPlaylist?.files?.array as? [ArchiveFileEntity] {
@@ -77,9 +112,24 @@ class Player: NSObject, ObservableObject {
                 mainPlaylist?.name = "main"
                 PersistenceController.shared.save()
             }
-
         } catch {
           print("failed to fetch items!")
+        }
+
+        do {
+          try favoritesFetchController.performFetch()
+            if let favoritesList = favoritesFetchController.fetchedObjects?.first {
+                favoritesPlaylist = favoritesList
+                if let files = favoritesPlaylist?.files?.array as? [ArchiveFileEntity] {
+                    favoriteItems = files
+                }
+            } else {
+                favoritesPlaylist = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
+                favoritesPlaylist?.name = "favorites"
+                PersistenceController.shared.save()
+            }
+        } catch {
+          print("failed to fetch favorite items!")
         }
 
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
@@ -129,14 +179,34 @@ class Player: NSObject, ObservableObject {
     }
 
     public func appendPlaylistItem(_ item: ArchiveFile) throws {
-        guard let playlist = mainPlaylist else { return }
         let archiveFileEntity = item.archiveFileEntity()
+        try? self.appendPlaylistItem(archiveFileEntity: archiveFileEntity)
+    }
+
+    public func appendPlaylistItem(archiveFileEntity: ArchiveFileEntity) throws {
+        guard let playlist = mainPlaylist else { return }
 
         let sameValues = self.items.filter {$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString }
         guard sameValues.isEmpty else { throw PlayerError.alreadyOnPlaylist }
 
         playlist.addToFiles(archiveFileEntity)
         PersistenceController.shared.save()
+    }
+
+    public func appendFavoriteItem(_ item: ArchiveFile) throws {
+        guard let playlist = favoritesPlaylist else { return }
+        let archiveFileEntity = item.archiveFileEntity()
+
+        let sameValues = self.favoriteItems.filter {$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString }
+        guard sameValues.isEmpty else { throw PlayerError.alreadyOnFavorites }
+
+        playlist.addToFiles(archiveFileEntity)
+        PersistenceController.shared.save()
+    }
+
+    public func checkDupes(archiveFile: ArchiveFile) throws {
+        let sameValues = self.items.filter {$0.onlineUrl?.absoluteString == archiveFile.url?.absoluteString }
+        guard sameValues.isEmpty else { throw PlayerError.alreadyOnPlaylist }
     }
 
     public func getPlaylist() -> [ArchiveFileEntity] {
@@ -153,8 +223,8 @@ class Player: NSObject, ObservableObject {
         PersistenceController.shared.save()
     }
 
-    public func removePlaylistItem(at offsets: IndexSet){
-        self.removePlayListEntities(at: offsets)
+    public func removeListItem(list: PlaylistEntity?, at offsets: IndexSet){
+        self.removePlayListEntities(list: list, at: offsets)
     }
 
 
@@ -168,10 +238,10 @@ class Player: NSObject, ObservableObject {
         }
     }
 
-    private func removePlayListEntities(at offsets: IndexSet) {
-        guard let playlist = mainPlaylist else { return }
+    private func removePlayListEntities(list: PlaylistEntity?, at offsets: IndexSet) {
+        guard let playlist = list else { return }
         for index in offsets {
-            let archiveFileEntity = items[index]
+            let archiveFileEntity = playlist.name == "main" ? items[index] : favoriteItems[index]
             self.deleteLocalFile(item: archiveFileEntity)
             playlist.removeFromFiles(archiveFileEntity)
             PersistenceController.shared.delete(archiveFileEntity, false)
@@ -180,11 +250,8 @@ class Player: NSObject, ObservableObject {
     }
 
 
-    public func rearrangePlaylist(fromOffsets source: IndexSet, toOffset destination: Int) {
-        guard let playlist = mainPlaylist else { return }
-//        playlist.
-//        //self.items.move(fromOffsets: source, toOffset: destination)
-
+    public func rearrangeList(list: PlaylistEntity?, fromOffsets source: IndexSet, toOffset destination: Int) {
+        guard let playlist = list else { return }
         playlist.moveObject(indexes: source, toIndex: destination)
         PersistenceController.shared.save()
     }
@@ -267,8 +334,24 @@ class Player: NSObject, ObservableObject {
 
         if playingFile?.format != "VBR MP3" {
             PlayerControls.showVideo.send(true)
+        } else {
+            PlayerControls.showVideo.send(false)
         }
 
+    }
+
+    private func loadNowPlayingMediaArtwork() {
+        guard let url = self.playingFile?.iconUrl else { return }
+        DispatchQueue.global().async { [weak self] in
+            if let data = try? Data(contentsOf: url) {
+                if let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self?.playingImage = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+                        self?.setPlayingInfo(playing: false)
+                    }
+                }
+            }
+        }
     }
 
     public func didTapPlayButton() {
@@ -330,6 +413,9 @@ class Player: NSObject, ObservableObject {
                     DispatchQueue.main.async {
                         self.sliderProgressSubject.send(progress)
                         self.durationSubject.send(CMTimeGetSeconds((player.currentItem?.duration)!))
+                        if progress < 1.0 {
+                            self.liveNowPlaying(playing: true)
+                        }
                     }
                 }
 
@@ -339,6 +425,10 @@ class Player: NSObject, ObservableObject {
                     DispatchQueue.main.asyncAfter(deadline: time) {
                         self.monitorPlayback()
                     }
+                } else {
+//                    DispatchQueue.main.async {
+//                        self.liveNowPlaying(playing: false)
+//                    }
                 }
             }
             return
@@ -359,87 +449,56 @@ class Player: NSObject, ObservableObject {
         return 0
     }
 
-
-    private func setPlayingInfo(playing:Bool) {
-
+    public func setPlayingInfo(playing:Bool) {
 
         if playing {
             UIApplication.shared.beginReceivingRemoteControlEvents()
         }
 
-        let playBackRate = playing ? 1.0 : 0.0
+        let artist = self.playingFile?.displayArtist
+        let fileTitle = self.playingFile?.displayTitle ?? self.fileIdentifierTitle
 
+        var songInfo = [String: Any]()
 
-        var artist = self.playingFile?.artist ?? ""
-        var fileTitle = self.fileTitle ?? ""
+        songInfo[MPMediaItemPropertyTitle] = fileTitle
+        songInfo[MPMediaItemPropertyArtist] = artist
+        songInfo[MPMediaItemPropertyAlbumArtist] = artist
+        songInfo[MPMediaItemPropertyAlbumTitle] = self.fileIdentifierTitle
 
-        var songInfo : [String : AnyObject] = [
-            MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
-            MPMediaItemPropertyAlbumTitle: self.fileIdentifierTitle! as AnyObject,
-            MPMediaItemPropertyPlaybackDuration : NSNumber(value: CMTimeGetSeconds((self.avPlayer?.currentItem?.duration)!) as Double),
-            MPNowPlayingInfoPropertyPlaybackRate: playBackRate as AnyObject,
-            MPMediaItemPropertyTitle: fileTitle as AnyObject,
-            MPMediaItemPropertyArtist: artist as AnyObject
-        ]
+        if let mediaType = self.playingMediaType {
+            songInfo[MPNowPlayingInfoPropertyMediaType] = mediaType.rawValue
+        }
 
-//        songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
-//        songInfo[MPMediaItemPropertyArtist] = self.playingFile?.artist ?? "" as AnyObject
-//        if let image = await getImage() {
-//            songInfo[MPMediaItemPropertyArtwork] = image
-//        }
+        if let url = self.playingFile?.url {
+            songInfo[MPNowPlayingInfoPropertyAssetURL] = url
+        }
 
+        if let image = self.playingImage {
+            songInfo[MPMediaItemPropertyArtwork] = image
+        }
 
-
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
-
-//        if let identifier = self.playingFile?.identifier {
-
-
-//            imageView.af.setImage(
-//                withURL: url!,
-//                placeholderImage: nil,
-//                filter: nil,
-//                progress: nil,
-//                progressQueue: DispatchQueue.main,
-//                imageTransition: UIImageView.ImageTransition.noTransition,
-//                runImageTransitionIfCached: false) { [self] (response) in
-//
-//                    switch response.result {
-//                    case .success(let image):
-//                        self.mediaArtwork = MPMediaItemArtwork(boundsSize: image.size, requestHandler: { (size) -> UIImage in
-//                            image
-//                        })
-//
-////                        self.controlsController?.playerIcon.image = image
-////                        self.controlsController?.playerIcon.backgroundColor = UIColor.white
-//
-//                        let playBackRate = playing ? 1.0 : 0.0
-//
-//                        var songInfo : [String : AnyObject] = [
-//                            MPNowPlayingInfoPropertyElapsedPlaybackTime : NSNumber(value: Double(self.elapsedSeconds()) as Double),
-//                            MPMediaItemPropertyAlbumTitle: self.fileIdentifier! as AnyObject,
-//                            MPMediaItemPropertyPlaybackDuration : NSNumber(value: CMTimeGetSeconds((self.avPlayer?.currentItem?.duration)!) as Double),
-//                            MPNowPlayingInfoPropertyPlaybackRate: playBackRate as AnyObject
-//                        ]
-//
-//                        if let artwork = self.mediaArtwork {
-//                            songInfo[MPMediaItemPropertyArtwork] = artwork
-//                        }
-//
-//                        songInfo[MPMediaItemPropertyTitle] = self.fileTitle as AnyObject?
-//                        songInfo[MPMediaItemPropertyAlbumArtist] = self.playingFile?.artist as AnyObject
-//
-//
-//                        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
-//
-//
-//                    case .failure(let error):
-//                        print("-----------> player couldn't get image: \(error)")
-//                        break
-//                    }
-//                }
-//        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
     }
+
+    public func liveNowPlaying(playing: Bool) {
+
+        if let player = self.avPlayer {
+            let playBackRate = playing ? 1.0 : 0.0
+
+            var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
+
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds((player.currentItem?.duration)!)
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.elapsedSeconds()
+            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = playBackRate
+            nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
+            //        nowPlayingInfo[MPNowPlayingInfoPropertyCurrentLanguageOptions] = metadata.currentLanguageOptions
+            //        nowPlayingInfo[MPNowPlayingInfoPropertyAvailableLanguageOptions] = metadata.availableLanguageOptionGroups
+
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        }
+
+    }
+
 
     private func getImage() async -> UIImage? {
 
@@ -492,7 +551,17 @@ extension Player: NSFetchedResultsControllerDelegate {
       else { return }
       DispatchQueue.main.async {
           if let files = playlist.files?.array as? [ArchiveFileEntity] {
-              self.items = files
+
+              switch playlist.name {
+              case "main":
+                  self.items = files
+              case "favorites":
+                  self.favoriteItems = files
+              case .none:
+                  print("no playlist name")
+              case .some(_):
+                  print("some what?")
+              }
           }
       }
   }

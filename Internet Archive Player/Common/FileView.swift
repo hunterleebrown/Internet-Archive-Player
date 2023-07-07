@@ -14,6 +14,19 @@ enum FileViewMode {
     case playlist
 }
 
+struct MenuAction: Hashable {
+    static func == (lhs: MenuAction, rhs: MenuAction) -> Bool {
+        return lhs.name == rhs.name
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+    }
+
+    var name: String
+    var action: (()->())
+    var imageName: String? = nil
+}
 
 struct FileView: View {
     var archiveFile: ArchiveFile
@@ -22,7 +35,7 @@ struct FileView: View {
     var showImage: Bool = false
     var showDownloadButton = true
     var fileViewMode: FileViewMode = .detail
-    var ellipsisAction: (()->())? = nil
+    var ellipsisAction: [MenuAction] = [MenuAction]()
 
     init(_ archiveFile: ArchiveFile,
          showImage: Bool = false,
@@ -30,7 +43,7 @@ struct FileView: View {
          backgroundColor: Color? = Color.fairyRedAlpha,
          textColor: Color = Color.fairyCream,
          fileViewMode: FileViewMode = .detail,
-         ellipsisAction: (()->())? = nil){
+         ellipsisAction: [MenuAction] = []){
 
         self.archiveFile = archiveFile
         self.showImage = showImage
@@ -127,17 +140,23 @@ struct FileView: View {
                     .frame(width: 44, height: 44)
                 }
 
-                if let ellipsisAction = ellipsisAction {
+                if ellipsisAction.count > 0 {
                     Menu {
-                        Button(action: {
-                            ellipsisAction()
-                        }){
-                            HStack {
-                                Image(systemName: PlayerButtonType.list.rawValue)
-                            Text("Add to Playlist")
+
+                        ForEach(self.ellipsisAction, id: \.self) { menuItem in
+                            Button(action: {
+                                menuItem.action()
+                            }){
+                                HStack {
+                                    Image(systemName: menuItem.imageName ?? "")
+                                    Text(menuItem.name)
+                                }
                             }
+                            .frame(width: 44, height: 44)
+
                         }
-                        .frame(width: 44, height: 44)
+
+
                     } label: {
                         Image(systemName: "ellipsis")
                             .foregroundColor(textColor)
