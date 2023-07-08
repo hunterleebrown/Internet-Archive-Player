@@ -23,10 +23,10 @@ struct BetterHome: View {
     @State var showVideoPlayer: Bool = false
 
     var body: some View {
-        NavigationStack {
 
-            GeometryReader { geo in
-                VStack {
+        GeometryReader { geo in
+            VStack(spacing:0) {
+                NavigationStack {
                     Playlist()
                         .navigationTitle("Playlist")
                         .toolbar {
@@ -34,9 +34,11 @@ struct BetterHome: View {
                             Button(action: {
                                 presentingSearch.toggle()
                             }){
-                                Image(systemName: "magnifyingglass")
-                                    .resizable()
-                                    .frame(width: 30, height: 30)
+                                NavigationLink(destination: SearchView()) {
+                                    Image(systemName: "magnifyingglass")
+                                        .resizable()
+                                        .frame(width: 30, height: 30)
+                                }
                             }
                             .tint(.fairyRed)
 
@@ -66,9 +68,9 @@ struct BetterHome: View {
                             }
 
                         }
-                        .sheet(isPresented: $presentingSearch) {
-                            SearchView()
-                        }
+//                        .sheet(isPresented: $presentingSearch) {
+//                            SearchView()
+//                        }
                         .sheet(isPresented: $presentingFavorites) {
                             NewFavoritesView()
                         }
@@ -85,20 +87,26 @@ struct BetterHome: View {
                                 showVideoPlayer = show
                             }
                         }
-
-                    ZStack {
-                        CustomVideoPlayer()
-                            .background(Color.black)
-                            .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 120 )
-                            .zIndex(showVideoPlayer ? 1 : 0)
-
-                        PlayerControls()
-                            .padding(10).zIndex(showVideoPlayer ? 0 : 1)
-                            .background(Color("playerBackground"))
-                    }
                 }
+
+                ZStack {
+                    CustomVideoPlayer()
+                        .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 120 )
+                        .zIndex(showVideoPlayer ? 1 : 0)
+
+                    PlayerControls()
+                        .zIndex(showVideoPlayer ? 0 : 1)
+                        .background(Color("playerBackground"))
+                }
+                .background(Color("playerBackground"))
+
+
             }
-            .environmentObject(iaPlayer)
+            .background(Color("playerBackground"))
+
+
         }
+        .environmentObject(iaPlayer)
     }
+
 }

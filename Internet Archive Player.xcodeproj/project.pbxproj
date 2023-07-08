@@ -10,6 +10,9 @@
 		5A012CAE282B54C800785420 /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A012CAD282B54C800785420 /* Downloader.swift */; };
 		5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2FACD227A10FB200D02945 /* SearchItemView.swift */; };
 		5A305F522807BF5E00735FAA /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 5A305F512807BF5E00735FAA /* iaAPI */; };
+		5A33A43D2A59C11D0010C6FA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5A33A43C2A59C11D0010C6FA /* LaunchScreen.storyboard */; };
+		5A33A43F2A59CC520010C6FA /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */; };
+		5A33A4412A59CCD50010C6FA /* BetterDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A33A4402A59CCD50010C6FA /* BetterDetail.swift */; };
 		5A4151B827B0FDF8007A3623 /* IAReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B727B0FDF8007A3623 /* IAReachability.swift */; };
 		5A4151BA27B0FEAA007A3623 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B927B0FEAA007A3623 /* Player.swift */; };
 		5A4151BD27B3645E007A3623 /* Inject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BC27B3645E007A3623 /* Inject.swift */; };
@@ -67,6 +70,9 @@
 /* Begin PBXFileReference section */
 		5A012CAD282B54C800785420 /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
 		5A2FACD227A10FB200D02945 /* SearchItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchItemView.swift; sourceTree = "<group>"; };
+		5A33A43C2A59C11D0010C6FA /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
+		5A33A4402A59CCD50010C6FA /* BetterDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetterDetail.swift; sourceTree = "<group>"; };
 		5A4151B727B0FDF8007A3623 /* IAReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAReachability.swift; sourceTree = "<group>"; };
 		5A4151B927B0FEAA007A3623 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		5A4151BC27B3645E007A3623 /* Inject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inject.swift; sourceTree = "<group>"; };
@@ -186,6 +192,7 @@
 		5ADED037279B56EE00FB2E6D /* Internet Archive Player */ = {
 			isa = PBXGroup;
 			children = (
+				5A33A43C2A59C11D0010C6FA /* LaunchScreen.storyboard */,
 				5A012CAC282B54B900785420 /* Downloader */,
 				5AC5B2B0281C9F7A00CDE937 /* Model Extensions */,
 				CE1ACD502812FA5F00EF968A /* Services */,
@@ -306,6 +313,8 @@
 			isa = PBXGroup;
 			children = (
 				CE16141A279E9EE900ED0055 /* Detail.swift */,
+				5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */,
+				5A33A4402A59CCD50010C6FA /* BetterDetail.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -421,6 +430,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5ADED06D279B608F00FB2E6D /* Iconochive-Regular.ttf in Resources */,
+				5A33A43D2A59C11D0010C6FA /* LaunchScreen.storyboard in Resources */,
 				5ADED040279B56F000FB2E6D /* Preview Assets.xcassets in Resources */,
 				5ADED03D279B56F000FB2E6D /* Assets.xcassets in Resources */,
 			);
@@ -462,11 +472,13 @@
 				5A4F2D5B2A53227C00DCDF95 /* AttString+Extension.swift in Sources */,
 				5AC5B2B2281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift in Sources */,
 				5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */,
+				5A33A43F2A59CC520010C6FA /* DetailViewModel.swift in Sources */,
 				5AC10D5B281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld in Sources */,
 				5AC10D5D281C98B200119C4E /* Persistence.swift in Sources */,
 				5A71893F280B721400B1944B /* NavigationBarModifier.swift in Sources */,
 				5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */,
 				5AC5B2B4281CA4B000CDE937 /* EntityFileView.swift in Sources */,
+				5A33A4412A59CCD50010C6FA /* BetterDetail.swift in Sources */,
 				5AA391A52A4F4C8A00C65A48 /* BetterHome.swift in Sources */,
 				5A4F2D5D2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift in Sources */,
 				5ADED06E279B60F500FB2E6D /* IAMediaUtils.swift in Sources */,
@@ -635,6 +647,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Internet Archive Player/Preview Content\"";
@@ -645,7 +658,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "IA Player";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -667,6 +680,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Internet Archive Player/Preview Content\"";
@@ -677,7 +691,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "IA Player";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
