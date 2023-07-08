@@ -19,7 +19,7 @@ struct SearchView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             //            VStack() {
             //                Text(viewModel.archiveError ?? "Error with Search")
             //                    .padding(10)
@@ -34,7 +34,7 @@ struct SearchView: View {
             //            .padding(10)
 
 
-            VStack(alignment: .leading, spacing: 5.0) {
+            VStack(alignment: .leading, spacing: 5) {
 
                 Picker("What media type?", selection: $viewModel.mediaType) {
                     Text(ArchiveMediaType.audio.rawValue).tag(0)
@@ -66,21 +66,14 @@ struct SearchView: View {
                 .onSubmit(of: .search, {
                     viewModel.search(query: viewModel.searchText, loadMore: false)
                 })
-//                .background(
-//                    Image("petabox")
-//                        .resizable()
-//                        .opacity(0.3)
-//                        .aspectRatio(contentMode: .fill)
-//                        .blur(radius: 05)
-//                )
-//                .background(Color("playerBackground"))
                 .frame(maxWidth: .infinity)
                 .listStyle(PlainListStyle())
-                .navigationTitle("Search")
-                .navigationBarColor(backgroundColor: Color("playerbackground"), titleColor: .fairyRed)
+
             }
         }
         .navigationViewStyle(.stack)
+        .navigationTitle("Search")
+        .navigationBarColor(backgroundColor: Color("playerbackground"), titleColor: .fairyRed)
     }
 }
 

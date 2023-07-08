@@ -12,15 +12,15 @@ import Combine
 
 struct Detail: View {
     @EnvironmentObject var iaPlayer: Player
-    @StateObject var viewModel = Detail.ViewModel()
+    @StateObject var viewModel = DetailViewModel()
     private var identifier: String
     @State private var descriptionExpanded = false
-    @State private var titleScrollOffset: CGFloat = .zero
     @State private var playlistAddAllAlert = false
     @State private var isPresented = false
 
     @State var playlistErrorAlertShowing: Bool = false
     @State var favoritesErrorAlertShowing: Bool = false
+
 
 
     init(_ identifier: String, isPresented: Bool = false) {
@@ -44,7 +44,11 @@ struct Detail: View {
                         placeholder: {
                             Color.black
                         })
+                    .frame(minWidth:180, maxWidth: 180,
+                           minHeight: 180, maxHeight: 180)
                     .cornerRadius(15)
+                    .shadow(color: .gray, radius: 5, x: 0, y: 5)
+
                 }
 
                 Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
@@ -64,13 +68,17 @@ struct Detail: View {
                         .multilineTextAlignment(.center)
                 }
 
-                if let desc = self.viewModel.archiveDoc?.descriptionHtml {
+                if let desc = self.viewModel.archiveDoc?.descriptionHtml, desc.length > 0 {
                     Text(AttributedString(desc))
                         .padding(10.0)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: 350, minHeight:10)
                         .background(Color.white)
-                        .cornerRadius(5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Color.fairyRedAlpha, lineWidth: 1)
+                        )
                 }
+
 
                 HStack() {
                     Text("Files")
@@ -226,67 +234,3 @@ struct Detail_Previews: PreviewProvider {
     }
 }
 
-extension Detail {
-    final class ViewModel: ObservableObject {
-        let service: PlayerArchiveService
-        @Published var archiveDoc: ArchiveMetaData? = nil
-        @Published var audioFiles = [ArchiveFile]()
-        @Published var movieFiles = [ArchiveFile]()
-
-        @Published var playingFile: ArchiveFileEntity?
-
-        private var cancellables = Set<AnyCancellable>()
-
-        init() {
-            self.service = PlayerArchiveService()
-        }
-        
-        public func getArchiveDoc(identifier: String){
-            Task { @MainActor in
-                do {
-                    let doc = try await self.service.getArchiveAsync(with: identifier)
-                    self.archiveDoc = doc.metadata
-                    self.audioFiles = doc.non78Audio.sorted{
-                        guard let track1 = $0.track, let track2 = $1.track else { return false}
-                        return track1 < track2
-                    }
-
-                    self.movieFiles = doc.files.filter{ $0.format == .h264 }
-                    
-                } catch {
-                    print(error)
-                }
-            }
-        }
-        
-        public func addAllFilesToPlaylist(player: Player) {
-            audioFiles.forEach { file in
-                do {
-                    try player.appendPlaylistItem(file)
-                } catch PlayerError.alreadyOnPlaylist {
-
-                } catch {
-                    
-                }
-            }
-        }
-
-        public func setSubscribers(_ player: Player) {
-            player.playingFilePublisher
-                .removeDuplicates()
-                .sink { file in
-                    self.playingFile = file
-                }
-                .store(in: &cancellables)
-        }
-
-        public func sortedAudioFiles() -> [ArchiveFile] {
-            return audioFiles.sorted { lf, rf in
-                if let lTrack = Int(lf.track ?? ""), let rTrack = Int(rf.track ?? "") {
-                    return lTrack < rTrack
-                }
-                return false
-            }
-        }
-    }
-}
