@@ -9,10 +9,61 @@ import SwiftUI
 import iaAPI
 import Combine
 
+
+struct SearchFilter: Hashable {
+    var name: String
+    var identifier: String
+}
+
+
+struct SearchFilters: View {
+
+    @State private var searchFilter: SearchFilter?
+    var searchFiltersViewModel: SearchFiltersViewModel
+    var delegate: SearchView?
+
+    let collections: [SearchFilter] = [
+        SearchFilter(name: "All", identifier: ""),
+        SearchFilter(name: "Audio Books & Poetry", identifier: "audio_bookspoetry"),
+        SearchFilter(name: "LibriVox", identifier: "librivoxaudio")
+    ]
+
+
+    var body: some View {
+        List(collections, id: \.self, selection: $searchFilter ) { filter in
+
+            HStack {
+                if searchFiltersViewModel.collectionSelection == filter {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(Color.fairyRed)
+                }
+                Text(filter.name)
+            }
+        }
+        .onChange(of: searchFilter) { newValue in
+            if let val = newValue {
+                searchFiltersViewModel.collectionSelection = val
+                if let del = delegate {
+                    del.showCollections = false
+                    del.viewModel.search(query: del.viewModel.searchText, collection: searchFiltersViewModel.collectionSelection.identifier.isEmpty ? nil : searchFiltersViewModel.collectionSelection.identifier, loadMore: false)
+
+                }
+            }
+        }
+    }
+}
+
+class SearchFiltersViewModel: ObservableObject {
+    @Published var collectionSelection: SearchFilter = SearchFilter(name: "All", identifier: "")
+}
+
 struct SearchView: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel = SearchView.ViewModel()
     @FocusState private var searchFocused: Bool
+    @State private var collection: String = ""
+    @State var showCollections: Bool = false
+    @StateObject var searchFiltersViewModel = SearchFiltersViewModel()
 
     init() {
         searchFocused = false
@@ -20,19 +71,6 @@ struct SearchView: View {
 
     var body: some View {
         NavigationStack {
-            //            VStack() {
-            //                Text(viewModel.archiveError ?? "Error with Search")
-            //                    .padding(10)
-            //                    .foregroundColor(Color.fairyCream)
-            //                    .font(.headline)
-            //                    .frame(maxWidth: .infinity)
-            //                    .background(Rectangle().fill(Color.fairyRedAlpha).cornerRadius(10))
-            //                    .transition(.move(edge: .leading))
-            //                Spacer()
-            //            }
-            //            .zIndex(viewModel.noDataFound ? 1 : 2)
-            //            .padding(10)
-
 
             VStack(alignment: .leading, spacing: 5) {
 
@@ -46,9 +84,48 @@ struct SearchView: View {
                     viewModel.search(query: viewModel.searchText, loadMore: false)
                 }
 
+                HStack(alignment: .center , spacing:20) {
+                    Text("From collection:")
+                    Button(searchFiltersViewModel.collectionSelection.name) {
+                        showCollections = true
+                    }
+                }
+                .padding(.horizontal, 20)
+
+
+//                TextField("Collection?", text: $collection)
+//                    .overlay(
+//                        RoundedRectangle(cornerRadius: 5)
+//                            .stroke(Color.gray, lineWidth: 1)
+//                    )
+//                    .padding([.horizontal], 20)
+
+
+
+
+//                ScrollView(.horizontal) {
+//                    LazyHStack {
+//                        ForEach(0..<10) { i in
+//                            RoundedRectangle(cornerRadius: 25)
+//                                .fill(Color(hue: Double(i) / 10, saturation: 1, brightness: 1).gradient)
+//                                .frame(width: 300, height: 100)
+//                        }
+//                    }
+//                    .scrollTargetLayout()
+//                }
+//                .scrollTargetBehavior(.viewAligned)
+//                .safeAreaPadding(.horizontal, 40)
+
                 List{
                     ForEach(viewModel.items, id: \.self) { doc in
-                        NavigationLink(destination: Detail(doc.identifier!)) {
+                        NavigationLink(destination:
+                                        Detail(doc.identifier!)
+                            .safeAreaInset(edge: .bottom, content: {
+                                Spacer()
+                                    .frame(height: 200)
+                            })
+
+                        ) {
                             SearchItemView(item: doc)
                                 .onAppear {
                                     if doc == viewModel.items.last {
@@ -64,13 +141,20 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
                 .onSubmit(of: .search, {
-                    viewModel.search(query: viewModel.searchText, loadMore: false)
+                    viewModel.search(query: viewModel.searchText, collection: searchFiltersViewModel.collectionSelection.identifier.isEmpty ? nil : searchFiltersViewModel.collectionSelection.identifier, loadMore: false)
                 })
                 .frame(maxWidth: .infinity)
                 .listStyle(PlainListStyle())
 
             }
+            .sheet(isPresented: $showCollections) {
+                SearchFilters(searchFiltersViewModel: searchFiltersViewModel, delegate: self)
+            }
         }
+        .safeAreaInset(edge: .bottom, content: {
+            Spacer()
+                .frame(height: 200)
+        })
         .navigationViewStyle(.stack)
         .navigationTitle("Search")
         .navigationBarColor(backgroundColor: Color("playerbackground"), titleColor: .fairyRed)
@@ -114,12 +198,13 @@ extension SearchView {
             self.service = PlayerArchiveService()
         }
 
-        func search(query: String, loadMore: Bool) {
+        func search(query: String, collection:String? = nil, loadMore: Bool) {
             guard !searchText.isEmpty, searchText.count > 2, !searchStarted  else { return }
             self.isSearching = true
             self.noDataFound = false
             self.isLoadingMore = loadMore
             self.searchStarted = true
+            self.archiveError = nil
             Task { @MainActor in
                 do {
 
@@ -131,8 +216,8 @@ extension SearchView {
 
                     let format: ArchiveFileFormat = self.mediaTypes[self.mediaType] == .movies ? .h264HD : .mp3
                     let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
-
-                    let data = try await self.service.searchAsync(query: query, mediaTypes: [searchMediaType], rows: self.rows, page: self.page, format: format)
+                    print(query)
+                    let data = try await self.service.searchAsync(query: query, mediaTypes: [searchMediaType], rows: self.rows, page: self.page, format: format, collection: collection)
 
                     self.numberOfResults = data.response.numFound
                     self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
@@ -148,6 +233,11 @@ extension SearchView {
 
                     self.isSearching = false
                     self.searchStarted = false
+
+                    if self.items.count == 0 {
+                        throw ArchiveServiceError.nodata
+                    }
+
                 } catch let error as ArchiveServiceError {
                     withAnimation(.easeIn(duration: 0.33)) {
                         self.archiveError = error.description
