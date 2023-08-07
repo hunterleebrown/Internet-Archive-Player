@@ -218,7 +218,7 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
-        controller.view.backgroundColor = UIColor.clear
+        controller.view.backgroundColor = UIColor.black
         return controller
     }
 
