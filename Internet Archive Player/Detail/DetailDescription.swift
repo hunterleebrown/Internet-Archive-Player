@@ -34,9 +34,9 @@ struct DetailDescription: View {
 
                 Text(AttributedString(attString))
                     .background(Color.white)
+                Spacer()
             }
             .padding(20.0)
-            Spacer()
         }
     }
 }
