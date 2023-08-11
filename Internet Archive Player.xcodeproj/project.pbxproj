@@ -43,6 +43,7 @@
 		5ADED06D279B608F00FB2E6D /* Iconochive-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5ADED06C279B608F00FB2E6D /* Iconochive-Regular.ttf */; };
 		5ADED06E279B60F500FB2E6D /* IAMediaUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */; };
 		5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */; };
+		5AE69CD22A846DBE0062CC5D /* DetailDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE69CD12A846DBE0062CC5D /* DetailDescription.swift */; };
 		CE16141B279E9EE900ED0055 /* Detail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE16141A279E9EE900ED0055 /* Detail.swift */; };
 		CE1ACD522812FA8B00EF968A /* PlayerArchiveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1ACD512812FA8B00EF968A /* PlayerArchiveService.swift */; };
 		CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF72C9927B5D72600B8AF15 /* FileView.swift */; };
@@ -106,6 +107,7 @@
 		5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAMediaUtils.swift; sourceTree = "<group>"; };
 		5ADED06C279B608F00FB2E6D /* Iconochive-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Iconochive-Regular.ttf"; sourceTree = "<group>"; };
 		5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundColorModifier.swift; sourceTree = "<group>"; };
+		5AE69CD12A846DBE0062CC5D /* DetailDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailDescription.swift; sourceTree = "<group>"; };
 		CE16141A279E9EE900ED0055 /* Detail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detail.swift; sourceTree = "<group>"; };
 		CE1ACD512812FA8B00EF968A /* PlayerArchiveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerArchiveService.swift; sourceTree = "<group>"; };
 		CEF72C9927B5D72600B8AF15 /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
@@ -309,6 +311,7 @@
 				CE16141A279E9EE900ED0055 /* Detail.swift */,
 				5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */,
 				5A33A4402A59CCD50010C6FA /* BetterDetail.swift */,
+				5AE69CD12A846DBE0062CC5D /* DetailDescription.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -460,6 +463,7 @@
 				5ADED068279B5D0200FB2E6D /* FavoritesView.swift in Sources */,
 				5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */,
 				5A012CAE282B54C800785420 /* Downloader.swift in Sources */,
+				5AE69CD22A846DBE0062CC5D /* DetailDescription.swift in Sources */,
 				CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */,
 				5A4F2D5B2A53227C00DCDF95 /* AttString+Extension.swift in Sources */,
 				5AC5B2B2281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift in Sources */,

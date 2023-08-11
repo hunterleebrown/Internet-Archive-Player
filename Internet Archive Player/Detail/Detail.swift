@@ -54,7 +54,6 @@ struct Detail: View {
                 Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                     .font(.headline)
                     .bold()
-//                    .multilineTextAlignment(.center)
 
                 if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
                     Text(artist)
@@ -68,17 +67,15 @@ struct Detail: View {
                         .multilineTextAlignment(.center)
                 }
 
-                if let desc = self.viewModel.archiveDoc?.descriptionHtml, desc.length > 0 {
-                    Text(AttributedString(desc))
-                        .padding(10.0)
-                        .frame(maxWidth: 350, minHeight:10)
-                        .background(Color.white)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 5)
-                                .stroke(Color.fairyRedAlpha, lineWidth: 1)
-                        )
+                if let desc = self.viewModel.archiveDoc?.description {
+                    Button {
+                        descriptionExpanded = true
+                    } label: {
+                        Text("Description")
+                            .font(.subheadline)
+                            .tint(.fairyRed)
+                    }
                 }
-
 
                 HStack() {
                     Text("Files")
@@ -167,6 +164,11 @@ struct Detail: View {
         .onAppear() {
             self.viewModel.getArchiveDoc(identifier: self.identifier)
             self.viewModel.setSubscribers(iaPlayer)
+        }
+        .sheet(isPresented: $descriptionExpanded) {
+            if let doc = self.viewModel.archiveDoc {
+                DetailDescription(doc: doc)
+            }
         }
         .navigationBarItems(trailing:
                                 Button(action: {

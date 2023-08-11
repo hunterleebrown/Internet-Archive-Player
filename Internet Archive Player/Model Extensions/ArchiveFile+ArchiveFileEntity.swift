@@ -94,6 +94,14 @@ extension ArchiveFileEntity {
         return Downloader.directory().appendingPathComponent(identifier).appendingPathComponent(lastPathComponent)
     }
 
+    public var isAudio: Bool {
+        return format == "VBR MP3"
+    }
+
+    public var isVideo: Bool {
+        return !isAudio
+    }
+
 }
 
 extension ArchiveFileEntity {
