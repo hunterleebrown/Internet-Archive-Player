@@ -10,9 +10,9 @@ import AVKit
 
 enum PlayerButtonType: String {
     case video = "video"
-    case play = "play"
-    case backwards = "backward.end"
-    case forwards = "forward.end"
+    case play = "play.fill"
+    case backwards = "backward.end.fill"
+    case forwards = "forward.end.fill"
     case pause = "pause"
     case expand = "arrow.up.left.and.arrow.down.right"
     case list = "list.bullet.rectangle.portrait"
@@ -41,7 +41,7 @@ struct PlayerButton: View {
                 .resizable()
                 .frame(width: size?.width, height: size?.height)
         }
-        .tint(.fairyRed)
+        .tint(.fairyCream)
     }
 }
 

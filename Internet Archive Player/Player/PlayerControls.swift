@@ -17,72 +17,78 @@ struct PlayerControls: View {
     static var showPlayingDetails = PassthroughSubject<ArchiveFileEntity, Never>()
     static var showVideo = PassthroughSubject<Bool, Never>()
 
+    var foregroundColor: Color = .fairyCream
+    var backgroundColor: Color = .fairyRed
+
     var body: some View {
         VStack(alignment: .leading, spacing: 5){
-            Divider()
-                .padding(5)
-                .tint(Color.fairyRed)
 
             if let file = viewModel.playingFile {
-                Button {
-                    PlayerControls.showPlayingDetails.send(file)
-                } label: {
-                    HStack(alignment: .center) {
-                        AsyncImage(
-                            url: file.iconUrl,
-                            content: { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: 44,
-                                           maxHeight: 44)
-                                    .background(Color.black)
+                HStack(alignment: .center) {
 
-                            },
-                            placeholder: {
-                                Color(.black)
-                                    .frame(maxWidth: 44,
-                                           maxHeight: 44)
-                            })
-                        .cornerRadius(5)
-                        .frame(width: 44, height: 44, alignment: .leading)
+                    Button {
+                        PlayerControls.showPlayingDetails.send(file)
+                    } label: {
+                        HStack(alignment: .center) {
+                            AsyncImage(
+                                url: file.iconUrl,
+                                content: { image in
+                                    image.resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(maxWidth: 44,
+                                               maxHeight: 44)
+                                        .background(Color.black)
 
-                        VStack(alignment: .leading, spacing:2.0){
-                            Text(viewModel.playingFile?.displayTitle ?? "")
-                                .font(.caption)
-                                .bold()
-                                .foregroundColor(.fairyRed)
-                                .frame(maxWidth: .infinity, alignment:.leading)
-                                .multilineTextAlignment(.leading)
-                            Text(viewModel.playingFile?.artist ?? viewModel.playingFile?.creator ?? viewModel.playingFile?.archiveTitle ?? "")
-                                .font(.caption2)
-                                .foregroundColor(.fairyRed)
-                                .frame(maxWidth:. infinity, alignment: .leading)
-                                .multilineTextAlignment(.leading)
+                                },
+                                placeholder: {
+                                    Color(.black)
+                                        .frame(maxWidth: 44,
+                                               maxHeight: 44)
+                                })
+                            .cornerRadius(5)
+                            .frame(width: 44, height: 44, alignment: .leading)
+
+                            VStack(alignment: .leading, spacing:2.0){
+                                Text(viewModel.playingFile?.displayTitle ?? "")
+                                    .font(.caption)
+                                    .bold()
+                                    .foregroundColor(foregroundColor)
+                                    .frame(maxWidth: .infinity, alignment:.leading)
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(2)
+                                Text(viewModel.playingFile?.artist ?? viewModel.playingFile?.creator ?? viewModel.playingFile?.archiveTitle ?? "")
+                                    .font(.caption2)
+                                    .foregroundColor(foregroundColor)
+                                    .frame(maxWidth:. infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                                    .lineLimit(2)
+                            }
                         }
-                        .padding(5)
-
                     }
+
+                    Spacer()
+
+                    AirPlayButton()
+                        .frame(width: 44, height: 44)
                 }
-//                .frame(maxHeight: 33.0)
-                .padding(5)
             }
 
             Slider(value: $viewModel.progress,
                    in: 0...1,
                    onEditingChanged: sliderEditingChanged)
-            .tint(.fairyRed)
+            .tint(foregroundColor)
             .disabled(viewModel.playingFile == nil)
 
             HStack(alignment: .center, spacing: 5.0){
                 Text(viewModel.minimumValue)
-                    .foregroundColor(.fairyRed)
+                    .foregroundColor(foregroundColor)
                     .font(.system(size:9.0))
                     .frame(width: 44.0)
 
                 Spacer()
 
                 Text(viewModel.remainingValue)
-                    .foregroundColor(.fairyRed)
+                    .foregroundColor(foregroundColor)
                     .font(.system(size:9.0))
                     .frame(width: 44.0)
             }
@@ -105,16 +111,11 @@ struct PlayerControls: View {
                     iaPlayer.advancePlayer(.forwards)
                 }
 
-                Spacer()
-                
-                AirPlayButton()
-                    .frame(width: 33.0, height: 33.0)
-
             }
-            .tint(.fairyCream)
-            .padding([.leading, .trailing, .bottom], 10)
+            .tint(foregroundColor)
         }
-        .background(Color("playerBackground"))
+        .padding()
+        .background(backgroundColor)
         .onAppear() {
             viewModel.setSubscribers(iaPlayer)
         }
@@ -217,6 +218,7 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
+        controller.view.backgroundColor = UIColor.black
         return controller
     }
 

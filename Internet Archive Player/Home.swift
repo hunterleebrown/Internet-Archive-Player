@@ -1,5 +1,5 @@
 //
-//  BetterHome.swift
+//  Home.swift
 //  Internet Archive Player
 //
 //  Created by Hunter Lee Brown on 6/30/23.
@@ -14,17 +14,19 @@ enum PresentedSheet {
     case favorites
 }
 
-struct BetterHome: View {
+struct Home: View {
     @StateObject var iaPlayer = Player()
     @State private var presentingSearch = false
     @State private var presentingFavorites = false
     @State var playingFile: ArchiveFileEntity? = nil
     @State private var showingAlert = false
     @State var showVideoPlayer: Bool = false
+    @State var showNetworkAlert: Bool = false
 
     var body: some View {
 
         GeometryReader { geo in
+
             VStack(spacing:0) {
                 NavigationStack {
                     Playlist()
@@ -68,9 +70,6 @@ struct BetterHome: View {
                             }
 
                         }
-//                        .sheet(isPresented: $presentingSearch) {
-//                            SearchView()
-//                        }
                         .sheet(isPresented: $presentingFavorites) {
                             NewFavoritesView()
                         }
@@ -87,23 +86,34 @@ struct BetterHome: View {
                                 showVideoPlayer = show
                             }
                         }
+                        .onReceive(Player.networkAlert, perform: { badNetwork in
+                            showNetworkAlert = true
+                        })
+                        .alert("There is no network connection", isPresented: $showNetworkAlert) {
+                            Button("OK") {
+                                showNetworkAlert = false
+                            }
+                        }
+                        .safeAreaInset(edge: .bottom) {
+                            Spacer()
+                                .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 200 )
+                        }
+
+
                 }
+                .safeAreaInset(edge: .bottom) {
+                    ZStack {
+                        CustomVideoPlayer()
+                            .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 0 )
+                            .zIndex(showVideoPlayer ? 1 : 0)
 
-                ZStack {
-                    CustomVideoPlayer()
-                        .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 120 )
-                        .zIndex(showVideoPlayer ? 1 : 0)
-
-                    PlayerControls()
-                        .zIndex(showVideoPlayer ? 0 : 1)
-                        .background(Color("playerBackground"))
+                        PlayerControls()
+                            .cornerRadius(10)
+                            .zIndex(showVideoPlayer ? 0 : 1)
+                    }
+                    .padding(10)
                 }
-                .background(Color("playerBackground"))
-
-
             }
-            .background(Color("playerBackground"))
-
 
         }
         .environmentObject(iaPlayer)
