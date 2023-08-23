@@ -36,6 +36,8 @@ class Player: NSObject, ObservableObject {
 
     @Published var showPlayingDetailView = false
 
+    static var networkAlert = PassthroughSubject<Bool, Never>()
+
     public enum AdvanceDirection: Int {
         case forwards = 1
         case backwards = -1
@@ -280,7 +282,16 @@ class Player: NSObject, ObservableObject {
         self.fileIdentifier = archiveFileEntity.identifier
         self.playingFile = archiveFileEntity
         self.playingFileSubject.send(archiveFileEntity)
+
+        if archiveFileEntity.workingUrl!.absoluteString.contains("https") {
+            guard IAReachability.isConnectedToNetwork() else {
+                Player.networkAlert.send(true)
+                return
+            }
+        }
+
         self.loadAndPlay(archiveFileEntity.workingUrl!)
+
     }
 
 
@@ -293,12 +304,12 @@ class Player: NSObject, ObservableObject {
 
     private func loadAndPlay(_ playUrl: URL) {
 
-        if playUrl.absoluteString.contains("https") {
-            guard IAReachability.isConnectedToNetwork() else {
-                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "networkAlert"), object: nil)
-                return
-            }
-        }
+//        if playUrl.absoluteString.contains("https") {
+//            guard IAReachability.isConnectedToNetwork() else {
+//                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "networkAlert"), object: nil)
+//                return
+//            }
+//        }
 
         if let player = avPlayer {
             player.pause()

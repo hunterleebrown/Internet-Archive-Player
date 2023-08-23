@@ -21,6 +21,7 @@ struct Home: View {
     @State var playingFile: ArchiveFileEntity? = nil
     @State private var showingAlert = false
     @State var showVideoPlayer: Bool = false
+    @State var showNetworkAlert: Bool = false
 
     var body: some View {
 
@@ -83,6 +84,14 @@ struct Home: View {
                         .onReceive(PlayerControls.showVideo) { show in
                             withAnimation {
                                 showVideoPlayer = show
+                            }
+                        }
+                        .onReceive(Player.networkAlert, perform: { badNetwork in
+                            showNetworkAlert = true
+                        })
+                        .alert("There is no network connection", isPresented: $showNetworkAlert) {
+                            Button("OK") {
+                                showNetworkAlert = false
                             }
                         }
                         .safeAreaInset(edge: .bottom) {
