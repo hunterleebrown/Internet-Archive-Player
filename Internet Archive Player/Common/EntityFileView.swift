@@ -154,41 +154,6 @@ struct EntityFileView: View {
                             .frame(width: 44, height: 44)
                     }
                     .highPriorityGesture(TapGesture())
-
-
-//                Menu {
-//                    if (showDownloadButton && archiveFile.format == "VBR MP3") {
-//                        Button(action: {
-//                            archiveFile.download(delegate: viewModel)
-//                        }) {
-//                            Image(systemName: "icloud.and.arrow.down")
-//                                .aspectRatio(contentMode: .fill)
-//                                .foregroundColor(textColor)
-//                            Text("Download")
-//                        }
-//                        .frame(width: 44, height: 44)
-//                    }
-//
-//                    Button(action: {
-//
-//                        PlayerControls.showPlayingDetails.send(archiveFile)
-//
-//                    }){
-//                        HStack {
-//                            Image(systemName: "info.circle")
-//                            Text("Archive Details")
-//                        }
-//                    }
-//
-//
-//
-//                } label: {
-//                    Image(systemName: "ellipsis")
-//                        .foregroundColor(textColor)
-//                        .aspectRatio(contentMode: .fill)
-//                        .frame(width: 33, height: 33)
-//                }
-//                .highPriorityGesture(TapGesture())
             }
             .tint(textColor)
             .padding(5.0)

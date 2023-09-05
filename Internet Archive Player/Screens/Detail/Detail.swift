@@ -12,7 +12,7 @@ import Combine
 
 struct Detail: View {
     @EnvironmentObject var iaPlayer: Player
-    @StateObject var viewModel = DetailViewModel()
+    @StateObject private var viewModel = DetailViewModel()
     private var identifier: String
     @State private var descriptionExpanded = false
     @State private var playlistAddAllAlert = false
@@ -21,7 +21,7 @@ struct Detail: View {
     @State var playlistErrorAlertShowing: Bool = false
     @State var favoritesErrorAlertShowing: Bool = false
 
-
+    @State var otherPlaylistPresented = false
 
     init(_ identifier: String, isPresented: Bool = false) {
         self.identifier = identifier
@@ -170,6 +170,11 @@ struct Detail: View {
                 DetailDescription(doc: doc)
             }
         }
+//        .sheet(isPresented: $otherPlaylistPresented) {
+//            if let archivefile = viewModel.playlistArchiveFile {
+//                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFile: archivefile)
+//            }
+//        }
         .navigationBarItems(trailing:
                                 Button(action: {
         }) {
@@ -202,7 +207,7 @@ struct Detail: View {
     private func menuActions(archiveFile: ArchiveFile) -> [MenuAction] {
         var actions = [MenuAction]()
 
-        let playlist = MenuAction(name: "Add to playlist", action:  {
+        let playlist = MenuAction(name: "Add to Now Playing", action:  {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
@@ -212,7 +217,7 @@ struct Detail: View {
             }
         }, imageName: "list.bullet.rectangle.portrait")
 
-        let favorites = MenuAction(name: "Add to favorites", action:  {
+        let favorites = MenuAction(name: "Add to Favorites", action:  {
             do  {
                 try iaPlayer.appendFavoriteItem(archiveFile)
             } catch PlayerError.alreadyOnFavorites {
@@ -222,8 +227,23 @@ struct Detail: View {
             }
         }, imageName: "heart")
 
+
+//        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
+//            do  {
+////                try iaPlayer.appendFavoriteItem(archiveFile)
+//                viewModel.playlistArchiveFile = archiveFile
+//                otherPlaylistPresented = true
+//
+//            } catch PlayerError.alreadyOnFavorites {
+////                self.favoritesErrorAlertShowing = true
+//            } catch {
+//
+//            }
+//        }, imageName: "music.note.list")
+
         actions.append(playlist)
         actions.append(favorites)
+//        actions.append(otherPlaylist)
 
         return actions
     }

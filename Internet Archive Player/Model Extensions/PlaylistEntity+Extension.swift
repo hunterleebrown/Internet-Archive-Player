@@ -10,20 +10,19 @@ import CoreData
 
 extension PlaylistEntity {
 
-    static var playlistFetchRequest: NSFetchRequest<PlaylistEntity> {
-      let request: NSFetchRequest<PlaylistEntity> = PlaylistEntity.fetchRequest()
-      request.predicate = NSPredicate(format: "name == %@", "main")
-      request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+    static func fetchRequest(playlistName: String) -> NSFetchRequest<PlaylistEntity> {
+        let request: NSFetchRequest<PlaylistEntity> = PlaylistEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "name == %@", "\(playlistName)")
+        request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
 
-      return request
+        return request
     }
 
-    static var favoritesFetchRequest: NSFetchRequest<PlaylistEntity> {
-      let request: NSFetchRequest<PlaylistEntity> = PlaylistEntity.fetchRequest()
-      request.predicate = NSPredicate(format: "name == %@", "favorites")
-      request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+    static func fetchRequestAllPlaylists() -> NSFetchRequest<PlaylistEntity> {
+        let request: NSFetchRequest<PlaylistEntity> = PlaylistEntity.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
 
-      return request
+        return request
     }
 
     private var mutableSubItems: NSMutableOrderedSet {
@@ -32,6 +31,28 @@ extension PlaylistEntity {
 
     public func moveObject(indexes: IndexSet, toIndex: Int) {
         mutableSubItems.moveObjects(at: indexes, to: toIndex)
+    }
+
+    static public func getAllPlaylists() -> [PlaylistEntity] {
+        let listsFetchController =
+        NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequestAllPlaylists(),
+                                   managedObjectContext: PersistenceController.shared.container.viewContext,
+                                   sectionNameKeyPath: nil,
+                                   cacheName: nil)
+
+
+        do {
+            try listsFetchController.performFetch()
+            if let playlists = listsFetchController.fetchedObjects {
+                if playlists.count > 0 {
+                    return playlists.filter{!$0.permanent}
+                }
+            }
+        } catch {
+            print("failed to fetch items!")
+        }
+
+        return []
     }
 
 }

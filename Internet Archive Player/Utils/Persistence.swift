@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import iaAPI
 
 struct PersistenceController {
     static let shared = PersistenceController()
@@ -72,5 +73,19 @@ struct PersistenceController {
         if saveOperation == true {
             self.save()
         }
+    }
+
+    public func appendPlaylistItem(_ item: ArchiveFile, playList: PlaylistEntity) throws {
+        let archiveFileEntity = item.archiveFileEntity()
+
+        if let files = playList.files?.array as? [ArchiveFileEntity] {
+            let filtered = files.filter({$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString})
+            guard filtered.isEmpty else {
+                throw PlayerError.alreadyOnPlaylist
+            }
+        }
+
+        playList.addToFiles(archiveFileEntity)
+        PersistenceController.shared.save()
     }
 }

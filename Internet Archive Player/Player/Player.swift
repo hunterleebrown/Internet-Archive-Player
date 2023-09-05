@@ -78,13 +78,13 @@ class Player: NSObject, ObservableObject {
 
     override init() {
         playlistFetchController =
-        NSFetchedResultsController(fetchRequest:  PlaylistEntity.playlistFetchRequest,
+        NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequest(playlistName: "main"),
                                    managedObjectContext: PersistenceController.shared.container.viewContext,
                                    sectionNameKeyPath: nil,
                                    cacheName: nil)
 
         favoritesFetchController =
-        NSFetchedResultsController(fetchRequest:  PlaylistEntity.favoritesFetchRequest,
+        NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequest(playlistName: "favorites"),
                                    managedObjectContext: PersistenceController.shared.container.viewContext,
                                    sectionNameKeyPath: nil,
                                    cacheName: nil)
@@ -102,6 +102,7 @@ class Player: NSObject, ObservableObject {
             } else {
                 mainPlaylist = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
                 mainPlaylist?.name = "main"
+                mainPlaylist?.permanent = true
                 PersistenceController.shared.save()
             }
         } catch {
@@ -118,6 +119,7 @@ class Player: NSObject, ObservableObject {
             } else {
                 favoritesPlaylist = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
                 favoritesPlaylist?.name = "favorites"
+                favoritesPlaylist?.permanent = true
                 PersistenceController.shared.save()
             }
         } catch {
@@ -172,6 +174,15 @@ class Player: NSObject, ObservableObject {
     public func appendPlaylistItem(_ item: ArchiveFile) throws {
         let archiveFileEntity = item.archiveFileEntity()
         try? self.appendPlaylistItem(archiveFileEntity: archiveFileEntity)
+    }
+
+    public func appendAndPlay(_ archiveFileEntity: ArchiveFileEntity) throws {
+        do {
+            try self.appendPlaylistItem(archiveFileEntity: archiveFileEntity)
+        } catch (let error) {
+            throw error
+        }
+        self.playFile(archiveFileEntity)
     }
 
     public func appendPlaylistItem(archiveFileEntity: ArchiveFileEntity) throws {
@@ -233,11 +244,15 @@ class Player: NSObject, ObservableObject {
         guard let playlist = list else { return }
         for index in offsets {
             let archiveFileEntity = playlist.name == "main" ? items[index] : favoriteItems[index]
+            if let playingFile = self.playingFile, playingFile == archiveFileEntity{
+                self.stopPlaying()
+            }
             self.deleteLocalFile(item: archiveFileEntity)
             playlist.removeFromFiles(archiveFileEntity)
             PersistenceController.shared.delete(archiveFileEntity, false)
         }
         PersistenceController.shared.save()
+        self.playingFile = nil
     }
 
 
@@ -291,7 +306,6 @@ class Player: NSObject, ObservableObject {
         }
 
         self.loadAndPlay(archiveFileEntity.workingUrl!)
-
     }
 
 
@@ -303,13 +317,6 @@ class Player: NSObject, ObservableObject {
     }
 
     private func loadAndPlay(_ playUrl: URL) {
-
-//        if playUrl.absoluteString.contains("https") {
-//            guard IAReachability.isConnectedToNetwork() else {
-//                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "networkAlert"), object: nil)
-//                return
-//            }
-//        }
 
         if let player = avPlayer {
             player.pause()
@@ -338,6 +345,19 @@ class Player: NSObject, ObservableObject {
             PlayerControls.showVideo.send(false)
         }
 
+    }
+
+    private func stopPlaying() {
+        if let player = avPlayer {
+            player.pause()
+            if(self.observing) {
+                player.removeObserver(self, forKeyPath: "rate", context: &observerContext)
+                self.observing = false
+            }
+            self.setPlayingInfo(playing: false)
+            avPlayer = nil
+            self.sliderProgressSubject.send(0)
+        }
     }
 
     private func loadNowPlayingMediaArtwork() {

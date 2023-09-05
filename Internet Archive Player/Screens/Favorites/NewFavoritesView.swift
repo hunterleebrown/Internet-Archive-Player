@@ -18,6 +18,8 @@ struct NewFavoritesView: View {
     @State private var seek = 1.0
     @State private var showingAlert = false
 
+    @State var playlistErrorAlertShowing: Bool = false
+
     var body: some View {
         NavigationView {
             List{
@@ -30,9 +32,16 @@ struct NewFavoritesView: View {
                                    fileViewMode: .playlist,
                                    ellipsisAction: self.menuActions(archiveFile: archiveFile))
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    //                        .onTapGesture {
-                    //                            //                    iaPlayer.playFile(archiveFile)
-                    //                        }
+                    .onTapGesture {
+                        do {
+                            try iaPlayer.appendAndPlay(archiveFile)
+                        } catch PlayerError.alreadyOnPlaylist {
+                            self.playlistErrorAlertShowing = true
+                        } catch {
+
+                        }
+
+                    }
                     .padding(10)
 
                 }
@@ -48,6 +57,10 @@ struct NewFavoritesView: View {
             .navigationBarColor(backgroundColor: Color("playerBackground"), titleColor: .fairyRed)
             .tint(.fairyRed)
             .navigationTitle("Favorites")
+            .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
+                Button("Okay", role: .cancel) { }
+                    .tint(Color.fairyRed)
+            }
         }
     }
 
@@ -66,7 +79,7 @@ struct NewFavoritesView: View {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFileEntity: archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
-                //                self.playlistErrorAlertShowing = true
+                self.playlistErrorAlertShowing = true
             } catch {
 
             }

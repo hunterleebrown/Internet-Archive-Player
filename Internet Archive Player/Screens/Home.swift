@@ -30,28 +30,53 @@ struct Home: View {
             VStack(spacing:0) {
                 NavigationStack {
                     Playlist()
-                        .navigationTitle("Playlist")
+                        .navigationTitle("Now Playing")
                         .toolbar {
 
-                            Button(action: {
-                                presentingSearch.toggle()
-                            }){
-                                NavigationLink(destination: SearchView()) {
-                                    Image(systemName: "magnifyingglass")
+                            ToolbarItem(placement: .navigationBarLeading) {
+
+                                Button(action: {
+                                    presentingSearch.toggle()
+                                }){
+                                    NavigationLink(destination: SearchView()) {
+                                        Image(systemName: "magnifyingglass")
+                                            .resizable()
+                                            .frame(width: 30, height: 30)
+                                    }
+                                }
+                                .tint(.fairyRed)
+                            }
+
+//                            ToolbarItem(placement: .navigationBarLeading) {
+//
+//                                Button(action: {
+//                                    print("lists tapped")
+//                                }){
+//                                    NavigationLink(destination: ListsView()) {
+//                                        Image(systemName: "music.note.list")
+//                                            .resizable()
+//                                            .frame(width: 30, height: 30)
+//                                    }
+//                                }
+//                                .tint(.fairyRed)
+//                            }
+
+                            ToolbarItem(placement: .navigationBarLeading) {
+
+                                Button(action: {
+                                    presentingFavorites.toggle()
+                                }){
+                                    Image(systemName: "heart")
                                         .resizable()
                                         .frame(width: 30, height: 30)
                                 }
-                            }
-                            .tint(.fairyRed)
+                                .tint(.fairyRed)
 
-                            Button(action: {
-                                presentingFavorites.toggle()
-                            }){
-                                Image(systemName: "heart")
-                                    .resizable()
-                                    .frame(width: 30, height: 30)
                             }
-                            .tint(.fairyRed)
+                            
+                        }
+                        .toolbar {
+
 
                             EditButton()
                                 .tint(.fairyRed)

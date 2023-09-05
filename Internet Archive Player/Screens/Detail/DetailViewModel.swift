@@ -19,6 +19,8 @@ final class DetailViewModel: ObservableObject {
 
     @Published var playingFile: ArchiveFileEntity?
 
+    @Published var playlistArchiveFile: ArchiveFile?
+
     private var cancellables = Set<AnyCancellable>()
 
     init() {
