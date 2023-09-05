@@ -21,12 +21,16 @@
 		5A4F2D5B2A53227C00DCDF95 /* AttString+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D5A2A53227C00DCDF95 /* AttString+Extension.swift */; };
 		5A4F2D5D2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */; };
 		5A71893F280B721400B1944B /* NavigationBarModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A71893E280B721400B1944B /* NavigationBarModifier.swift */; };
+		5A9DCF932AA6647600F6EFDB /* OtherPlaylist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DCF922AA6647600F6EFDB /* OtherPlaylist.swift */; };
+		5A9DCF952AA6796E00F6EFDB /* SingleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DCF942AA6796E00F6EFDB /* SingleListView.swift */; };
 		5AA391A52A4F4C8A00C65A48 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA391A42A4F4C8A00C65A48 /* Home.swift */; };
 		5AC10D5B281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5AC10D59281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld */; };
 		5AC10D5D281C98B200119C4E /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC10D5C281C98B200119C4E /* Persistence.swift */; };
 		5AC5B2B2281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5B2B1281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift */; };
 		5AC5B2B4281CA4B000CDE937 /* EntityFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5B2B3281CA4B000CDE937 /* EntityFileView.swift */; };
 		5AC5DBA4281F7C36004D64DB /* PlaylistEntity+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */; };
+		5AD216F22AA5770300325087 /* Lists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD216F12AA5770300325087 /* Lists.swift */; };
+		5AD216F42AA5862B00325087 /* NewPlaylist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD216F32AA5862B00325087 /* NewPlaylist.swift */; };
 		5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC51279CCB7000495070 /* PlayerControls.swift */; };
 		5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC53279CCED100495070 /* PlayerButton.swift */; };
 		5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC55279CDE2100495070 /* AirPlayButton.swift */; };
@@ -38,7 +42,6 @@
 		5ADED054279B56F000FB2E6D /* Internet_Archive_PlayerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED053279B56F000FB2E6D /* Internet_Archive_PlayerUITests.swift */; };
 		5ADED056279B56F000FB2E6D /* Internet_Archive_PlayerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED055279B56F000FB2E6D /* Internet_Archive_PlayerUITestsLaunchTests.swift */; };
 		5ADED065279B58CB00FB2E6D /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED064279B58CB00FB2E6D /* SearchView.swift */; };
-		5ADED068279B5D0200FB2E6D /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED067279B597800FB2E6D /* FavoritesView.swift */; };
 		5ADED06D279B608F00FB2E6D /* Iconochive-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5ADED06C279B608F00FB2E6D /* Iconochive-Regular.ttf */; };
 		5ADED06E279B60F500FB2E6D /* IAMediaUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */; };
 		5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */; };
@@ -80,6 +83,8 @@
 		5A4F2D5A2A53227C00DCDF95 /* AttString+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AttString+Extension.swift"; sourceTree = "<group>"; };
 		5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveMetaData+Extension.swift"; sourceTree = "<group>"; };
 		5A71893E280B721400B1944B /* NavigationBarModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBarModifier.swift; sourceTree = "<group>"; };
+		5A9DCF922AA6647600F6EFDB /* OtherPlaylist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherPlaylist.swift; sourceTree = "<group>"; };
+		5A9DCF942AA6796E00F6EFDB /* SingleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleListView.swift; sourceTree = "<group>"; };
 		5AA391A42A4F4C8A00C65A48 /* Home.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Home.swift; sourceTree = "<group>"; };
 		5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Internet-Archive-Player-Info.plist"; sourceTree = SOURCE_ROOT; };
 		5AC10D5A281C988C00119C4E /* InternetArchivePlayer.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = InternetArchivePlayer.xcdatamodel; sourceTree = "<group>"; };
@@ -88,6 +93,8 @@
 		5AC5B2B1281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveFile+ArchiveFileEntity.swift"; sourceTree = "<group>"; };
 		5AC5B2B3281CA4B000CDE937 /* EntityFileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EntityFileView.swift; sourceTree = "<group>"; };
 		5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlaylistEntity+Extension.swift"; sourceTree = "<group>"; };
+		5AD216F12AA5770300325087 /* Lists.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lists.swift; sourceTree = "<group>"; };
+		5AD216F32AA5862B00325087 /* NewPlaylist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPlaylist.swift; sourceTree = "<group>"; };
 		5AD6BC51279CCB7000495070 /* PlayerControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerControls.swift; sourceTree = "<group>"; };
 		5AD6BC53279CCED100495070 /* PlayerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButton.swift; sourceTree = "<group>"; };
 		5AD6BC55279CDE2100495070 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
@@ -102,7 +109,6 @@
 		5ADED053279B56F000FB2E6D /* Internet_Archive_PlayerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet_Archive_PlayerUITests.swift; sourceTree = "<group>"; };
 		5ADED055279B56F000FB2E6D /* Internet_Archive_PlayerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet_Archive_PlayerUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		5ADED064279B58CB00FB2E6D /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
-		5ADED067279B597800FB2E6D /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
 		5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAMediaUtils.swift; sourceTree = "<group>"; };
 		5ADED06C279B608F00FB2E6D /* Iconochive-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Iconochive-Regular.ttf"; sourceTree = "<group>"; };
 		5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundColorModifier.swift; sourceTree = "<group>"; };
@@ -165,6 +171,17 @@
 				5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */,
 			);
 			path = "Model Extensions";
+			sourceTree = "<group>";
+		};
+		5AD216F02AA576C400325087 /* Lists */ = {
+			isa = PBXGroup;
+			children = (
+				5AD216F12AA5770300325087 /* Lists.swift */,
+				5AD216F32AA5862B00325087 /* NewPlaylist.swift */,
+				5A9DCF922AA6647600F6EFDB /* OtherPlaylist.swift */,
+				5A9DCF942AA6796E00F6EFDB /* SingleListView.swift */,
+			);
+			path = Lists;
 			sourceTree = "<group>";
 		};
 		5ADED02C279B56EE00FB2E6D = {
@@ -244,7 +261,6 @@
 		5ADED063279B589600FB2E6D /* Favorites */ = {
 			isa = PBXGroup;
 			children = (
-				5ADED067279B597800FB2E6D /* FavoritesView.swift */,
 				5AFEC5062A99880800E0BFD3 /* NewFavoritesView.swift */,
 			);
 			path = Favorites;
@@ -309,6 +325,7 @@
 				5AFEC5042A9986BE00E0BFD3 /* Playlist */,
 				CEF72C9827A24BF700B8AF15 /* Detail */,
 				5ADED062279B588E00FB2E6D /* Search */,
+				5AD216F02AA576C400325087 /* Lists */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -471,13 +488,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				5AC5DBA4281F7C36004D64DB /* PlaylistEntity+Extension.swift in Sources */,
+				5A9DCF952AA6796E00F6EFDB /* SingleListView.swift in Sources */,
 				5AD6BC58279CF31400495070 /* Playlist.swift in Sources */,
 				5A4F2D592A50781D00DCDF95 /* UIImageView+Extension.swift in Sources */,
 				5AFEC5072A99880800E0BFD3 /* NewFavoritesView.swift in Sources */,
 				5A4151BD27B3645E007A3623 /* Inject.swift in Sources */,
 				5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */,
 				5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */,
-				5ADED068279B5D0200FB2E6D /* FavoritesView.swift in Sources */,
 				5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */,
 				5A012CAE282B54C800785420 /* Downloader.swift in Sources */,
 				5AE69CD22A846DBE0062CC5D /* DetailDescription.swift in Sources */,
@@ -488,8 +505,11 @@
 				5A33A43F2A59CC520010C6FA /* DetailViewModel.swift in Sources */,
 				5AC10D5B281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld in Sources */,
 				5AC10D5D281C98B200119C4E /* Persistence.swift in Sources */,
+				5AD216F42AA5862B00325087 /* NewPlaylist.swift in Sources */,
 				5A71893F280B721400B1944B /* NavigationBarModifier.swift in Sources */,
+				5A9DCF932AA6647600F6EFDB /* OtherPlaylist.swift in Sources */,
 				5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */,
+				5AD216F22AA5770300325087 /* Lists.swift in Sources */,
 				5AC5B2B4281CA4B000CDE937 /* EntityFileView.swift in Sources */,
 				5A33A4412A59CCD50010C6FA /* BetterDetail.swift in Sources */,
 				5AA391A52A4F4C8A00C65A48 /* Home.swift in Sources */,
@@ -671,6 +691,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -704,6 +725,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
