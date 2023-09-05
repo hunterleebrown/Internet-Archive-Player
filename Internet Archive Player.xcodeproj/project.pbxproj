@@ -10,7 +10,6 @@
 		5A012CAE282B54C800785420 /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A012CAD282B54C800785420 /* Downloader.swift */; };
 		5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2FACD227A10FB200D02945 /* SearchItemView.swift */; };
 		5A305F522807BF5E00735FAA /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 5A305F512807BF5E00735FAA /* iaAPI */; };
-		5A33A43D2A59C11D0010C6FA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5A33A43C2A59C11D0010C6FA /* LaunchScreen.storyboard */; };
 		5A33A43F2A59CC520010C6FA /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */; };
 		5A33A4412A59CCD50010C6FA /* BetterDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A33A4402A59CCD50010C6FA /* BetterDetail.swift */; };
 		5A4151B827B0FDF8007A3623 /* IAReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B727B0FDF8007A3623 /* IAReachability.swift */; };
@@ -72,7 +71,6 @@
 /* Begin PBXFileReference section */
 		5A012CAD282B54C800785420 /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
 		5A2FACD227A10FB200D02945 /* SearchItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchItemView.swift; sourceTree = "<group>"; };
-		5A33A43C2A59C11D0010C6FA /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		5A33A4402A59CCD50010C6FA /* BetterDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetterDetail.swift; sourceTree = "<group>"; };
 		5A4151B727B0FDF8007A3623 /* IAReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAReachability.swift; sourceTree = "<group>"; };
@@ -210,7 +208,6 @@
 				5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */,
 				5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */,
 				5AC10D59281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld */,
-				5A33A43C2A59C11D0010C6FA /* LaunchScreen.storyboard */,
 				5AFEC5052A9986D700E0BFD3 /* Screens */,
 				5ADED074279B8A4A00FB2E6D /* Player */,
 				5A012CAC282B54B900785420 /* Downloader */,
@@ -460,7 +457,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5ADED06D279B608F00FB2E6D /* Iconochive-Regular.ttf in Resources */,
-				5A33A43D2A59C11D0010C6FA /* LaunchScreen.storyboard in Resources */,
 				5ADED040279B56F000FB2E6D /* Preview Assets.xcassets in Resources */,
 				5ADED03D279B56F000FB2E6D /* Assets.xcassets in Resources */,
 			);
