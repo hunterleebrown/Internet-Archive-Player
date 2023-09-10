@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import AVKit
+import Combine
 
 enum PresentedSheet {
     case search
@@ -22,6 +23,11 @@ struct Home: View {
     @State private var showingAlert = false
     @State var showVideoPlayer: Bool = false
     @State var showNetworkAlert: Bool = false
+    @State var showControls: Bool = false
+    @State var maxControlHeight: Bool = true
+
+    static var showControlsPass = PassthroughSubject<Bool, Never>()
+    static var controlHeightPass = PassthroughSubject<Bool, Never>()
 
     var body: some View {
 
@@ -111,8 +117,18 @@ struct Home: View {
                                 showVideoPlayer = show
                             }
                         }
+                        .onReceive(Home.showControlsPass) { show in
+                            withAnimation {
+                                showControls = show
+                            }
+                        }
                         .onReceive(Player.networkAlert, perform: { badNetwork in
                             showNetworkAlert = true
+                        })
+                        .onReceive(Home.controlHeightPass, perform: { show in
+                            withAnimation {
+                                maxControlHeight = show
+                            }
                         })
                         .alert("There is no network connection", isPresented: $showNetworkAlert) {
                             Button("OK") {
@@ -127,16 +143,34 @@ struct Home: View {
 
                 }
                 .safeAreaInset(edge: .bottom) {
-                    ZStack {
-                        CustomVideoPlayer()
-                            .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 0 )
-                            .zIndex(showVideoPlayer ? 1 : 0)
+                    VStack(spacing: 0) {
+                        ZStack {
+                            CustomVideoPlayer()
+                                .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 0 )
+                                .zIndex(showVideoPlayer ? 1 : 0)
 
-                        PlayerControls()
-                            .cornerRadius(10)
-                            .zIndex(showVideoPlayer ? 0 : 1)
+                            PlayerControls()
+                                .zIndex(showVideoPlayer ? 0 : 1)
+                        }
                     }
+                    .opacity(showControls ? 1 : 0)
                     .padding(10)
+                    .frame(maxWidth: 428, maxHeight: maxControlHeight ? nil : 0.5)
+                    .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
+                        .onEnded { value in
+                            print(value.translation)
+                            switch(value.translation.width, value.translation.height) {
+                                case (...0, -30...30):  print("left swipe")
+                                case (0..., -30...30):  print("right swipe")
+                                case (-100...100, ...0):
+                                print("up swipe")
+                                Home.controlHeightPass.send(true)
+                                case (-100...100, 0...):  print("down swipe")
+                                Home.controlHeightPass.send(false)
+                                default:  print("no clue")
+                            }
+                        }
+                    )
                 }
             }
 

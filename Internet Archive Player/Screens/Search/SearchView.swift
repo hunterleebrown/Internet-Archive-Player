@@ -9,61 +9,15 @@ import SwiftUI
 import iaAPI
 import Combine
 
-
-struct SearchFilter: Hashable {
-    var name: String
-    var identifier: String
-}
-
-
-struct SearchFilters: View {
-
-    @State private var searchFilter: SearchFilter?
-    var searchFiltersViewModel: SearchFiltersViewModel
-    var delegate: SearchView?
-
-    let collections: [SearchFilter] = [
-        SearchFilter(name: "All", identifier: ""),
-        SearchFilter(name: "Audio Books & Poetry", identifier: "audio_bookspoetry"),
-        SearchFilter(name: "LibriVox", identifier: "librivoxaudio")
-    ]
-
-
-    var body: some View {
-        List(collections, id: \.self, selection: $searchFilter ) { filter in
-
-            HStack {
-                if searchFiltersViewModel.collectionSelection == filter {
-                    Image(systemName: "checkmark")
-                        .foregroundColor(Color.fairyRed)
-                }
-                Text(filter.name)
-            }
-        }
-        .onChange(of: searchFilter) { newValue in
-            if let val = newValue {
-                searchFiltersViewModel.collectionSelection = val
-                if let del = delegate {
-                    del.showCollections = false
-                    del.viewModel.search(query: del.viewModel.searchText, collection: searchFiltersViewModel.collectionSelection.identifier.isEmpty ? nil : searchFiltersViewModel.collectionSelection.identifier, loadMore: false)
-
-                }
-            }
-        }
-    }
-}
-
-class SearchFiltersViewModel: ObservableObject {
-    @Published var collectionSelection: SearchFilter = SearchFilter(name: "All", identifier: "")
-}
-
 struct SearchView: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel = SearchView.ViewModel()
     @FocusState private var searchFocused: Bool
     @State private var collection: String = ""
     @State var showCollections: Bool = false
-    @StateObject var searchFiltersViewModel = SearchFiltersViewModel()
+
+    @State var collectionName: String = "All"
+    @State var collectionIdentifier: String?
 
     init() {
         searchFocused = false
@@ -85,36 +39,27 @@ struct SearchView: View {
                 }
 
                 HStack(alignment: .center , spacing:20) {
-                    Text("From collection:")
-                    Button(searchFiltersViewModel.collectionSelection.name) {
+                    Text("Filter:")
+
+                    Button {
                         showCollections = true
+                    } label: {
+                        Text("Collection: \(collectionName)")
+                            .padding()
+                            .frame(height: 40)
+                            .foregroundColor(Color.fairyCream)
+                            .background(
+                                RoundedRectangle(
+                                     cornerRadius: 10,
+                                     style: .continuous
+                                 )
+                                .fill(Color.fairyRed)
+                            )
                     }
+
+
                 }
                 .padding(.horizontal, 20)
-
-
-//                TextField("Collection?", text: $collection)
-//                    .overlay(
-//                        RoundedRectangle(cornerRadius: 5)
-//                            .stroke(Color.gray, lineWidth: 1)
-//                    )
-//                    .padding([.horizontal], 20)
-
-
-
-
-//                ScrollView(.horizontal) {
-//                    LazyHStack {
-//                        ForEach(0..<10) { i in
-//                            RoundedRectangle(cornerRadius: 25)
-//                                .fill(Color(hue: Double(i) / 10, saturation: 1, brightness: 1).gradient)
-//                                .frame(width: 300, height: 100)
-//                        }
-//                    }
-//                    .scrollTargetLayout()
-//                }
-//                .scrollTargetBehavior(.viewAligned)
-//                .safeAreaPadding(.horizontal, 40)
 
                 List{
                     ForEach(viewModel.items, id: \.self) { doc in
@@ -141,14 +86,18 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
                 .onSubmit(of: .search, {
-                    viewModel.search(query: viewModel.searchText, collection: searchFiltersViewModel.collectionSelection.identifier.isEmpty ? nil : searchFiltersViewModel.collectionSelection.identifier, loadMore: false)
+                    viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
                 })
                 .frame(maxWidth: .infinity)
                 .listStyle(PlainListStyle())
 
             }
             .sheet(isPresented: $showCollections) {
-                SearchFilters(searchFiltersViewModel: searchFiltersViewModel, delegate: self)
+                let type = self.viewModel.mediaTypes[self.viewModel.mediaType]
+                if let topCollectionType = ArchiveTopCollectionType(rawValue: type.rawValue) {
+                    let filterViewModel = SearchFiltersViewModel(collectionType: topCollectionType)
+                    SearchFilters(searchFiltersViewModel: filterViewModel, delegate: self)
+                }
             }
         }
         .safeAreaInset(edge: .bottom, content: {
@@ -183,7 +132,7 @@ extension SearchView {
 
         @Published var mediaType: Int = 0
 
-        private let mediaTypes: [ArchiveMediaType] = [.audio, .movies]
+        public let mediaTypes: [ArchiveMediaType] = [.audio, .movies]
         private var isLoadingMore: Bool = false
         private var page: Int = 1
         private var numberOfResults = 0
@@ -214,7 +163,7 @@ extension SearchView {
                         self.items.removeAll()
                     }
 
-                    let format: ArchiveFileFormat = self.mediaTypes[self.mediaType] == .movies ? .h264HD : .mp3
+                    let format: ArchiveFileFormat? = self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
                     let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
                     print(query)
                     let data = try await self.service.searchAsync(query: query, mediaTypes: [searchMediaType], rows: self.rows, page: self.page, format: format, collection: collection)

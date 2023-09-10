@@ -21,6 +21,7 @@ struct PlayerControls: View {
     var backgroundColor: Color = .fairyRed
 
     var body: some View {
+
         VStack(alignment: .leading, spacing: 5){
 
             if let file = viewModel.playingFile {
@@ -116,6 +117,7 @@ struct PlayerControls: View {
         }
         .padding()
         .background(backgroundColor)
+        .cornerRadius(10)
         .onAppear() {
             viewModel.setSubscribers(iaPlayer)
         }

@@ -37,12 +37,47 @@ final class DetailViewModel: ObservableObject {
                     return track1 < track2
                 }
 
-                self.movieFiles = doc.files.filter{ $0.format == .h264 }
+                let video = doc.files.filter{ $0.isVideo }
+                if video.count > 0 {
+//                    var h264HD = video.filter {$0.format == .h264HD || $0.format == .h264 || $0.format == .mpg512kb}
+//                    self.movieFiles = h264HD.count > 0 ? h264HD : video
+                    self.movieFiles = desiredVideo(files:video)
+                }
 
             } catch {
                 print(error)
             }
         }
+    }
+
+    private func desiredVideo(files: [ArchiveFile]) -> [ArchiveFile] {
+//        var h264HD = files.filter {$0.format == .h264HD }
+//        var h264 = files.filter { $0.format == .h264 }
+//        var mpg512 = files.filter { $0.format == .mpg512kb }
+
+        var goodFiles: [String: [ArchiveFile]] = [:]
+
+        ArchiveFileFormat.allCases.forEach { format in
+            goodFiles[format.rawValue] = files.filter {$0.format == format}
+        }
+
+        if let h264HD = goodFiles[ArchiveFileFormat.h264HD.rawValue], !h264HD.isEmpty{
+            return h264HD
+        }
+
+        if let h264 = goodFiles[ArchiveFileFormat.h264.rawValue], !h264.isEmpty{
+            return h264
+        }
+
+        if let mpg512 = goodFiles[ArchiveFileFormat.mpg512kb.rawValue], !mpg512.isEmpty{
+            return mpg512
+        }
+
+        if let mp4HiRes = goodFiles[ArchiveFileFormat.mp4HiRes.rawValue], !mp4HiRes.isEmpty{
+            return mp4HiRes
+        }
+
+        return files
     }
 
     public func addAllFilesToPlaylist(player: Player) {

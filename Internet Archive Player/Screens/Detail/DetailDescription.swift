@@ -16,24 +16,35 @@ struct DetailDescription: View {
     var body: some View {
         if let attString = doc.description.joined(separator: "").html2AttributedString {
             ScrollView() {
-                Text(doc.archiveTitle ?? "")
-                    .font(.headline)
-                    .bold()
+                VStack(spacing: 10) {
+                    Text(doc.archiveTitle ?? "")
+                        .font(.headline)
+                        .bold()
 
-                if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
-                    Text(artist)
-                        .font(.subheadline)
-                        .multilineTextAlignment(.center)
+                    if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
+                        Text(artist)
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    if let publisher = doc.publisher, !publisher.isEmpty {
+                        Text(publisher.joined(separator: ", "))
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    HStack(alignment: .top, spacing: 5) {
+                        Text("Collection:")
+                            .font(.subheadline)
+                            .bold()
+                        Text(doc.collection.joined(separator: ", "))
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    Text(AttributedString(attString))
+                        .background(Color.white)
                 }
-
-                if let publisher = doc.publisher {
-                    Text(publisher.joined(separator: ", "))
-                        .font(.subheadline)
-                        .multilineTextAlignment(.center)
-                }
-
-                Text(AttributedString(attString))
-                    .background(Color.white)
                 Spacer()
             }
             .padding(20.0)
