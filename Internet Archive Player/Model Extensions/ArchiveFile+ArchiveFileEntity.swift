@@ -27,6 +27,15 @@ extension ArchiveFile {
         return archiveFileEntity
     }
 
+    public var isVideo: Bool {
+        switch self.format {
+        case .h264, .h264HD, .mp4HiRes, .mpg512kb:
+            return true
+        default:
+            return false
+        }
+    }
+
 }
 
 extension ArchiveFileEntity {

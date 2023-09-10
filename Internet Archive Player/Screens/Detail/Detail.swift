@@ -73,9 +73,20 @@ struct Detail: View {
                     } label: {
                         Text("Description")
                             .font(.subheadline)
-                            .tint(.fairyRed)
+                            .bold()
+                            .foregroundColor(Color.fairyRed)
+                            .padding()
+                            .background(
+                                RoundedRectangle(
+                                     cornerRadius: 10,
+                                     style: .continuous
+                                 )
+                                .stroke(Color.fairyRed)
+                            )
                     }
                 }
+
+                
 
                 HStack() {
                     Text("Files")

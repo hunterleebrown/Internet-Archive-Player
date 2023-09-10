@@ -46,8 +46,9 @@ class Player: NSObject, ObservableObject {
     var mainPlaylist: PlaylistEntity? = nil
     var favoritesPlaylist: PlaylistEntity? = nil
 
-    public var playingFile: ArchiveFileEntity? {
+    @Published public var playingFile: ArchiveFileEntity? {
         didSet {
+            Home.showControlsPass.send(playingFile != nil)
             self.loadNowPlayingMediaArtwork()
         }
     }
