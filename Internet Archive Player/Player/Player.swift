@@ -516,17 +516,6 @@ class Player: NSObject, ObservableObject {
         }
 
     }
-
-
-    private func getImage() async -> UIImage? {
-
-        if let iconUrl = self.playingFile?.iconUrl {
-            async let (data, _) = try! await URLSession.shared.data(from: iconUrl)
-            return await UIImage(data: data)
-        }
-
-        return nil
-    }
 }
 
 extension Player: NSFetchedResultsControllerDelegate {

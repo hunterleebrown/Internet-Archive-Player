@@ -21,7 +21,6 @@ struct PlayerControls: View {
     var backgroundColor: Color = .fairyRed
 
     var body: some View {
-
         VStack(alignment: .leading, spacing: 5){
 
             if let file = viewModel.playingFile {
@@ -116,7 +115,24 @@ struct PlayerControls: View {
             .tint(foregroundColor)
         }
         .padding()
-        .background(backgroundColor)
+        .background(
+            backgroundColor
+
+            //            AsyncImage (
+            //                url: viewModel.playingFile?.iconUrl,
+            //                content: { image in
+            //                    image
+            //                        .resizable()
+            //                        .aspectRatio(contentMode: .fill)
+            //                },
+            //                placeholder: {
+            //                    Color.black
+            //                })
+            //            .overlay(Rectangle().fill(Color.white.opacity(0.3)), alignment: .topTrailing)
+            //            .clipped()
+
+        )
+        .coordinateSpace(name: "playerControls")
         .cornerRadius(10)
         .onAppear() {
             viewModel.setSubscribers(iaPlayer)

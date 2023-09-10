@@ -23,51 +23,67 @@ struct Detail: View {
 
     @State var otherPlaylistPresented = false
 
+    @State var scrollOffset: CGFloat = CGFloat.zero
+    @State var hideNavigationBar: Bool = false
+
+    @State var backgroundBlur: Double = 0.0
+    
+    @State var backgroundURL: URL?
+    static var backgroundPass = PassthroughSubject<URL, Never>()
+
     init(_ identifier: String, isPresented: Bool = false) {
         self.identifier = identifier
         self.isPresented = isPresented
     }
     
     var body: some View {
-        List {
+        ObservableScrollView(scrollOffset: $scrollOffset) {
+            Spacer().frame(height: 200)
             VStack(alignment: .center, spacing: 5.0) {
-                if let iconUrl = viewModel.archiveDoc?.iconUrl {
-                    AsyncImage (
-                        url: iconUrl,
-                        content: { image in
-                            image.resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(minWidth:180, maxWidth: 180,
-                                       minHeight: 180, maxHeight: 180)
-                                .background(Color.black)
-                        },
-                        placeholder: {
-                            Color.black
-                        })
-                    .frame(minWidth:180, maxWidth: 180,
-                           minHeight: 180, maxHeight: 180)
-                    .cornerRadius(15)
-                    .shadow(color: .gray, radius: 5, x: 0, y: 5)
-
-                }
-
                 Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                     .font(.headline)
                     .bold()
+                    .foregroundColor(.black)
+                    .frame(alignment: .center)
+                    .multilineTextAlignment(.center)
 
-                if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", ") {
-                    Text(artist)
-                        .font(.subheadline)
-                        .multilineTextAlignment(.center)
+                if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
+                    HStack(alignment: .top) {
+//                        Text("Artist: ")
+//                            .bold()
+//                            .font(.subheadline)
+//                            .foregroundColor(.black)
+
+                        Text(artist)
+                            .font(.caption)
+                            .multilineTextAlignment(.leading)
+                            .foregroundColor(.black)
+                    }
                 }
 
-                if let publisher = self.viewModel.archiveDoc?.publisher {
-                    Text(publisher.joined(separator: ", "))
-                        .font(.subheadline)
-                        .multilineTextAlignment(.center)
+                if let publisher = self.viewModel.archiveDoc?.publisher, !publisher.isEmpty {
+                    HStack(alignment: .top) {
+//                        Text("Publisher: ")
+//                            .bold()
+//                            .font(.subheadline)
+//                            .foregroundColor(.black)
+                        Text(publisher.joined(separator: ", "))
+                            .font(.caption)
+                            .multilineTextAlignment(.leading)
+                            .foregroundColor(.black)
+                    }
                 }
+            }
+            .padding()
+            .background(
+                Color.white.opacity(0.5)
+            )
+            .cornerRadius(10)
 
-                if let desc = self.viewModel.archiveDoc?.description {
+
+            VStack(alignment: .center, spacing: 5.0) {
+
+                if (self.viewModel.archiveDoc?.description) != nil {
                     Button {
                         descriptionExpanded = true
                     } label: {
@@ -78,21 +94,17 @@ struct Detail: View {
                             .padding()
                             .background(
                                 RoundedRectangle(
-                                     cornerRadius: 10,
-                                     style: .continuous
-                                 )
-                                .stroke(Color.fairyRed)
+                                    cornerRadius: 10,
+                                    style: .continuous
+                                )
+                                .fill(Color.white.opacity(0.5))
                             )
                     }
                 }
 
-                
 
                 HStack() {
-                    Text("Files")
-                        .font(.subheadline)
-                        .bold()
-                        .foregroundColor(.fairyRed)
+
                     Spacer()
 
                     Menu {
@@ -112,6 +124,14 @@ struct Detail: View {
                             Image(systemName: PlayerButtonType.list.rawValue)
                                 .tint(.fairyRed)
                         }
+                        .padding(5)
+                        .background(
+                            RoundedRectangle(
+                                cornerRadius: 10,
+                                style: .continuous
+                            )
+                            .fill(Color.white.opacity(0.5))
+                        )
                     }
                     .highPriorityGesture(TapGesture())
                 }
@@ -122,8 +142,16 @@ struct Detail: View {
                         Text("Audio")
                             .font(.subheadline)
                             .bold()
-                            .foregroundColor(.fairyRed)
-                            .padding(.horizontal, 10)
+                            .foregroundColor(.black)
+                            .padding(5)
+                            .background(
+                                RoundedRectangle(
+                                    cornerRadius: 10,
+                                    style: .continuous
+                                )
+                                .fill(Color.white.opacity(0.5))
+                            )
+                        
 
                         ForEach(self.viewModel.sortedAudioFiles(), id: \.self) { file in
                             self.createFileView(file)
@@ -145,8 +173,15 @@ struct Detail: View {
                         Text("Movies")
                             .font(.subheadline)
                             .bold()
-                            .foregroundColor(.fairyRed)
-                            .padding(.horizontal, 10)
+                            .foregroundColor(.black)
+                            .padding(5)
+                            .background(
+                                RoundedRectangle(
+                                    cornerRadius: 10,
+                                    style: .continuous
+                                )
+                                .fill(Color.white.opacity(0.5))
+                            )
 
                         ForEach(self.viewModel.movieFiles, id: \.self) { file in
                             self.createFileView(file)
@@ -164,14 +199,61 @@ struct Detail: View {
                         }
                     }
                 }
-
+                .padding(10)
             }
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .listRowSeparator(.hidden)
-            .padding(10)
+//            .listRowBackground(Color.clear)
+//            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+//            .listRowSeparator(.hidden)
         }
-        .listStyle(PlainListStyle())
-        .navigationTitle("Archive")
+        .onChange(of: scrollOffset, perform: { scrollOfset in
+            let offset = scrollOfset + (self.hideNavigationBar ? 50 : 0) // note 1
+            if offset > 25 {
+                withAnimation(.easeIn(duration: 1), {
+                    self.hideNavigationBar = true
+                    self.backgroundBlur = 10
+                })
+            }
+            if offset < 75 {
+                withAnimation(.easeIn(duration: 1), {
+                    self.hideNavigationBar = false
+                    self.backgroundBlur = 0
+                })
+            }
+        })
+        .navigationBarHidden(hideNavigationBar)
+        .background(
+            ZStack (alignment: .top) {
+                if let img = self.backgroundURL {
+
+                    if let img = viewModel.uiImage, let color = img.averageColor {
+                        Rectangle().fill(
+//                            LinearGradient(gradient: Gradient(colors: [Color(color), .black]), startPoint: .top, endPoint: .bottom)
+                            Color(color)
+                        )
+                        .ignoresSafeArea()
+                    }
+
+                    AsyncImage (
+                        url: img,
+                        content: { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .cornerRadius(10)
+                        },
+                        placeholder: {
+                            Color.black
+                        })
+                    .padding(10)
+//                    .overlay(Rectangle().fill(Color.white.opacity(0.3)), alignment: .topTrailing)
+                    .blur(radius: backgroundBlur)
+                }
+            }
+        )
+        .listStyle(.plain)
+        //        .navigationTitle("Archive")
+        .toolbarBackground( Color.clear, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .onAppear() {
             self.viewModel.getArchiveDoc(identifier: self.identifier)
             self.viewModel.setSubscribers(iaPlayer)
@@ -181,29 +263,40 @@ struct Detail: View {
                 DetailDescription(doc: doc)
             }
         }
-//        .sheet(isPresented: $otherPlaylistPresented) {
-//            if let archivefile = viewModel.playlistArchiveFile {
-//                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFile: archivefile)
-//            }
-//        }
-        .navigationBarItems(trailing:
-                                Button(action: {
-        }) {
-            Image(systemName: "heart")
-                .tint(.fairyRed)
-        })
-//        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
-//        .alert("Add all files to Playlist?", isPresented: $playlistAddAllAlert) {
-//            Button("No", role: .cancel) { }
-//            Button("Yes") {
-//                viewModel.addAllFilesToPlaylist(player: iaPlayer)
-//            }
-//        }
+        //        .sheet(isPresented: $otherPlaylistPresented) {
+        //            if let archivefile = viewModel.playlistArchiveFile {
+        //                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFile: archivefile)
+        //            }
+        //        }
+//        .navigationBarItems(trailing:
+//                                Button(action: {
+//        }) {
+//            Image(systemName: "heart")
+//                .tint(.fairyRed)
+//        })
+//        //        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
+        //        .alert("Add all files to Playlist?", isPresented: $playlistAddAllAlert) {
+        //            Button("No", role: .cancel) { }
+        //            Button("Yes") {
+        //                viewModel.addAllFilesToPlaylist(player: iaPlayer)
+        //            }
+        //        }
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
         .alert(PlayerError.alreadyOnFavorites.description, isPresented: $favoritesErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
+        }
+        .onReceive(Detail.backgroundPass) { url in
+            withAnimation {
+                self.backgroundURL = url
+            }
+        }
+        .opacity(self.backgroundURL != nil ? 1 : 0)
+        .edgesIgnoringSafeArea(.top)
+        .safeAreaInset(edge: .bottom) {
+            Spacer()
+                .frame(height:100)
         }
     }
 
@@ -239,22 +332,22 @@ struct Detail: View {
         }, imageName: "heart")
 
 
-//        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
-//            do  {
-////                try iaPlayer.appendFavoriteItem(archiveFile)
-//                viewModel.playlistArchiveFile = archiveFile
-//                otherPlaylistPresented = true
-//
-//            } catch PlayerError.alreadyOnFavorites {
-////                self.favoritesErrorAlertShowing = true
-//            } catch {
-//
-//            }
-//        }, imageName: "music.note.list")
+        //        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
+        //            do  {
+        ////                try iaPlayer.appendFavoriteItem(archiveFile)
+        //                viewModel.playlistArchiveFile = archiveFile
+        //                otherPlaylistPresented = true
+        //
+        //            } catch PlayerError.alreadyOnFavorites {
+        ////                self.favoritesErrorAlertShowing = true
+        //            } catch {
+        //
+        //            }
+        //        }, imageName: "music.note.list")
 
         actions.append(playlist)
         actions.append(favorites)
-//        actions.append(otherPlaylist)
+        //        actions.append(otherPlaylist)
 
         return actions
     }

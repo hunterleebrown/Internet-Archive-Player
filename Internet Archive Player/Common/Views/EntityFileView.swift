@@ -82,10 +82,11 @@ struct EntityFileView: View {
                 }
 
                 HStack(alignment: .center, spacing: 5) {
-                    Text(archiveFile.format ?? "")
+
+                    Image(systemName: archiveFile.isVideo ? "video" : "hifispeaker")
+                        .tint(.black)
                         .font(.caption2)
-                        .foregroundColor(textColor)
-                        .bold()
+
                     Text("· \(archiveFile.calculatedSize ?? "\"\"") mb")
                         .font(.caption2)
                         .foregroundColor(textColor)

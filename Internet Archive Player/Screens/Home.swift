@@ -153,6 +153,7 @@ struct Home: View {
                                 .zIndex(showVideoPlayer ? 0 : 1)
                         }
                     }
+                    .coordinateSpace(name: "controls")
                     .opacity(showControls ? 1 : 0)
                     .padding(10)
                     .frame(maxWidth: 428, maxHeight: maxControlHeight ? nil : 0.5)
@@ -173,7 +174,6 @@ struct Home: View {
                     )
                 }
             }
-
         }
         .environmentObject(iaPlayer)
     }

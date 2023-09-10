@@ -16,10 +16,12 @@ struct DetailDescription: View {
     var body: some View {
         if let attString = doc.description.joined(separator: "").html2AttributedString {
             ScrollView() {
-                VStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 10) {
                     Text(doc.archiveTitle ?? "")
                         .font(.headline)
                         .bold()
+                        .multilineTextAlignment(.center)
+                        .frame(alignment: .center)
 
                     if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
                         Text(artist)
@@ -28,19 +30,27 @@ struct DetailDescription: View {
                     }
 
                     if let publisher = doc.publisher, !publisher.isEmpty {
-                        Text(publisher.joined(separator: ", "))
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
+                        HStack(alignment: .top, spacing: 5) {
+                            Text("Publisher:")
+                                .font(.caption)
+                                .bold()
+                            Text(publisher.joined(separator: ", "))
+                                .font(.caption)
+                                .multilineTextAlignment(.center)
+                        }
                     }
 
                     HStack(alignment: .top, spacing: 5) {
                         Text("Collection:")
-                            .font(.subheadline)
+                            .font(.caption)
                             .bold()
                         Text(doc.collection.joined(separator: ", "))
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
+                            .font(.caption)
+                            .multilineTextAlignment(.leading)
                     }
+
+                    Spacer()
+                        .frame(height:44)
 
                     Text(AttributedString(attString))
                         .background(Color.white)
