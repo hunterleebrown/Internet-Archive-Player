@@ -16,10 +16,10 @@ final class DetailViewModel: ObservableObject {
     @Published var archiveDoc: ArchiveMetaData? = nil
     @Published var audioFiles = [ArchiveFile]()
     @Published var movieFiles = [ArchiveFile]()
-
     @Published var playingFile: ArchiveFileEntity?
-
     @Published var playlistArchiveFile: ArchiveFile?
+    @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
+    @Published var uiImage: UIImage?
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -44,6 +44,11 @@ final class DetailViewModel: ObservableObject {
                     self.movieFiles = desiredVideo(files:video)
                 }
 
+                if let icon = doc.metadata?.iconUrl {
+                    //self.backgroundIconUrl = icon
+                    Detail.backgroundPass.send(icon)
+                    self.uiImage = await IAMediaUtils.getImage(url: icon)
+                }
             } catch {
                 print(error)
             }
