@@ -102,11 +102,11 @@ struct Detail: View {
                     }
                 }
 
+#if !os(tvOS)
 
                 HStack() {
 
                     Spacer()
-
                     Menu {
                         Button(action: {
                             viewModel.addAllFilesToPlaylist(player: iaPlayer)
@@ -136,6 +136,7 @@ struct Detail: View {
                     .highPriorityGesture(TapGesture())
                 }
                 .padding(10)
+#endif
 
                 LazyVStack(alignment: .leading) {
                     if self.viewModel.audioFiles.count > 0 {

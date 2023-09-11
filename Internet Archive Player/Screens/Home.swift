@@ -83,10 +83,11 @@ struct Home: View {
                         }
                         .toolbar {
 
+#if !os(tvOS)
 
                             EditButton()
                                 .tint(.fairyRed)
-
+#endif
                             Button(action: {
                                 showingAlert = true
                             }) {
@@ -157,6 +158,8 @@ struct Home: View {
                     .opacity(showControls ? 1 : 0)
                     .padding(10)
                     .frame(maxWidth: 428, maxHeight: maxControlHeight ? nil : 0.5)
+#if !os(tvOS)
+
                     .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
                         .onEnded { value in
                             print(value.translation)
@@ -172,6 +175,7 @@ struct Home: View {
                             }
                         }
                     )
+#endif
                 }
             }
         }

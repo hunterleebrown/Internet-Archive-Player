@@ -114,6 +114,8 @@ struct EntityFileView: View {
             }
             .padding(5.0)
             Spacer()
+#if !os(tvOS)
+
             HStack() {
 
                     Menu {
@@ -158,6 +160,7 @@ struct EntityFileView: View {
             }
             .tint(textColor)
             .padding(5.0)
+#endif
         }
         .background(backgroundColor ?? nil)
         .cornerRadius(5.0)

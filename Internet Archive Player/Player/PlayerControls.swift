@@ -73,6 +73,7 @@ struct PlayerControls: View {
                 }
             }
 
+#if !os(tvOS)
             Slider(value: $viewModel.progress,
                    in: 0...1,
                    onEditingChanged: sliderEditingChanged)
@@ -92,7 +93,8 @@ struct PlayerControls: View {
                     .font(.system(size:9.0))
                     .frame(width: 44.0)
             }
-
+#endif
+            
             HStack(alignment: .center, spacing: 10.0) {
 
                 PlayerButton(.backwards) {

@@ -25,6 +25,7 @@ struct DraggableModifier : ViewModifier {
             CGSize(width: direction == .vertical ? 0 : draggedOffset.width,
                    height: direction == .horizontal ? 0 : draggedOffset.height)
         )
+#if !os(tvOS)
         .gesture(
             DragGesture()
             .onChanged { value in
@@ -34,6 +35,7 @@ struct DraggableModifier : ViewModifier {
                 self.draggedOffset = .zero
             }
         )
+#endif
     }
 
 }

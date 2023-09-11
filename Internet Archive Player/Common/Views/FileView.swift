@@ -139,7 +139,7 @@ struct FileView: View {
                     }
                     .frame(width: 44, height: 44)
                 }
-
+#if !os(tvOS)
                 if ellipsisAction.count > 0 {
                     Menu {
 
@@ -165,6 +165,7 @@ struct FileView: View {
                     }
                     .highPriorityGesture(TapGesture())
                 }
+#endif
             }
             .tint(textColor)
             .padding(5.0)
