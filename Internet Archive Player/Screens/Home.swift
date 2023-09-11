@@ -105,7 +105,9 @@ struct Home: View {
                             NewFavoritesView()
                         }
                         .sheet(item: $playingFile, content: { file in
-                            Detail(file.identifier!, isPresented: true)
+                            if let identifier = file.identifier {
+                                Detail(identifier, isPresented: true)
+                            }
                         })
                         .onReceive(PlayerControls.showPlayingDetails) { file in
                             withAnimation {

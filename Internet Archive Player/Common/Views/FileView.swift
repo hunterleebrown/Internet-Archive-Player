@@ -16,7 +16,7 @@ enum FileViewMode {
 
 struct MenuAction: Hashable {
     static func == (lhs: MenuAction, rhs: MenuAction) -> Bool {
-        return lhs.name == rhs.name
+        return lhs.id == rhs.id
     }
 
     func hash(into hasher: inout Hasher) {
@@ -26,6 +26,7 @@ struct MenuAction: Hashable {
     var name: String
     var action: (()->())
     var imageName: String? = nil
+    var id = UUID().uuidString
 }
 
 struct FileView: View {
@@ -170,7 +171,7 @@ struct FileView: View {
             .padding(5.0)
         }
         .background(backgroundColor ?? nil)
-        .cornerRadius(5.0)
+        .cornerRadius(5)
     }
     
     private func fileTitle(_ iaFile: ArchiveFile?) -> String {

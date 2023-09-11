@@ -56,9 +56,6 @@ final class DetailViewModel: ObservableObject {
     }
 
     private func desiredVideo(files: [ArchiveFile]) -> [ArchiveFile] {
-//        var h264HD = files.filter {$0.format == .h264HD }
-//        var h264 = files.filter { $0.format == .h264 }
-//        var mpg512 = files.filter { $0.format == .mpg512kb }
 
         var goodFiles: [String: [ArchiveFile]] = [:]
 
@@ -72,6 +69,10 @@ final class DetailViewModel: ObservableObject {
 
         if let h264 = goodFiles[ArchiveFileFormat.h264.rawValue], !h264.isEmpty{
             return h264
+        }
+
+        if let h264IA = goodFiles[ArchiveFileFormat.h264IA.rawValue], !h264IA.isEmpty{
+            return h264IA
         }
 
         if let mpg512 = goodFiles[ArchiveFileFormat.mpg512kb.rawValue], !mpg512.isEmpty{

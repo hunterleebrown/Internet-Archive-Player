@@ -29,7 +29,7 @@ extension ArchiveFile {
 
     public var isVideo: Bool {
         switch self.format {
-        case .h264, .h264HD, .mp4HiRes, .mpg512kb:
+        case .h264, .h264HD, .mp4HiRes, .mpg512kb, .h264IA:
             return true
         default:
             return false
