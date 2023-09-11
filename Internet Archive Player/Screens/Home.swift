@@ -93,7 +93,7 @@ struct Home: View {
                                 Image(systemName: "trash")
                                     .foregroundColor(.fairyRed)
                             }
-                            .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
+                            .alert("Are you sure you want to delete the PLAYLIST?", isPresented: $showingAlert) {
                                 Button("No", role: .cancel) { }
                                 Button("Yes") {
                                     iaPlayer.clearPlaylist()
