@@ -5,7 +5,7 @@
     mkdir TestFlight
     pushd TestFlight
       for locale in en-GB en-US; do
-        git fetch --deepen 3 && git log origin..HEAD --pretty=format:"%s" > WhatToTest.$locale.txt
+        git fetch --deepen 3 && git log main..HEAD --pretty=format:"%s" > WhatToTest.$locale.txt
       done
     popd
   popd
