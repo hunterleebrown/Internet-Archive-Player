@@ -54,10 +54,14 @@ struct DetailDescription: View {
 
                     Text(AttributedString(attString))
                         .background(Color.white)
+                        .padding(10)
+
+                    Spacer()
                 }
                 Spacer()
             }
-            .padding(20.0)
+            .padding(20)
         }
+
     }
 }

@@ -31,6 +31,8 @@ struct Detail: View {
     @State var backgroundURL: URL?
     static var backgroundPass = PassthroughSubject<URL, Never>()
 
+    var detailCornerRadius: CGFloat = 5.0
+
     init(_ identifier: String, isPresented: Bool = false) {
         self.identifier = identifier
         self.isPresented = isPresented
@@ -78,8 +80,7 @@ struct Detail: View {
             .background(
                 Color.white.opacity(0.5)
             )
-            .cornerRadius(10)
-
+            .cornerRadius(detailCornerRadius)
 
             VStack(alignment: .center, spacing: 5.0) {
 
@@ -102,11 +103,8 @@ struct Detail: View {
                     }
                 }
 
-
                 HStack() {
-
                     Spacer()
-
                     Menu {
                         Button(action: {
                             viewModel.addAllFilesToPlaylist(player: iaPlayer)
@@ -127,7 +125,7 @@ struct Detail: View {
                         .padding(5)
                         .background(
                             RoundedRectangle(
-                                cornerRadius: 10,
+                                cornerRadius: detailCornerRadius,
                                 style: .continuous
                             )
                             .fill(Color.white.opacity(0.5))
@@ -146,7 +144,7 @@ struct Detail: View {
                             .padding(5)
                             .background(
                                 RoundedRectangle(
-                                    cornerRadius: 10,
+                                    cornerRadius: detailCornerRadius,
                                     style: .continuous
                                 )
                                 .fill(Color.white.opacity(0.5))
@@ -177,7 +175,7 @@ struct Detail: View {
                             .padding(5)
                             .background(
                                 RoundedRectangle(
-                                    cornerRadius: 10,
+                                    cornerRadius: detailCornerRadius,
                                     style: .continuous
                                 )
                                 .fill(Color.white.opacity(0.5))
