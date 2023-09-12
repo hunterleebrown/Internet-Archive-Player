@@ -39,15 +39,13 @@ final class DetailViewModel: ObservableObject {
 
                 let video = doc.files.filter{ $0.isVideo }
                 if video.count > 0 {
-//                    var h264HD = video.filter {$0.format == .h264HD || $0.format == .h264 || $0.format == .mpg512kb}
-//                    self.movieFiles = h264HD.count > 0 ? h264HD : video
                     self.movieFiles = desiredVideo(files:video)
                 }
 
-                if let icon = doc.metadata?.iconUrl {
+                if let art = doc.preferredAlbumArt {
                     //self.backgroundIconUrl = icon
-                    Detail.backgroundPass.send(icon)
-                    self.uiImage = await IAMediaUtils.getImage(url: icon)
+                    Detail.backgroundPass.send(art)
+                    self.uiImage = await IAMediaUtils.getImage(url: art)
                 }
             } catch {
                 print(error)
