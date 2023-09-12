@@ -51,11 +51,6 @@ struct Detail: View {
 
                 if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
                     HStack(alignment: .top) {
-//                        Text("Artist: ")
-//                            .bold()
-//                            .font(.subheadline)
-//                            .foregroundColor(.black)
-
                         Text(artist)
                             .font(.caption)
                             .multilineTextAlignment(.leading)
@@ -65,10 +60,10 @@ struct Detail: View {
 
                 if let publisher = self.viewModel.archiveDoc?.publisher, !publisher.isEmpty {
                     HStack(alignment: .top) {
-//                        Text("Publisher: ")
-//                            .bold()
-//                            .font(.subheadline)
-//                            .foregroundColor(.black)
+                        //                        Text("Publisher: ")
+                        //                            .bold()
+                        //                            .font(.subheadline)
+                        //                            .foregroundColor(.black)
                         Text(publisher.joined(separator: ", "))
                             .font(.caption)
                             .multilineTextAlignment(.leading)
@@ -149,7 +144,7 @@ struct Detail: View {
                                 )
                                 .fill(Color.white.opacity(0.5))
                             )
-                        
+
 
                         ForEach(self.viewModel.sortedAudioFiles(), id: \.self) { file in
                             self.createFileView(file)
@@ -199,9 +194,9 @@ struct Detail: View {
                 }
                 .padding(10)
             }
-//            .listRowBackground(Color.clear)
-//            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-//            .listRowSeparator(.hidden)
+            //            .listRowBackground(Color.clear)
+            //            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            //            .listRowSeparator(.hidden)
         }
         .onChange(of: scrollOffset, perform: { scrollOfset in
             let offset = scrollOfset + (self.hideNavigationBar ? 50 : 0) // note 1
@@ -221,32 +216,42 @@ struct Detail: View {
         .navigationBarHidden(hideNavigationBar)
         .background(
             ZStack (alignment: .top) {
-                if let img = self.backgroundURL {
+                if let img = self.backgroundURL,
+                   let avg = viewModel.uiImage,
+                   let color = avg.averageColor {
 
-                    if let img = viewModel.uiImage, let color = img.averageColor {
-                        Rectangle().fill(
-                            Color(color)
-                        )
-                        .ignoresSafeArea()
-                    }
+                    Rectangle().fill(
+                        Color(color)
+                    )
+                    .ignoresSafeArea()
 
-                    AsyncImage (
-                        url: img,
-                        content: { image in
+
+
+                    AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
+                        switch phase {
+                        case .empty:
+                            Color.clear
+
+                        case .success(let image):
                             image
                                 .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .cornerRadius(10)
-                        },
-                        placeholder: {
-                            Color.black
-                        })
+                                .scaledToFit()
+                                .cornerRadius(20)
+
+                        case .failure(_):
+                            EmptyView()
+
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                    .padding(.top, 10)
                     .padding(10)
-//                    .overlay(Rectangle().fill(Color.white.opacity(0.3)), alignment: .topTrailing)
+                    .overlay(Rectangle().fill(Color(color).opacity(0.5)), alignment: .topTrailing)
                     .blur(radius: backgroundBlur)
-                    .cornerRadius(40)
 
                 }
+
             }
         )
         .listStyle(.plain)
@@ -267,13 +272,13 @@ struct Detail: View {
         //                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFile: archivefile)
         //            }
         //        }
-//        .navigationBarItems(trailing:
-//                                Button(action: {
-//        }) {
-//            Image(systemName: "heart")
-//                .tint(.fairyRed)
-//        })
-//        //        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
+        //        .navigationBarItems(trailing:
+        //                                Button(action: {
+        //        }) {
+        //            Image(systemName: "heart")
+        //                .tint(.fairyRed)
+        //        })
+        //        //        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
         //        .alert("Add all files to Playlist?", isPresented: $playlistAddAllAlert) {
         //            Button("No", role: .cancel) { }
         //            Button("Yes") {
@@ -293,6 +298,10 @@ struct Detail: View {
         }
         .opacity(self.backgroundURL != nil ? 1 : 0)
         .edgesIgnoringSafeArea(.top)
+        .safeAreaInset(edge: .top, content: {
+            Spacer()
+                .frame(height: 20)
+        })
         .safeAreaInset(edge: .bottom) {
             Spacer()
                 .frame(height:100)
