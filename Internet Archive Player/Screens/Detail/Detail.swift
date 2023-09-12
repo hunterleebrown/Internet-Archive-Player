@@ -225,7 +225,6 @@ struct Detail: View {
 
                     if let img = viewModel.uiImage, let color = img.averageColor {
                         Rectangle().fill(
-//                            LinearGradient(gradient: Gradient(colors: [Color(color), .black]), startPoint: .top, endPoint: .bottom)
                             Color(color)
                         )
                         .ignoresSafeArea()
@@ -245,6 +244,8 @@ struct Detail: View {
                     .padding(10)
 //                    .overlay(Rectangle().fill(Color.white.opacity(0.3)), alignment: .topTrailing)
                     .blur(radius: backgroundBlur)
+                    .cornerRadius(40)
+
                 }
             }
         )
@@ -286,7 +287,7 @@ struct Detail: View {
             Button("Okay", role: .cancel) { }
         }
         .onReceive(Detail.backgroundPass) { url in
-            withAnimation {
+            withAnimation(.linear(duration: 0.3)) {
                 self.backgroundURL = url
             }
         }
