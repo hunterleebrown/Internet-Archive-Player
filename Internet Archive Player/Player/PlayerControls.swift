@@ -18,7 +18,7 @@ struct PlayerControls: View {
     static var showVideo = PassthroughSubject<Bool, Never>()
 
     var foregroundColor: Color = .fairyCream
-    var backgroundColor: Color = .fairyRed
+    var backgroundColor: Color = .fairyRed.opacity(0.8)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5){

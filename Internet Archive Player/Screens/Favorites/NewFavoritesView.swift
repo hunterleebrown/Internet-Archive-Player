@@ -42,8 +42,7 @@ struct NewFavoritesView: View {
                         }
 
                     }
-                    .padding(10)
-
+                    .padding(.horizontal, 10)
                 }
                 .onDelete(perform: self.remove)
                 .onMove(perform: self.move)

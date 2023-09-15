@@ -24,7 +24,7 @@ struct SearchView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
 
             VStack(alignment: .leading, spacing: 5) {
 
@@ -63,14 +63,7 @@ struct SearchView: View {
 
                 List{
                     ForEach(viewModel.items, id: \.self) { doc in
-                        NavigationLink(destination:
-                                        Detail(doc.identifier!)
-                            .safeAreaInset(edge: .bottom, content: {
-                                Spacer()
-                                    .frame(height: 200)
-                            })
-
-                        ) {
+                        NavigationLink(destination: Detail(doc.identifier!)) {
                             SearchItemView(item: doc)
                                 .onAppear {
                                     if doc == viewModel.items.last {
@@ -100,10 +93,6 @@ struct SearchView: View {
                 }
             }
         }
-        .safeAreaInset(edge: .bottom, content: {
-            Spacer()
-                .frame(height: 200)
-        })
         .navigationViewStyle(.stack)
         .navigationTitle("Search")
         .navigationBarColor(backgroundColor: Color("playerbackground"), titleColor: .fairyRed)
@@ -112,7 +101,7 @@ struct SearchView: View {
 
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
-        SearchView()
+        SearchView().environmentObject(Player())
     }
 }
 

@@ -32,11 +32,10 @@ struct Home: View {
     var body: some View {
 
         GeometryReader { geo in
-
-            VStack(spacing:0) {
-                NavigationStack {
+            NavigationStack {
+                VStack(spacing:0) {
                     Playlist()
-                        .navigationTitle("Now Playing On")
+                        .navigationTitle("Now Playing")
                         .toolbar {
 
                             ToolbarItem(placement: .navigationBarLeading) {
@@ -53,19 +52,19 @@ struct Home: View {
                                 .tint(.fairyRed)
                             }
 
-//                            ToolbarItem(placement: .navigationBarLeading) {
-//
-//                                Button(action: {
-//                                    print("lists tapped")
-//                                }){
-//                                    NavigationLink(destination: ListsView()) {
-//                                        Image(systemName: "music.note.list")
-//                                            .resizable()
-//                                            .frame(width: 30, height: 30)
-//                                    }
-//                                }
-//                                .tint(.fairyRed)
-//                            }
+                            //                            ToolbarItem(placement: .navigationBarLeading) {
+                            //
+                            //                                Button(action: {
+                            //                                    print("lists tapped")
+                            //                                }){
+                            //                                    NavigationLink(destination: ListsView()) {
+                            //                                        Image(systemName: "music.note.list")
+                            //                                            .resizable()
+                            //                                            .frame(width: 30, height: 30)
+                            //                                    }
+                            //                                }
+                            //                                .tint(.fairyRed)
+                            //                            }
 
                             ToolbarItem(placement: .navigationBarLeading) {
 
@@ -137,12 +136,6 @@ struct Home: View {
                                 showNetworkAlert = false
                             }
                         }
-                        .safeAreaInset(edge: .bottom) {
-                            Spacer()
-                                .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 200 )
-                        }
-
-
                 }
                 .safeAreaInset(edge: .bottom) {
                     VStack(spacing: 0) {
@@ -163,14 +156,14 @@ struct Home: View {
                         .onEnded { value in
                             print(value.translation)
                             switch(value.translation.width, value.translation.height) {
-                                case (...0, -30...30):  print("left swipe")
-                                case (0..., -30...30):  print("right swipe")
-                                case (-100...100, ...0):
+                            case (...0, -30...30):  print("left swipe")
+                            case (0..., -30...30):  print("right swipe")
+                            case (-100...100, ...0):
                                 print("up swipe")
                                 Home.controlHeightPass.send(true)
-                                case (-100...100, 0...):  print("down swipe")
+                            case (-100...100, 0...):  print("down swipe")
                                 Home.controlHeightPass.send(false)
-                                default:  print("no clue")
+                            default:  print("no clue")
                             }
                         }
                     )
@@ -180,4 +173,9 @@ struct Home: View {
         .environmentObject(iaPlayer)
     }
 
+}
+struct Home_Preview: PreviewProvider {
+    static var previews: some View {
+        Home()
+    }
 }

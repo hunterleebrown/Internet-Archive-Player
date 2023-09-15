@@ -31,7 +31,7 @@ struct Playlist: View {
                 .onTapGesture {
                     iaPlayer.playFile(archiveFile)
                 }
-                .padding(10)
+                .padding(.horizontal, 5)
             }
             .onDelete(perform: self.remove)
             .onMove(perform: self.move)
@@ -87,7 +87,7 @@ extension Playlist {
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
-        Playlist()
+        Playlist().environmentObject(Player())
     }
 }
 

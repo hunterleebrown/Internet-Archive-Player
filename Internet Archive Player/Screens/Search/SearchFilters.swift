@@ -8,11 +8,13 @@
 import Foundation
 import iaAPI
 import SwiftUI
+import UIKit
 
 struct SearchFilter: Hashable {
     var name: String
     var identifier: String
     var iconUrl: URL?
+    var uiImage: UIImage?
 }
 
 
@@ -25,13 +27,20 @@ struct SearchFilters: View {
     var body: some View {
         List(searchFiltersViewModel.items, id: \.self, selection: $searchFilter ) { filter in
 
-            HStack(spacing: 10) {
+            HStack(alignment:.top, spacing: 5.0) {
 //                if delegate?.collectionName == filter.name {
 //                    Image(systemName: "checkmark")
 //                        .foregroundColor(Color.fairyRed)
 //                }
 
-                if filter.iconUrl != nil {
+                if let uiImage = filter.uiImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .cornerRadius(5)
+                        .frame(width: 44, height: 48)
+                        .padding(.horizontal, 5)
+
+                } else if filter.iconUrl != nil {
                     AsyncImage(
                         url: filter.iconUrl,
                         content: { image in
@@ -40,7 +49,6 @@ struct SearchFilters: View {
                                 .frame(maxWidth: 44,
                                        maxHeight: 44)
                                 .background(Color.black)
-
                         },
                         placeholder: {
                             Color(.black)
@@ -48,19 +56,23 @@ struct SearchFilters: View {
                                        maxHeight: 44)
                         })
                     .cornerRadius(5)
-                    .frame(width: 48, height: 44, alignment: .leading)
+                    .frame(width: 44, height: 48)
+                    .padding(.horizontal, 5)
                 }
 
                 Text(filter.name)
+                    .font(.subheadline)
                     .foregroundColor(delegate?.collectionName == filter.name ? Color.fairyCream : Color.black)
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .padding(.leading, 10)
+                    .padding(.leading, 5)
 
             }
+            .listRowInsets(EdgeInsets(top: 1, leading: 5, bottom: 1, trailing: 5))
             .background(delegate?.collectionName == filter.name ? Color.fairyRed : Color.white)
             .cornerRadius(10)
         }
         .listStyle(PlainListStyle())
+
         .onChange(of: searchFilter) { newValue in
             if let val = newValue {
                 searchFiltersViewModel.collectionSelection = val
@@ -76,6 +88,12 @@ struct SearchFilters: View {
         .onAppear() {
             searchFiltersViewModel.search()
         }
+    }
+}
+
+struct SearchFilters_Previews: PreviewProvider {
+    static var previews: some View {
+        SearchFilters(searchFiltersViewModel: SearchFiltersViewModel(collectionType: .audio))
     }
 }
 
@@ -101,14 +119,16 @@ class SearchFiltersViewModel: ObservableObject {
                     SearchFilter(name: doc.archiveTitle ?? "title", identifier: doc.identifier ?? "zero", iconUrl: doc.iconUrl)
                 })
 
-                var all = SearchFilter(name: "All", identifier: "")
+                let image = await IAMediaUtils.getImage(url: URL(string: "https://archive.org/logos/hires/ia-tight-480x480.jpg")!)
+
+                let all = SearchFilter(name: "All \(self.collectionType.rawValue.capitalized)", identifier: "", uiImage: image)
                 self.items.insert(all, at: 0)
 
                 if self.items.count == 0 {
                     throw ArchiveServiceError.nodata
                 }
 
-            } catch let error as ArchiveServiceError {
+            } catch _ as ArchiveServiceError {
 //                withAnimation(.easeIn(duration: 0.33)) {
 //                    self.archiveError = error.description
 //                    self.noDataFound = true
