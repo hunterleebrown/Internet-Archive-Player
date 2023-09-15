@@ -247,13 +247,13 @@ class Player: NSObject, ObservableObject {
             let archiveFileEntity = playlist.name == "main" ? items[index] : favoriteItems[index]
             if let playingFile = self.playingFile, playingFile == archiveFileEntity{
                 self.stopPlaying()
+                self.playingFile = nil
             }
             self.deleteLocalFile(item: archiveFileEntity)
             playlist.removeFromFiles(archiveFileEntity)
             PersistenceController.shared.delete(archiveFileEntity, false)
         }
         PersistenceController.shared.save()
-        self.playingFile = nil
     }
 
 

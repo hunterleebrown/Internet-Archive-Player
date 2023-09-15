@@ -40,14 +40,17 @@ struct Detail: View {
     
     var body: some View {
         ObservableScrollView(scrollOffset: $scrollOffset) {
-            Spacer().frame(height: 200)
-            VStack(alignment: .center, spacing: 5.0) {
+            Spacer().frame(height: 300)
+            VStack(alignment: .leading, spacing:0) {
                 Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                     .font(.headline)
                     .bold()
-                    .foregroundColor(.black)
-                    .frame(alignment: .center)
-                    .multilineTextAlignment(.center)
+                    .foregroundColor(Color(.black))
+//                    .frame(alignment: .center)
+                    .multilineTextAlignment(.leading)
+                    .padding(.top, 10)
+                    .padding(.horizontal, 10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
                     HStack(alignment: .top) {
@@ -55,48 +58,33 @@ struct Detail: View {
                             .font(.caption)
                             .multilineTextAlignment(.leading)
                             .foregroundColor(.black)
+                            .padding(.horizontal, 10)
+
                     }
                 }
-
-                if let publisher = self.viewModel.archiveDoc?.publisher, !publisher.isEmpty {
-                    HStack(alignment: .top) {
-                        //                        Text("Publisher: ")
-                        //                            .bold()
-                        //                            .font(.subheadline)
-                        //                            .foregroundColor(.black)
-                        Text(publisher.joined(separator: ", "))
-                            .font(.caption)
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(.black)
-                    }
-                }
-            }
-            .padding()
-            .background(
-                Color.white.opacity(0.5)
-            )
-            .cornerRadius(detailCornerRadius)
-
-            VStack(alignment: .center, spacing: 5.0) {
 
                 if (self.viewModel.archiveDoc?.description) != nil {
                     Button {
                         descriptionExpanded = true
                     } label: {
-                        Text("Description")
-                            .font(.subheadline)
-                            .bold()
-                            .foregroundColor(Color.fairyRed)
-                            .padding()
-                            .background(
-                                RoundedRectangle(
-                                    cornerRadius: 10,
-                                    style: .continuous
-                                )
-                                .fill(Color.white.opacity(0.5))
-                            )
+                        Image(systemName: "info.square")
+                            .font(.title)
+                            .tint(.fairyRed)
+                            .padding(10)
                     }
                 }
+            }
+            .background(
+                Color.white.opacity(0.5)
+//                Color(avgColor(viewModel) ?? .white).opacity(0.5)
+            )
+            .cornerRadius(detailCornerRadius)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+
+            
+
+            VStack(alignment: .center, spacing: 5.0) {
 
                 HStack() {
                     Spacer()
@@ -201,16 +189,20 @@ struct Detail: View {
         .onChange(of: scrollOffset, perform: { scrollOfset in
             let offset = scrollOfset + (self.hideNavigationBar ? 50 : 0) // note 1
             if offset > 25 {
-                withAnimation(.easeIn(duration: 1), {
-                    self.hideNavigationBar = true
-                    self.backgroundBlur = 10
-                })
+                DispatchQueue.main.async {
+                    withAnimation(.easeIn(duration: 1), {
+                        self.hideNavigationBar = true
+                        self.backgroundBlur = 10
+                    })
+                }
             }
             if offset < 75 {
-                withAnimation(.easeIn(duration: 1), {
-                    self.hideNavigationBar = false
-                    self.backgroundBlur = 0
-                })
+                DispatchQueue.main.async {
+                    withAnimation(.easeIn(duration: 1), {
+                        self.hideNavigationBar = false
+                        self.backgroundBlur = 0
+                    })
+                }
             }
         })
         .navigationBarHidden(hideNavigationBar)
@@ -226,7 +218,6 @@ struct Detail: View {
                     .ignoresSafeArea()
 
 
-
                     AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
                         switch phase {
                         case .empty:
@@ -236,7 +227,8 @@ struct Detail: View {
                             image
                                 .resizable()
                                 .scaledToFit()
-                                .cornerRadius(20)
+                                .overlay(Rectangle().fill(Color(color).opacity(0.5)), alignment: .topTrailing)
+                                .blur(radius: backgroundBlur)
 
                         case .failure(_):
                             EmptyView()
@@ -245,11 +237,6 @@ struct Detail: View {
                             EmptyView()
                         }
                     }
-                    .padding(.top, 10)
-                    .padding(10)
-                    .overlay(Rectangle().fill(Color(color).opacity(0.5)), alignment: .topTrailing)
-                    .blur(radius: backgroundBlur)
-
                 }
 
             }
@@ -302,10 +289,18 @@ struct Detail: View {
             Spacer()
                 .frame(height: 20)
         })
-        .safeAreaInset(edge: .bottom) {
-            Spacer()
-                .frame(height:100)
-        }
+    }
+
+    func complementaryColor(_ viewModel: DetailViewModel) -> UIColor? {
+        guard let avg = viewModel.uiImage,
+              let color = avg.averageColor else { return nil }
+
+        return color.complement
+    }
+
+    func avgColor(_ viewModel: DetailViewModel) -> UIColor? {
+        guard let avg = viewModel.uiImage else { return nil }
+        return avg.averageColor
     }
 
     func createFileView(_ archiveFile: ArchiveFile) -> FileView {
@@ -364,7 +359,7 @@ struct Detail: View {
 
 struct Detail_Previews: PreviewProvider {
     static var previews: some View {
-        Detail("hunterleebrown-lovesongs")
+        Detail("wcd_ray-of-light_madonna_flac_lossless_522566", isPresented: false).environmentObject(Player())
     }
 }
 
