@@ -35,7 +35,7 @@ struct Home: View {
             NavigationStack {
                 VStack(spacing:0) {
                     Playlist()
-                        .navigationTitle("Now Playing")
+                        .navigationTitle("Currently playing")
                         .toolbar {
 
                             ToolbarItem(placement: .navigationBarLeading) {
