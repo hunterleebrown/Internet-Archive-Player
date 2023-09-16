@@ -15,6 +15,11 @@ struct SearchFilter: Hashable {
     var identifier: String
     var iconUrl: URL?
     var uiImage: UIImage?
+    var image: Image?
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+    }
 }
 
 
@@ -25,54 +30,61 @@ struct SearchFilters: View {
     var delegate: SearchView?
 
     var body: some View {
-        List(searchFiltersViewModel.items, id: \.self, selection: $searchFilter ) { filter in
+        VStack(alignment: .center, spacing:10){
+            Text("Filter by collection")
+                .font(.headline)
+                .foregroundColor(Color.fairyRed)
+            List(searchFiltersViewModel.items, id: \.self, selection: $searchFilter ) { filter in
 
-            HStack(alignment:.top, spacing: 5.0) {
-//                if delegate?.collectionName == filter.name {
-//                    Image(systemName: "checkmark")
-//                        .foregroundColor(Color.fairyRed)
-//                }
+                HStack(alignment:.top, spacing: 5.0) {
 
-                if let uiImage = filter.uiImage {
-                    Image(uiImage: uiImage)
-                        .resizable()
+                    if let image = filter.image {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 44, height: 48)
+                            .padding(.horizontal, 5)
+                    } else if let uiImage = filter.uiImage {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .cornerRadius(5)
+                            .frame(width: 44, height: 48)
+                            .padding(.horizontal, 5)
+
+                    } else if filter.iconUrl != nil {
+                        AsyncImage(
+                            url: filter.iconUrl,
+                            content: { image in
+                                image.resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: 44,
+                                           maxHeight: 44)
+                                    .background(Color.black)
+                            },
+                            placeholder: {
+                                Color(.black)
+                                    .frame(maxWidth: 44,
+                                           maxHeight: 44)
+                            })
                         .cornerRadius(5)
                         .frame(width: 44, height: 48)
                         .padding(.horizontal, 5)
+                    }
 
-                } else if filter.iconUrl != nil {
-                    AsyncImage(
-                        url: filter.iconUrl,
-                        content: { image in
-                            image.resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(maxWidth: 44,
-                                       maxHeight: 44)
-                                .background(Color.black)
-                        },
-                        placeholder: {
-                            Color(.black)
-                                .frame(maxWidth: 44,
-                                       maxHeight: 44)
-                        })
-                    .cornerRadius(5)
-                    .frame(width: 44, height: 48)
-                    .padding(.horizontal, 5)
+                    Text(filter.name)
+                        .font(.subheadline)
+                        .foregroundColor(delegate?.collectionName == filter.name ? Color.fairyCream : Color.black)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .padding(.leading, 5)
+
                 }
-
-                Text(filter.name)
-                    .font(.subheadline)
-                    .foregroundColor(delegate?.collectionName == filter.name ? Color.fairyCream : Color.black)
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .padding(.leading, 5)
-
+                .listRowInsets(EdgeInsets(top: 1, leading: 5, bottom: 1, trailing: 5))
+                .background(delegate?.collectionName == filter.name ? Color.fairyRed : Color.white)
+                .cornerRadius(10)
             }
-            .listRowInsets(EdgeInsets(top: 1, leading: 5, bottom: 1, trailing: 5))
-            .background(delegate?.collectionName == filter.name ? Color.fairyRed : Color.white)
-            .cornerRadius(10)
+            .listStyle(PlainListStyle())
         }
-        .listStyle(PlainListStyle())
-
+        .offset(y:10)
         .onChange(of: searchFilter) { newValue in
             if let val = newValue {
                 searchFiltersViewModel.collectionSelection = val
@@ -119,9 +131,11 @@ class SearchFiltersViewModel: ObservableObject {
                     SearchFilter(name: doc.archiveTitle ?? "title", identifier: doc.identifier ?? "zero", iconUrl: doc.iconUrl)
                 })
 
-                let image = await IAMediaUtils.getImage(url: URL(string: "https://archive.org/logos/hires/ia-tight-480x480.jpg")!)
 
-                let all = SearchFilter(name: "All \(self.collectionType.rawValue.capitalized)", identifier: "", uiImage: image)
+                let image = Image(systemName: self.collectionType == .movies ? "video" : "hifispeaker")
+
+
+                let all = SearchFilter(name: "All \(self.collectionType.rawValue.capitalized)", identifier: "", image: image)
                 self.items.insert(all, at: 0)
 
                 if self.items.count == 0 {

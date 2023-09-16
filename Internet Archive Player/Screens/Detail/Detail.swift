@@ -63,15 +63,26 @@ struct Detail: View {
                     }
                 }
 
-                if (self.viewModel.archiveDoc?.description) != nil {
-                    Button {
-                        descriptionExpanded = true
-                    } label: {
-                        Image(systemName: "info.square")
-                            .font(.title)
-                            .tint(.fairyRed)
-                            .padding(10)
+                VStack(alignment: .center) {
+                    HStack(spacing:20) {
+                        if (self.viewModel.archiveDoc?.description) != nil {
+                            Button {
+                                descriptionExpanded = true
+                            } label: {
+                                Image(systemName: "info.circle")
+                                    .font(.largeTitle)
+                                    .tint(.fairyRed)
+                                    .padding(10)
+                            }
+                        }
+                        ShareLink(item: URL(string: "https://archive.org/details/\(identifier)")!) {
+                            Image(systemName: "square.and.arrow.up.circle")
+                                .font(.largeTitle)
+                        }
+
+
                     }
+                    .frame(maxWidth: .infinity)
                 }
             }
             .background(
@@ -86,39 +97,62 @@ struct Detail: View {
 
             VStack(alignment: .center, spacing: 5.0) {
 
-                HStack() {
-                    Spacer()
-                    Menu {
-                        Button(action: {
-                            viewModel.addAllFilesToPlaylist(player: iaPlayer)
-                        }){
-                            HStack {
-                                Image(systemName: PlayerButtonType.list.rawValue)
-                                Text("Add all to playlist")
-                            }
-                        }
-                        .frame(width: 44, height: 44)
-                    } label: {
-                        HStack(spacing: 1.0) {
-                            Image(systemName: "plus")
-                                .tint(.fairyRed)
-                            Image(systemName: PlayerButtonType.list.rawValue)
-                                .tint(.fairyRed)
-                        }
-                        .padding(5)
-                        .background(
-                            RoundedRectangle(
-                                cornerRadius: detailCornerRadius,
-                                style: .continuous
-                            )
-                            .fill(Color.white.opacity(0.5))
-                        )
+                if self.viewModel.audioFiles.isEmpty &&
+                    self.viewModel.movieFiles.isEmpty {
+                    VStack(alignment: .center) {
+                        Text("No playable file for app")
+                            .font(.body)
+                            .padding(.top, 5)
+                            .padding(.horizontal, 5)
+                        Link("View on archive.org", destination: URL(string: "https://archive.org/details/\(identifier)")!)
+                            .foregroundColor(.fairyRed)
+                            .padding(.bottom, 5)
+                            .padding(.horizontal, 5)
                     }
-                    .highPriorityGesture(TapGesture())
+                    .background(
+                        Color.white.opacity(0.5)
+                    )
+                    .cornerRadius(detailCornerRadius)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+
+                } else {
+                    HStack() {
+                        Spacer()
+                        Menu {
+                            Button(action: {
+                                viewModel.addAllFilesToPlaylist(player: iaPlayer)
+                            }){
+                                HStack {
+                                    Image(systemName: PlayerButtonType.list.rawValue)
+                                    Text("Add all to playlist")
+                                }
+                            }
+                            .frame(width: 44, height: 44)
+                        } label: {
+                            HStack(spacing: 1.0) {
+                                Image(systemName: "plus")
+                                    .tint(.fairyRed)
+                                Image(systemName: PlayerButtonType.list.rawValue)
+                                    .tint(.fairyRed)
+                            }
+                            .padding(5)
+                            .background(
+                                RoundedRectangle(
+                                    cornerRadius: detailCornerRadius,
+                                    style: .continuous
+                                )
+                                .fill(Color.white.opacity(0.5))
+                            )
+                        }
+                        .highPriorityGesture(TapGesture())
+                    }
+                    .padding(10)
+
                 }
-                .padding(10)
 
                 LazyVStack(alignment: .leading) {
+
                     if self.viewModel.audioFiles.count > 0 {
                         Text("Audio")
                             .font(.subheadline)
@@ -182,9 +216,6 @@ struct Detail: View {
                 }
                 .padding(10)
             }
-            //            .listRowBackground(Color.clear)
-            //            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            //            .listRowSeparator(.hidden)
         }
         .onChange(of: scrollOffset, perform: { scrollOfset in
             let offset = scrollOfset + (self.hideNavigationBar ? 50 : 0) // note 1
