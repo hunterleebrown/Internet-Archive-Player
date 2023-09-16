@@ -29,9 +29,10 @@ struct SearchView: View {
             VStack(alignment: .leading, spacing: 5) {
 
                 Picker("What media type?", selection: $viewModel.mediaType) {
-                    Text(ArchiveMediaType.audio.rawValue).tag(0)
-                    Text(ArchiveMediaType.movies.rawValue).tag(1)
+                    Image(systemName: "hifispeaker").tag(0)
+                    Image(systemName: "video").tag(1)
                 }
+                .foregroundColor(.fairyRed)
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 20)
                 .onChange(of: viewModel.mediaType) { newValue in
@@ -40,24 +41,24 @@ struct SearchView: View {
 
                 HStack(alignment: .center , spacing:20) {
                     Text("Filter:")
+                        .font(.subheadline)
 
                     Button {
                         showCollections = true
                     } label: {
                         Text("Collection: \(collectionName)")
+                            .font(.subheadline)
                             .padding()
-                            .frame(height: 40)
-                            .foregroundColor(Color.fairyCream)
+                            .frame(height: 33)
+                            .foregroundColor(Color.fairyRed)
                             .background(
                                 RoundedRectangle(
                                      cornerRadius: 10,
                                      style: .continuous
                                  )
-                                .fill(Color.fairyRed)
+                                .stroke(Color.fairyRed)
                             )
                     }
-
-
                 }
                 .padding(.horizontal, 20)
 

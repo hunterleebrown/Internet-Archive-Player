@@ -141,7 +141,7 @@ struct Home: View {
                     VStack(spacing: 0) {
                         ZStack {
                             CustomVideoPlayer()
-                                .frame(height: showVideoPlayer ? (geo.size.width / 1.778) : 0 )
+                                .frame(height: showVideoPlayer ? 250 : 0 )
                                 .zIndex(showVideoPlayer ? 1 : 0)
 
                             PlayerControls()

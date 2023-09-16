@@ -16,51 +16,85 @@ struct DetailDescription: View {
     var body: some View {
         if let attString = doc.description.joined(separator: "").html2AttributedString {
             ScrollView() {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(doc.archiveTitle ?? "")
-                        .font(.headline)
-                        .bold()
-                        .multilineTextAlignment(.center)
-                        .frame(alignment: .center)
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(alignment: .top) {
+                        AsyncImage(
+                            url: doc.iconUrl,
+                            content: { image in
+                                image.resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: 66,
+                                           maxHeight: 66)
+                                    .background(Color.black)
 
-                    if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
-                        Text(artist)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                    }
+                            },
+                            placeholder: {
+                                Color(.black)
+                                    .frame(maxWidth: 66,
+                                           maxHeight: 66)
+                            })
+                        .cornerRadius(5)
+                        .frame(width: 66, height: 66, alignment: .leading)
 
-                    if let publisher = doc.publisher, !publisher.isEmpty {
-                        HStack(alignment: .top, spacing: 5) {
-                            Text("Publisher:")
-                                .font(.caption)
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(doc.archiveTitle ?? "")
+                                .font(.headline)
+                                .foregroundColor(.black)
                                 .bold()
-                            Text(publisher.joined(separator: ", "))
-                                .font(.caption)
-                                .multilineTextAlignment(.center)
-                        }
-                    }
+                                .multilineTextAlignment(.leading)
+                                .frame(alignment: .leading)
 
-                    HStack(alignment: .top, spacing: 5) {
-                        Text("Collection:")
-                            .font(.caption)
-                            .bold()
-                        Text(doc.collection.joined(separator: ", "))
-                            .font(.caption)
-                            .multilineTextAlignment(.leading)
-                    }
+                            if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
+                                Text(artist)
+                                    .foregroundColor(.black)
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.leading)
+                            }
+
+                            if let publisher = doc.publisher, !publisher.isEmpty {
+                                HStack(alignment: .top, spacing: 5) {
+                                    Text("Publisher:")
+                                        .foregroundColor(.black)
+                                        .font(.caption)
+                                        .bold()
+                                    Text(publisher.joined(separator: ", "))
+                                        .foregroundColor(.black)
+                                        .font(.caption)
+                                        .multilineTextAlignment(.leading)
+                                }
+                            }
+
+                            HStack(alignment: .top, spacing: 5) {
+                                Text("Collection:")
+                                    .foregroundColor(.black)
+                                    .font(.caption)
+                                    .bold()
+                                Text(doc.collection.joined(separator: ", "))
+                                    .foregroundColor(.black)
+                                    .font(.caption)
+                                    .multilineTextAlignment(.leading)
+                            }
+                        }
+                }
 
                     Spacer()
                         .frame(height:44)
 
                     Text(AttributedString(attString))
+                        .textSelection(.enabled)
                         .background(Color.white)
                         .padding(10)
 
                     Spacer()
                 }
+                .background(Color.white)
+                .foregroundColor(.black)
+                .frame(maxWidth:.infinity)
+                .padding(5)
+
                 Spacer()
             }
-            .padding(20)
+            .background(Color.white)
         }
 
     }

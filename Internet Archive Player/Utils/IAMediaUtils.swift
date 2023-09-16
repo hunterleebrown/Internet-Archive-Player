@@ -461,7 +461,6 @@ struct IAMediaUtils
         switch string
         {
         case "VBR MP3":
-            
             return IAFileFormat.vbrmp3
         case "h.264":
             return IAFileFormat.h264
