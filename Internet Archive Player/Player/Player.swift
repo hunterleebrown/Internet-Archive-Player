@@ -58,7 +58,8 @@ class Player: NSObject, ObservableObject {
     @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
     @Published var favoriteItems: [ArchiveFileEntity] = [ArchiveFileEntity]()
 
-    @Published public var avPlayer: AVPlayer?
+    @Published public var avPlayer: AVPlayer
+    public var nowPlayingSession: MPNowPlayingSession
 
     private var observing = false
     fileprivate var observerContext = 0
@@ -78,6 +79,7 @@ class Player: NSObject, ObservableObject {
 
 
     override init() {
+
         playlistFetchController =
         NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequest(playlistName: "main"),
                                    managedObjectContext: PersistenceController.shared.container.viewContext,
@@ -89,7 +91,14 @@ class Player: NSObject, ObservableObject {
                                    managedObjectContext: PersistenceController.shared.container.viewContext,
                                    sectionNameKeyPath: nil,
                                    cacheName: nil)
+
+        let player = AVPlayer()
+        self.avPlayer = player
+        let session = MPNowPlayingSession(players: [player])
+        self.nowPlayingSession = session
+
         super.init()
+        sessionRemote(session: session)
         playlistFetchController.delegate = self
         favoritesFetchController.delegate = self
 
@@ -127,6 +136,7 @@ class Player: NSObject, ObservableObject {
           print("failed to fetch favorite items!")
         }
 
+
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
     }
 
@@ -161,15 +171,13 @@ class Player: NSObject, ObservableObject {
     }
 
     public func seekTo(with sliderValue: Double) {
-        guard let currentItem = avPlayer?.currentItem else { return }
-        if let player = avPlayer {
+        guard let currentItem = avPlayer.currentItem else { return }
             let duration = CMTimeGetSeconds(currentItem.duration)
             let sec = duration * Float64(sliderValue)
             let seakTime:CMTime = CMTimeMakeWithSeconds(sec, preferredTimescale: 600)
-            player.seek(to: seakTime) { _ in
+            avPlayer.seek(to: seakTime) { _ in
                 self.shouldPauseSliderProgress(false)
             }
-        }
     }
 
     public func appendPlaylistItem(_ item: ArchiveFile) throws {
@@ -319,23 +327,19 @@ class Player: NSObject, ObservableObject {
 
     private func loadAndPlay(_ playUrl: URL) {
 
-        if let player = avPlayer {
-            player.pause()
+            avPlayer.pause()
             if(self.observing) {
-                player.removeObserver(self, forKeyPath: "rate", context: &observerContext)
+                avPlayer.removeObserver(self, forKeyPath: "rate", context: &observerContext)
                 self.observing = false
             }
-            self.setPlayingInfo(playing: false)
-            avPlayer = nil
-        }
 
         self.setActiveAudioSession()
         print(playUrl.absoluteString)
-        avPlayer = AVPlayer(url: playUrl)
-        avPlayer?.addObserver(self, forKeyPath: "rate", options:.new, context: &observerContext)
+        let playerItem = AVPlayerItem(url: playUrl)
+        avPlayer.addObserver(self, forKeyPath: "rate", options:.new, context: &observerContext)
         self.observing = true
-        avPlayer?.play()
-        self.setPlayingInfo(playing: true)
+        avPlayer.replaceCurrentItem(with: playerItem)
+        avPlayer.play()
 
         print("Playing File: ")
         dump(playingFile?.format)
@@ -349,16 +353,12 @@ class Player: NSObject, ObservableObject {
     }
 
     private func stopPlaying() {
-        if let player = avPlayer {
-            player.pause()
+            avPlayer.pause()
             if(self.observing) {
-                player.removeObserver(self, forKeyPath: "rate", context: &observerContext)
+                avPlayer.removeObserver(self, forKeyPath: "rate", context: &observerContext)
                 self.observing = false
             }
-            self.setPlayingInfo(playing: false)
-            avPlayer = nil
             self.sliderProgressSubject.send(0)
-        }
     }
 
     private func loadNowPlayingMediaArtwork() {
@@ -376,21 +376,15 @@ class Player: NSObject, ObservableObject {
     }
 
     public func didTapPlayButton() {
-
-        if let player = avPlayer {
-            if player.currentItem != nil && self.playing {
-                player.pause()
-                self.setPlayingInfo(playing: false)
-            } else {
-                player.play()
-                self.setPlayingInfo(playing: true)
-            }
+        if avPlayer.currentItem != nil && self.playing {
+            avPlayer.pause()
+        } else {
+            avPlayer.play()
         }
     }
 
     private func setActiveAudioSession(){
         let audioSession = AVAudioSession.sharedInstance()
-
         do {
             try audioSession.setCategory(AVAudioSession.Category.playback, mode: .default, options: [])
             try audioSession.setActive(true)
@@ -401,16 +395,15 @@ class Player: NSObject, ObservableObject {
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if let player = avPlayer {
-            if player == object as! AVPlayer && "rate" == keyPath {
+            if avPlayer == object as! AVPlayer && "rate" == keyPath {
                 DispatchQueue.main.async {
-                    self.playing  = player.rate > 0.0
-                    self.playingSubject.send(player.rate > 0.0)
+                    self.playing  = self.avPlayer.rate > 0.0
+                    self.playingSubject.send(self.avPlayer.rate > 0.0)
                     self.monitorPlayback()
                 }
             }
 
-            if player == object as? AVPlayer && keyPath == #keyPath(AVPlayer.currentItem.status) {
+            if avPlayer == object as? AVPlayer && keyPath == #keyPath(AVPlayer.currentItem.status) {
                 let newStatus: AVPlayerItem.Status
                 if let newStatusAsNumber = change?[NSKeyValueChangeKey.newKey] as? NSNumber {
                     newStatus = AVPlayerItem.Status(rawValue: newStatusAsNumber.intValue)!
@@ -418,104 +411,129 @@ class Player: NSObject, ObservableObject {
                     newStatus = .unknown
                 }
                 if newStatus == .failed {
-                    NSLog("Error: \(String(describing: self.avPlayer?.currentItem?.error?.localizedDescription)), error: \(String(describing: self.avPlayer?.currentItem?.error))")
+                    print("Error: \(String(describing: self.avPlayer.currentItem?.error?.localizedDescription)), error: \(String(describing: self.avPlayer.currentItem?.error))")
                 }
             }
-        }
     }
 
     private func monitorPlayback() {
 
-        if let player = avPlayer {
-            if(player.currentItem != nil) {
-                let progress = CMTimeGetSeconds(player.currentTime()) / CMTimeGetSeconds((player.currentItem?.duration)!)
+            if(avPlayer.currentItem != nil) {
+                let progress = CMTimeGetSeconds(avPlayer.currentTime()) / CMTimeGetSeconds((avPlayer.currentItem?.duration)!)
                 self.sliderProgress = progress
                 if !pauseSliderProgress {
                     DispatchQueue.main.async {
                         self.sliderProgressSubject.send(progress)
-                        self.durationSubject.send(CMTimeGetSeconds((player.currentItem?.duration)!))
-                        if progress < 1.0 {
-                            self.liveNowPlaying(playing: true)
-                        }
+                        self.durationSubject.send(CMTimeGetSeconds((self.avPlayer.currentItem?.duration)!))
                     }
                 }
 
-                if(player.rate != 0.0) {
+                if(avPlayer.rate != 0.0) {
                     let delay = 0.1 * Double(NSEC_PER_SEC)
                     let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
                     DispatchQueue.main.asyncAfter(deadline: time) {
                         self.monitorPlayback()
                     }
-                } else {
-//                    DispatchQueue.main.async {
-//                        self.liveNowPlaying(playing: false)
-//                    }
                 }
             }
             return
-        }
     }
 
     private func elapsedSeconds()->Int {
-        if let player = avPlayer {
-
-            let calcTime = CMTimeGetSeconds((player.currentItem?.duration)!) - CMTimeGetSeconds(player.currentTime())
-            if(!calcTime.isNaN) {
-                let duration = CMTimeGetSeconds((player.currentItem?.duration)!)
-                return Int(duration) - Int(calcTime)
-            }
-            return 0
+        let calcTime = CMTimeGetSeconds((avPlayer.currentItem?.duration)!) - CMTimeGetSeconds(avPlayer.currentTime())
+        if(!calcTime.isNaN) {
+            let duration = CMTimeGetSeconds((avPlayer.currentItem?.duration)!)
+            return Int(duration) - Int(calcTime)
         }
-
         return 0
     }
 
-    public func setPlayingInfo(playing:Bool) {
-
-//        if playing {
-//            UIApplication.shared.beginReceivingRemoteControlEvents()
-//        }
+    private func setPlayingInfo(playing:Bool) {
 
         let artist = self.playingFile?.displayArtist
         let fileTitle = self.playingFile?.displayTitle ?? self.fileIdentifierTitle
 
-        var songInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
+        if let playItem = avPlayer.currentItem {
+            playItem.nowPlayingInfo = [
+                MPMediaItemPropertyTitle : fileTitle ?? "",
+                MPMediaItemPropertyArtist: artist ?? "",
+                MPNowPlayingInfoPropertyPlaybackQueueCount: self.items.count,
+            ]
+            if let image = self.playingImage {
+                playItem.nowPlayingInfo?[MPMediaItemPropertyArtwork] = image
+            }
 
-        songInfo[MPMediaItemPropertyTitle] = fileTitle
-        songInfo[MPMediaItemPropertyArtist] = artist
-        songInfo[MPMediaItemPropertyAlbumArtist] = artist
-        songInfo[MPMediaItemPropertyAlbumTitle] = self.fileIdentifierTitle
-        songInfo[MPNowPlayingInfoPropertyPlaybackQueueCount] = self.items.count
-        if let curFile = self.playingFile, let index = self.items.firstIndex(of: curFile) {
-            songInfo[MPNowPlayingInfoPropertyPlaybackQueueIndex] = index
-            songInfo[MPMediaItemPropertyMediaType] = curFile.isAudio ? MPMediaType.anyAudio.rawValue : MPMediaType.anyVideo.rawValue
+            if let curFile = self.playingFile, let index = self.items.firstIndex(of: curFile) {
+                playItem.nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackQueueIndex] = index
+                playItem.nowPlayingInfo?[MPMediaItemPropertyMediaType] = curFile.isAudio ? MPMediaType.anyAudio.rawValue : MPMediaType.anyVideo.rawValue
+            }
+
+            if let ft = fileTitle {
+                let title = AVMutableMetadataItem()
+                title.identifier = .commonIdentifierTitle
+                title.value = ft as NSString
+                title.extendedLanguageTag = "und"
+
+                playItem.externalMetadata = [title]
+
+            }
+            self.nowPlayingSession.becomeActiveIfPossible()
+            self.nowPlayingSession.automaticallyPublishesNowPlayingInfo = true
+
         }
-
-        if let image = self.playingImage {
-            songInfo[MPMediaItemPropertyArtwork] = image
-        }
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
     }
 
-    public func liveNowPlaying(playing: Bool) {
+    private func sessionRemote(session: MPNowPlayingSession) {
 
-        if let player = self.avPlayer {
-            let playBackRate = playing ? 1.0 : 0.0
+        session.remoteCommandCenter.playCommand.addTarget { event in
+            self.avPlayer.play()
+            return .success
+        }
 
-            var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
+        session.remoteCommandCenter.pauseCommand.addTarget { event in
+            self.avPlayer.pause()
+            return .success
+        }
 
-            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds((player.currentItem?.duration)!)
-            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.elapsedSeconds()
-            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = playBackRate
-//            nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
-            //        nowPlayingInfo[MPNowPlayingInfoPropertyCurrentLanguageOptions] = metadata.currentLanguageOptions
-            //        nowPlayingInfo[MPNowPlayingInfoPropertyAvailableLanguageOptions] = metadata.availableLanguageOptionGroups
+        session.remoteCommandCenter.changePlaybackPositionCommand.addTarget { [weak self] remoteEvent in
 
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+            if let event = remoteEvent as? MPChangePlaybackPositionCommandEvent {
+                let playerRate = self?.avPlayer.rate
+                self?.avPlayer.seek(to: CMTime(seconds: event.positionTime, preferredTimescale: CMTimeScale(1000)), completionHandler: { [weak self](success) in
+                     guard let self = self else {return}
+                     if success, let r = playerRate {
+                         self.avPlayer.rate = r
+                     }
+                 })
+                 return .success
+              }
+            
+            return .commandFailed
+        }
+
+
+
+        session.remoteCommandCenter.nextTrackCommand.addTarget { event in
+            if let playingFile = self.playingFile, let index = self.items.firstIndex(of: playingFile) {
+                guard self.items.indices.contains(index + 1) else { return .commandFailed }
+                self.playFile(self.items[index + 1])
+                return .success
+            }
+            return .commandFailed
+        }
+
+        session.remoteCommandCenter.previousTrackCommand.addTarget { event in
+            if let playingFile = self.playingFile, let index = self.items.firstIndex(of: playingFile) {
+                guard self.items.indices.contains(index - 1) else { return .commandFailed }
+                self.playFile(self.items[index - 1])
+                return .success
+            }
+            return .commandFailed
         }
 
     }
+
+
 }
 
 extension Player: NSFetchedResultsControllerDelegate {

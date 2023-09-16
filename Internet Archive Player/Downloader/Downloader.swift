@@ -77,7 +77,7 @@ class Downloader: NSObject {
 
     public func downloadFile() throws {
         if isFileDownloaded() {
-            print(downloadUrl)
+            print(downloadUrl?.absoluteString ?? "")
             throw DownloaderError.fileAlreadyExits
         }
         if let url = file.url {
@@ -169,7 +169,7 @@ extension Downloader: URLSessionDownloadDelegate {
 
         if downloadTask == self.downloadTask {
             let calculatedProgress = Float(totalBytesWritten) / Float(totalBytesExpectedToWrite)
-            print("Downloading: \(self.percentFormatter.string(from: NSNumber(value: calculatedProgress)))")
+            print("Downloading: \(self.percentFormatter.string(from: NSNumber(value: calculatedProgress)) ?? "")")
             DispatchQueue.main.async {
                 self.delegate?.downloadProgress = Double(calculatedProgress)
             }

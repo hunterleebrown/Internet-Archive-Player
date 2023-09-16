@@ -78,7 +78,7 @@ extension ArchiveFileEntity {
         let downloader = Downloader(self, delegate: delegate)
         do {
             try downloader.downloadFile()
-        } catch let error as Error {
+        } catch let error {
             print(error.localizedDescription)
         }
     }

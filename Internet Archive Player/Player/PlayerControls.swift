@@ -245,6 +245,6 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
     }
 
     static func dismantleUIViewController(_ uiViewController: AVPlayerViewController, coordinator: ()) {
-        Player.shared.avPlayer = nil
+//        Player.shared.avPlayer = nil
     }
 }
