@@ -36,6 +36,22 @@ struct Playlist: View {
             .onDelete(perform: self.remove)
             .onMove(perform: self.move)
         }
+        .toolbar {
+            EditButton()
+                .tint(.fairyRed)
+            Button(action: {
+                showingAlert = true
+            }) {
+                Image(systemName: "trash")
+                    .foregroundColor(.fairyRed)
+            }
+            .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
+                Button("No", role: .cancel) { }
+                Button("Yes") {
+                    iaPlayer.clearPlaylist()
+                }
+            }
+        }
         .listStyle(PlainListStyle())
         .modifier(BackgroundColorModifier(backgroundColor: Color("playerBackground")))
         .onAppear() {

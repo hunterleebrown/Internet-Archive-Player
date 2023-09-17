@@ -20,7 +20,6 @@ struct Home: View {
     @State private var presentingSearch = false
     @State private var presentingFavorites = false
     @State var playingFile: ArchiveFileEntity? = nil
-    @State private var showingAlert = false
     @State var showVideoPlayer: Bool = false
     @State var showNetworkAlert: Bool = false
     @State var showControls: Bool = false
@@ -79,26 +78,6 @@ struct Home: View {
 
                             }
                             
-                        }
-                        .toolbar {
-
-
-                            EditButton()
-                                .tint(.fairyRed)
-
-                            Button(action: {
-                                showingAlert = true
-                            }) {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.fairyRed)
-                            }
-                            .alert("Are you sure you want to delete the playlist?", isPresented: $showingAlert) {
-                                Button("No", role: .cancel) { }
-                                Button("Yes") {
-                                    iaPlayer.clearPlaylist()
-                                }
-                            }
-
                         }
                         .sheet(isPresented: $presentingFavorites) {
                             NewFavoritesView()
