@@ -24,8 +24,9 @@ struct Playlist: View {
         if searchText.isEmpty {
             return iaPlayer.items
         } else {
-            return iaPlayer.items.filter { //$0.name?.localizedCaseInsensitiveContains(searchText)
-                let title = $0.displayTitle
+            return iaPlayer.items.filter {
+                guard let archiveTitle = $0.archiveTitle else { return false }
+                let title = "\($0.displayTitle)\(archiveTitle)"
                 return title.localizedCaseInsensitiveContains(searchText)
             }
         }
