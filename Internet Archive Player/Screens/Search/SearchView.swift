@@ -76,15 +76,13 @@ struct SearchView: View {
                         .listRowBackground(Color.clear)
                     }
                 }
-                .zIndex(viewModel.noDataFound ? 2 : 1)
-                .frame(maxWidth: .infinity, alignment: .leading)
                 .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
                 .onSubmit(of: .search, {
                     viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
                 })
-                .frame(maxWidth: .infinity)
+                .zIndex(viewModel.noDataFound ? 2 : 1)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .listStyle(PlainListStyle())
-
             }
             .sheet(isPresented: $showCollections) {
                 let type = self.viewModel.mediaTypes[self.viewModel.mediaType]
@@ -96,7 +94,6 @@ struct SearchView: View {
         }
         .navigationViewStyle(.stack)
         .navigationTitle("Search")
-        .navigationBarColor(backgroundColor: Color("playerbackground"), titleColor: .fairyRed)
     }
 }
 

@@ -70,17 +70,17 @@ struct Home: View {
                                 Button(action: {
                                     presentingFavorites.toggle()
                                 }){
-                                    Image(systemName: "heart")
-                                        .resizable()
-                                        .frame(width: 30, height: 30)
+                                    NavigationLink(destination: NewFavoritesView()) {
+
+                                        Image(systemName: "heart")
+                                            .resizable()
+                                            .frame(width: 30, height: 30)
+                                    }
                                 }
                                 .tint(.fairyRed)
 
                             }
                             
-                        }
-                        .sheet(isPresented: $presentingFavorites) {
-                            NewFavoritesView()
                         }
                         .sheet(item: $playingFile, content: { file in
                             if let identifier = file.identifier {
@@ -116,6 +116,7 @@ struct Home: View {
                             }
                         }
                 }
+                .navigationBarColor(backgroundColor: .white, titleColor: .fairyRed)
                 .safeAreaInset(edge: .bottom) {
                     VStack(spacing: 0) {
                         ZStack {

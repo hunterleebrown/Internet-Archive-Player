@@ -48,18 +48,17 @@ struct NewFavoritesView: View {
                 .onMove(perform: self.move)
             }
             .listStyle(PlainListStyle())
-            .modifier(BackgroundColorModifier(backgroundColor: Color("playerBackground")))
-            .onAppear() {
-                viewModel.setUpSubscribers(iaPlayer)
-                iaPlayer.sendPlayingFileForPlaylist()
-            }
-            .navigationBarColor(backgroundColor: Color("playerBackground"), titleColor: .fairyRed)
             .tint(.fairyRed)
-            .navigationTitle("Favorites")
-            .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
-                Button("Okay", role: .cancel) { }
-                    .tint(Color.fairyRed)
-            }
+        }
+        .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
+            Button("Okay", role: .cancel) { }
+                .tint(Color.fairyRed)
+        }
+        .navigationTitle("Favorites")
+        .onAppear() {
+            viewModel.setUpSubscribers(iaPlayer)
+            iaPlayer.sendPlayingFileForPlaylist()
+
         }
     }
 

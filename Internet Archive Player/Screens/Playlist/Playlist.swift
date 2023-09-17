@@ -18,9 +18,22 @@ struct Playlist: View {
     @State private var seek = 1.0
     @State private var showingAlert = false
 
+    @State private var searchText = ""
+
+    var filteredResorts: [ArchiveFileEntity] {
+        if searchText.isEmpty {
+            return iaPlayer.items
+        } else {
+            return iaPlayer.items.filter { //$0.name?.localizedCaseInsensitiveContains(searchText)
+                let title = $0.archiveTitle
+                return title?.localizedCaseInsensitiveContains(searchText) ?? false
+            }
+        }
+    }
+
     var body: some View {
         List{
-            ForEach(iaPlayer.items, id: \.self) { archiveFile in
+            ForEach(filteredResorts, id: \.self) { archiveFile in
                 EntityFileView(archiveFile,
                                showImage: true,
                                backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
@@ -52,13 +65,12 @@ struct Playlist: View {
                 }
             }
         }
+        .searchable(text: $searchText, prompt: "Filter")
         .listStyle(PlainListStyle())
-        .modifier(BackgroundColorModifier(backgroundColor: Color("playerBackground")))
         .onAppear() {
             viewModel.setUpSubscribers(iaPlayer)
             iaPlayer.sendPlayingFileForPlaylist()
         }
-        .navigationBarColor(backgroundColor: Color("playerBackground"), titleColor: .fairyRed)
         .tint(.fairyRed)
 
     }
