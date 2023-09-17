@@ -116,7 +116,7 @@ struct Home: View {
                             }
                         }
                 }
-                .navigationBarColor(backgroundColor: .white, titleColor: .fairyRed)
+                .navigationBarColor(backgroundColor: nil, titleColor: .fairyRed)
                 .safeAreaInset(edge: .bottom) {
                     VStack(spacing: 0) {
                         ZStack {
