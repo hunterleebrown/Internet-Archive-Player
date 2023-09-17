@@ -73,13 +73,13 @@ struct SearchFilters: View {
 
                     Text(filter.name)
                         .font(.subheadline)
-                        .foregroundColor(delegate?.collectionName == filter.name ? Color.fairyCream : Color.black)
+                        .foregroundColor(delegate?.collectionName == filter.name ? Color.fairyCream : Color("playerBackgroundText"))
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .padding(.leading, 5)
 
                 }
                 .listRowInsets(EdgeInsets(top: 1, leading: 5, bottom: 1, trailing: 5))
-                .background(delegate?.collectionName == filter.name ? Color.fairyRed : Color.white)
+                .background(delegate?.collectionName == filter.name ? Color.fairyRed : Color("playerBackgrouond"))
                 .cornerRadius(10)
             }
             .listStyle(PlainListStyle())
