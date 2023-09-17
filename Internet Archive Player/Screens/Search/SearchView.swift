@@ -76,14 +76,15 @@ struct SearchView: View {
                         .listRowBackground(Color.clear)
                     }
                 }
+                .listStyle(PlainListStyle())
                 .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
                 .onSubmit(of: .search, {
                     viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
                 })
                 .zIndex(viewModel.noDataFound ? 2 : 1)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .listStyle(PlainListStyle())
             }
+            .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
             .sheet(isPresented: $showCollections) {
                 let type = self.viewModel.mediaTypes[self.viewModel.mediaType]
                 if let topCollectionType = ArchiveTopCollectionType(rawValue: type.rawValue) {
