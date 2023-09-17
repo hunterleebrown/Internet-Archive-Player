@@ -10,10 +10,10 @@ import AVKit
 
 enum PlayerButtonType: String {
     case video = "video"
-    case play = "play.fill"
+    case play = "play.circle"
     case backwards = "backward.end.fill"
     case forwards = "forward.end.fill"
-    case pause = "pause"
+    case pause = "pause.circle"
     case expand = "arrow.up.left.and.arrow.down.right"
     case list = "list.bullet.rectangle.portrait"
     case listFill = "list.bullet.rectangle.portrait.fill"
