@@ -68,8 +68,10 @@ struct PlayerControls: View {
 
                     Spacer()
 
-                    AirPlayButton()
-                        .frame(width: 44, height: 44)
+                    PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 40, height: 40)) {
+                        iaPlayer.didTapPlayButton()
+                    }
+
                 }
             }
 
@@ -95,15 +97,16 @@ struct PlayerControls: View {
 
             HStack(alignment: .center, spacing: 10.0) {
 
+                Spacer()
+
                 PlayerButton(.backwards) {
                     iaPlayer.advancePlayer(.backwards)
                 }
 
                 Spacer()
 
-                PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 44.0, height: 44.0)) {
-                    iaPlayer.didTapPlayButton()
-                }
+                AirPlayButton()
+                    .frame(width: 44, height: 44)
 
                 Spacer()
 
@@ -111,10 +114,12 @@ struct PlayerControls: View {
                     iaPlayer.advancePlayer(.forwards)
                 }
 
+                Spacer()
+
             }
             .tint(foregroundColor)
         }
-        .padding()
+        .padding(5)
         .background(
             backgroundColor
 
@@ -237,6 +242,7 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
         controller.view.backgroundColor = UIColor.black
+        controller.view.layer.cornerRadius = 10.0
         return controller
     }
 
