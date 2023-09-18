@@ -88,4 +88,23 @@ struct PersistenceController {
         playList.addToFiles(archiveFileEntity)
         PersistenceController.shared.save()
     }
+
+    public func isOnPlaylist(entity: ArchiveFileEntity) -> Bool {
+        let fetchRequest: NSFetchRequest<PlaylistEntity> = PlaylistEntity.fetchRequest()
+        do {
+            let playlists = try container.viewContext.fetch(fetchRequest)
+            var files = [ArchiveFileEntity]()
+            playlists.forEach{
+                if let af = $0.files?.array as? [ArchiveFileEntity] {
+                    files.append(contentsOf: af )
+                }
+            }
+
+            return files.contains(entity)
+        } catch let error {
+            print(error)
+        }
+
+        return false
+    }
 }

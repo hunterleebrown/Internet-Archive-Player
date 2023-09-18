@@ -55,6 +55,7 @@ class Downloader: NSObject {
     public static func removeFile(at path: URL) throws {
         if FileManager.default.fileExists(atPath: path.path) {
             try FileManager.default.removeItem(at: path)
+            print("---> deleted local file: \(path.lastPathComponent)")
         } else {
             throw DownloaderError.fileDoesNotExist
         }
