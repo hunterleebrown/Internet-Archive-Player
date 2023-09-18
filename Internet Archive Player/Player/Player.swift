@@ -257,11 +257,14 @@ class Player: NSObject, ObservableObject {
                 self.stopPlaying()
                 self.playingFile = nil
             }
-            self.deleteLocalFile(item: archiveFileEntity)
             playlist.removeFromFiles(archiveFileEntity)
-            PersistenceController.shared.delete(archiveFileEntity, false)
+            PersistenceController.shared.save()
+
+            if !PersistenceController.shared.isOnPlaylist(entity: archiveFileEntity) {
+                self.deleteLocalFile(item: archiveFileEntity)
+                PersistenceController.shared.delete(archiveFileEntity, false)
+            }
         }
-        PersistenceController.shared.save()
     }
 
 
