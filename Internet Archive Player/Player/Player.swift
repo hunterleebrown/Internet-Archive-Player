@@ -70,7 +70,6 @@ class Player: NSObject, ObservableObject {
     var fileTitle: String?
     var fileIdentifierTitle: String?
     var fileIdentifier: String?
-    var itemSubscritpions: Set<AnyCancellable> = Set<AnyCancellable>()
 
     let presentingController = AVPlayerViewController()
 
@@ -196,28 +195,32 @@ class Player: NSObject, ObservableObject {
 
     public func appendPlaylistItem(archiveFileEntity: ArchiveFileEntity) throws {
         guard let playlist = mainPlaylist else { return }
-
-        let sameValues = self.items.filter {$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString }
-        guard sameValues.isEmpty else { throw PlayerError.alreadyOnPlaylist }
-
+        try checkDupes(archiveFile: archiveFileEntity, list: self.items, error: .alreadyOnPlaylist)
         playlist.addToFiles(archiveFileEntity)
         PersistenceController.shared.save()
     }
 
-    public func appendFavoriteItem(_ item: ArchiveFile) throws {
+    public func appendFavoriteItem(file: ArchiveFile) throws {
+        let archiveFileEntity = file.archiveFileEntity()
+        try self.appendFavoriteItem(archiveFileEntity: archiveFileEntity)
+    }
+
+    public func appendFavoriteItem(archiveFileEntity: ArchiveFileEntity) throws {
         guard let playlist = favoritesPlaylist else { return }
-        let archiveFileEntity = item.archiveFileEntity()
-
-        let sameValues = self.favoriteItems.filter {$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString }
-        guard sameValues.isEmpty else { throw PlayerError.alreadyOnFavorites }
+        try checkDupes(archiveFile: archiveFileEntity, list: self.favoriteItems, error: .alreadyOnFavorites)
 
         playlist.addToFiles(archiveFileEntity)
         PersistenceController.shared.save()
     }
 
-    public func checkDupes(archiveFile: ArchiveFile) throws {
-        let sameValues = self.items.filter {$0.onlineUrl?.absoluteString == archiveFile.url?.absoluteString }
-        guard sameValues.isEmpty else { throw PlayerError.alreadyOnPlaylist }
+    public func checkDupes(archiveFile: ArchiveFileEntity, list: [ArchiveFileEntity], error: PlayerError) throws {
+        let sameValues = list.filter {$0.onlineUrl?.absoluteString == archiveFile.onlineUrl?.absoluteString }
+        guard sameValues.isEmpty else { throw error }
+    }
+
+    public func checkDupes(archiveFile: ArchiveFile, list: [ArchiveFileEntity], error: PlayerError) throws {
+        let sameValues = list.filter {$0.onlineUrl?.absoluteString == archiveFile.url?.absoluteString }
+        guard sameValues.isEmpty else { throw error }
     }
 
     public func getPlaylist() -> [ArchiveFileEntity] {

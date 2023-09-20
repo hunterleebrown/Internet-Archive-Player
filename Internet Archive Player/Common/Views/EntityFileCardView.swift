@@ -8,15 +8,11 @@
 import Foundation
 import SwiftUI
 import iaAPI
+import Combine
 
-public protocol FileViewDownloadDelegate {
-    var downloadProgress: Double { get set }
-}
+struct EntityFileCardView: View {
 
-
-struct EntityFileView: View {
-
-    @StateObject var viewModel: EntityFileView.ViewModel = EntityFileView.ViewModel()
+    @StateObject var viewModel: EntityFileCardView.ViewModel = EntityFileCardView.ViewModel()
 
     var archiveFile: ArchiveFileEntity
     var textColor = Color.white
@@ -26,12 +22,15 @@ struct EntityFileView: View {
     var fileViewMode: FileViewMode = .detail
     var ellipsisAction: [MenuAction] = [MenuAction]()
 
+    @State var backgroundURL: URL?
+    static var backgroundPass = PassthroughSubject<URL, Never>()
+
     init(_ archiveFile: ArchiveFileEntity,
          showImage: Bool = false,
          backgroundColor: Color? = Color.fairyRedAlpha,
          textColor: Color = Color.fairyCream,
          fileViewMode: FileViewMode = .detail,
-         ellipsisAction: [MenuAction] = [MenuAction]()){
+         ellipsisAction: [MenuAction] = [MenuAction]()) {
 
         self.archiveFile = archiveFile
         self.showImage = showImage
@@ -44,27 +43,6 @@ struct EntityFileView: View {
     var body: some View {
         
         HStack() {
-            if (showImage) {
-                AsyncImage(
-                    url: archiveFile.iconUrl,
-                    content: { image in
-                        image.resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: 44,
-                                   maxHeight: 44)
-                            .background(Color.black)
-
-                    },
-                    placeholder: {
-                        Color(.black)
-                            .frame(maxWidth: 44,
-                                   maxHeight: 44)
-                    })
-                    .cornerRadius(5)
-                    .padding(5)
-            }
-
-            Spacer()
             VStack(alignment: .leading, spacing: 0) {
                 Text(archiveFile.displayTitle)
                     .bold()
@@ -159,7 +137,36 @@ struct EntityFileView: View {
             .tint(textColor)
             .padding(5.0)
         }
-        .background(backgroundColor ?? nil)
+        .background(
+//            Color(uiColor:viewModel.uiImage?.averageColor ?? .black)
+
+            AsyncImage(url: archiveFile.iconUrl, transaction: Transaction(animation: .spring())) { phase in
+                switch phase {
+                case .empty:
+                    Color.clear
+
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 66, alignment: .top)
+
+
+                case .failure(_):
+                    EmptyView()
+
+                @unknown default:
+                    EmptyView()
+                }
+            }
+
+
+        )
+        .onReceive(EntityFileCardView.backgroundPass) { url in
+            withAnimation(.linear(duration: 0.3)) {
+                self.backgroundURL = url
+            }
+        }
         .cornerRadius(5.0)
         .onReceive(Downloader.downloadedSubject) { file in
             guard file.id == archiveFile.id else { return }
@@ -167,20 +174,33 @@ struct EntityFileView: View {
         }
         .onAppear() {
             showDownloadButton = !archiveFile.isLocalFile()
+            viewModel.loadImage(file: archiveFile)
         }
     }
+
 }
 
-struct MyPreviewProvider_Previews: PreviewProvider {
+struct EntityFileCardView_Previews: PreviewProvider {
     static var previews: some View {
         if let file = ArchiveFileEntity.firstEntity(context: PersistenceController.shared.container.viewContext) as? ArchiveFileEntity {
-            EntityFileView(file)
+                EntityFileCardView(file, showImage: true)
         }
     }
 }
 
-extension EntityFileView {
+extension EntityFileCardView {
     public class ViewModel: ObservableObject, FileViewDownloadDelegate {
         @Published var downloadProgress = 0.0
+        @Published var uiImage: UIImage?
+
+        public func loadImage(file: ArchiveFileEntity) {
+            Task { @MainActor in
+                if let icon = file.iconUrl {
+                    EntityFileCardView.backgroundPass.send(icon)
+                    self.uiImage = await IAMediaUtils.getImage(url: icon)
+                }
+
+            }
+        }
     }
 }

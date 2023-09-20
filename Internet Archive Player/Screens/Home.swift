@@ -24,9 +24,12 @@ struct Home: View {
     @State var showNetworkAlert: Bool = false
     @State var showControls: Bool = false
     @State var maxControlHeight: Bool = true
+    @State var fileForPlaylist: ArchiveFileEntity?
+    @State var otherPlaylistPresented: Bool = false
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var controlHeightPass = PassthroughSubject<Bool, Never>()
+    static var otherPlaylistPass = PassthroughSubject<ArchiveFileEntity, Never>()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -83,19 +86,19 @@ struct Home: View {
                                 .tint(.fairyRed)
                             }
 
-                            //                            ToolbarItem(placement: .navigationBarLeading) {
-                            //
-                            //                                Button(action: {
-                            //                                    print("lists tapped")
-                            //                                }){
-                            //                                    NavigationLink(destination: ListsView()) {
-                            //                                        Image(systemName: "music.note.list")
-                            //                                            .resizable()
-                            //                                            .frame(width: 30, height: 30)
-                            //                                    }
-                            //                                }
-                            //                                .tint(.fairyRed)
-                            //                            }
+                            ToolbarItem(placement: .navigationBarLeading) {
+
+                                Button(action: {
+                                    print("lists tapped")
+                                }){
+                                    NavigationLink(destination: ListsView()) {
+                                        Image(systemName: "music.note.list")
+                                            .resizable()
+                                            .frame(width: 30, height: 30)
+                                    }
+                                }
+                                .tint(.fairyRed)
+                            }
 
                             ToolbarItem(placement: .navigationBarLeading) {
 
@@ -153,6 +156,15 @@ struct Home: View {
                 maxControlHeight = show
             }
         })
+        .onReceive(Home.otherPlaylistPass, perform: { archiveFileEntiity in
+            fileForPlaylist = archiveFileEntiity
+            otherPlaylistPresented = true
+        })
+        .sheet(isPresented: $otherPlaylistPresented) {
+            if let f = fileForPlaylist {
+                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFileEntity: f)
+            }
+        }
         .alert("There is no network connection", isPresented: $showNetworkAlert) {
             Button("OK") {
                 showNetworkAlert = false

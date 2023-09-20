@@ -27,7 +27,6 @@ struct SingleListView: View {
                                fileViewMode: .playlist,
                                ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .padding(10)
                 .onTapGesture {
 //                    if let playingList = iaPlayer.mainPlaylist {
 //                        if playingList != playlistEntity {

@@ -171,6 +171,14 @@ struct EntityFileView: View {
     }
 }
 
+struct EntityFileView_Previews: PreviewProvider {
+    static var previews: some View {
+        if let file = ArchiveFileEntity.firstEntity(context: PersistenceController.shared.container.viewContext) as? ArchiveFileEntity {
+            EntityFileView(file)
+        }
+    }
+}
+
 extension EntityFileView {
     public class ViewModel: ObservableObject, FileViewDownloadDelegate {
         @Published var downloadProgress = 0.0
