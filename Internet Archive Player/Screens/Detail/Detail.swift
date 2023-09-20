@@ -151,7 +151,7 @@ struct Detail: View {
 
                 }
 
-                LazyVStack(alignment: .leading) {
+                VStack(alignment: .leading) {
 
                     if self.viewModel.audioFiles.count > 0 {
                         Text("Audio")
@@ -174,7 +174,7 @@ struct Detail: View {
                                 .padding(.trailing, 5.0)
                                 .onTapGesture {
                                     do  {
-                                        try iaPlayer.checkDupes(archiveFile: file)
+                                        try iaPlayer.checkDupes(archiveFile: file, list: iaPlayer.items, error: .alreadyOnPlaylist)
                                     } catch PlayerError.alreadyOnPlaylist {
                                         self.playlistErrorAlertShowing = true
                                         return
@@ -204,7 +204,7 @@ struct Detail: View {
                                 .padding(.trailing, 5.0)
                                 .onTapGesture {
                                     do  {
-                                        try iaPlayer.checkDupes(archiveFile: file)
+                                        try iaPlayer.checkDupes(archiveFile: file, list: iaPlayer.items, error: PlayerError.alreadyOnPlaylist)
                                     } catch PlayerError.alreadyOnPlaylist {
                                         self.playlistErrorAlertShowing = true
                                         return
@@ -268,6 +268,7 @@ struct Detail: View {
                             EmptyView()
                         }
                     }
+                    .frame(minHeight: 200, alignment: .center)
                 }
 
             }
@@ -285,24 +286,12 @@ struct Detail: View {
                 DetailDescription(doc: doc)
             }
         }
-        //        .sheet(isPresented: $otherPlaylistPresented) {
-        //            if let archivefile = viewModel.playlistArchiveFile {
-        //                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFile: archivefile)
-        //            }
-        //        }
-        //        .navigationBarItems(trailing:
-        //                                Button(action: {
-        //        }) {
-        //            Image(systemName: "heart")
-        //                .tint(.fairyRed)
-        //        })
-        //        //        .navigationBarColor(backgroundColor: UIColor(white: 1.0, alpha: 0.5), titleColor: .fairyRed)
-        //        .alert("Add all files to Playlist?", isPresented: $playlistAddAllAlert) {
-        //            Button("No", role: .cancel) { }
-        //            Button("Yes") {
-        //                viewModel.addAllFilesToPlaylist(player: iaPlayer)
-        //            }
-        //        }
+        .sheet(isPresented: $otherPlaylistPresented) {
+            if let file = viewModel.playlistArchiveFile {
+                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFile: file)
+            }
+        }
+
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
@@ -357,7 +346,7 @@ struct Detail: View {
 
         let favorites = MenuAction(name: "Add to Favorites", action:  {
             do  {
-                try iaPlayer.appendFavoriteItem(archiveFile)
+                try iaPlayer.appendFavoriteItem(file: archiveFile)
             } catch PlayerError.alreadyOnFavorites {
                 self.favoritesErrorAlertShowing = true
             } catch {
@@ -366,22 +355,14 @@ struct Detail: View {
         }, imageName: "heart")
 
 
-        //        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
-        //            do  {
-        ////                try iaPlayer.appendFavoriteItem(archiveFile)
-        //                viewModel.playlistArchiveFile = archiveFile
-        //                otherPlaylistPresented = true
-        //
-        //            } catch PlayerError.alreadyOnFavorites {
-        ////                self.favoritesErrorAlertShowing = true
-        //            } catch {
-        //
-        //            }
-        //        }, imageName: "music.note.list")
+        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
+            viewModel.playlistArchiveFile = archiveFile
+            otherPlaylistPresented = true
+        }, imageName: "music.note.list")
 
         actions.append(playlist)
         actions.append(favorites)
-        //        actions.append(otherPlaylist)
+        actions.append(otherPlaylist)
 
         return actions
     }
@@ -391,6 +372,7 @@ struct Detail: View {
 struct Detail_Previews: PreviewProvider {
     static var previews: some View {
         Detail("wcd_ray-of-light_madonna_flac_lossless_522566", isPresented: false).environmentObject(Player())
+//        Detail("13BinarySunsetAlternate", isPresented: false).environmentObject(Player())
     }
 }
 

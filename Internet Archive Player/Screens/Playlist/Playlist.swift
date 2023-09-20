@@ -17,6 +17,7 @@ struct Playlist: View {
     @StateObject var viewModel = Playlist.ViewModel()
     @State private var seek = 1.0
     @State private var showingAlert = false
+    @State var favoritesErrorAlertShowing: Bool = false
 
     @State private var searchText = ""
 
@@ -49,6 +50,9 @@ struct Playlist: View {
             }
             .onDelete(perform: self.remove)
             .onMove(perform: self.move)
+        }
+        .alert(PlayerError.alreadyOnFavorites.description, isPresented: $favoritesErrorAlertShowing) {
+            Button("Okay", role: .cancel) { }
         }
         .toolbar {
             EditButton()
@@ -90,8 +94,24 @@ struct Playlist: View {
         let details = MenuAction(name: "Archive details", action:  {
             PlayerControls.showPlayingDetails.send(archiveFileEntity)
         }, imageName: "info.circle")
-
         items.append(details)
+
+
+        let favorites = MenuAction(name: "Add to Favorites", action:  {
+            do  {
+                try iaPlayer.appendFavoriteItem(archiveFileEntity: archiveFileEntity)
+            } catch PlayerError.alreadyOnFavorites {
+                self.favoritesErrorAlertShowing = true
+            } catch {
+
+            }
+        }, imageName: "heart")
+        items.append(favorites)
+
+        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
+            Home.otherPlaylistPass.send(archiveFileEntity)
+        }, imageName: "music.note.list")
+        items.append(otherPlaylist)
 
         return items
     }

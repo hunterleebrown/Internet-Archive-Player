@@ -108,7 +108,7 @@ extension NewFavoritesView {
 
 struct SwiftUIView_PreviewsFavorites: PreviewProvider {
     static var previews: some View {
-        NewFavoritesView()
+        NewFavoritesView().environmentObject(Player())
     }
 }
 

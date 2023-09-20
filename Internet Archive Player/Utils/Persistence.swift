@@ -61,8 +61,9 @@ struct PersistenceController {
         if context.hasChanges {
             do {
                 try context.save()
-            } catch {
+            } catch let error {
                 // Show some error here
+                print(error)
             }
         }
     }
@@ -75,8 +76,12 @@ struct PersistenceController {
         }
     }
 
-    public func appendPlaylistItem(_ item: ArchiveFile, playList: PlaylistEntity) throws {
-        let archiveFileEntity = item.archiveFileEntity()
+    public func appendPlaylistItem(file: ArchiveFile, playList: PlaylistEntity) throws {
+        let archiveFileEntity = file.archiveFileEntity()
+        try self.appendPlaylistItem(archiveFileEntity: archiveFileEntity, playList: playList)
+    }
+
+    public func appendPlaylistItem(archiveFileEntity: ArchiveFileEntity, playList: PlaylistEntity) throws {
 
         if let files = playList.files?.array as? [ArchiveFileEntity] {
             let filtered = files.filter({$0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString})
@@ -86,7 +91,7 @@ struct PersistenceController {
         }
 
         playList.addToFiles(archiveFileEntity)
-        PersistenceController.shared.save()
+        save()
     }
 
     public func isOnPlaylist(entity: ArchiveFileEntity) -> Bool {
@@ -106,5 +111,21 @@ struct PersistenceController {
         }
 
         return false
+    }
+
+}
+
+extension NSManagedObject {
+    static public func firstEntity<T: NSManagedObject>(context: NSManagedObjectContext) -> T? {
+        guard let name = entity().name else { return nil }
+
+        let fetchRequest = NSFetchRequest<T>(entityName: name)
+        do {
+            let object = try context.fetch(fetchRequest)
+            if let foundObject = object.first { return foundObject }
+            return nil
+        } catch {
+            return nil
+        }
     }
 }
