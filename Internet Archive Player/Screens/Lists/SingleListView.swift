@@ -22,23 +22,34 @@ struct SingleListView: View {
 
                 EntityFileView(archiveFile,
                                showImage: true,
-                               backgroundColor: .white,
-                               textColor: .black,
+                               backgroundColor: nil,
+                               textColor: .primary,
                                fileViewMode: .playlist,
                                ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .onTapGesture {
-//                    if let playingList = iaPlayer.mainPlaylist {
-//                        if playingList != playlistEntity {
-//                            iaPlayer.changePlaylist(newPlaylist: playlistEntity)
-//                        }
-//                    }
                     iaPlayer.playFile(archiveFile)
                 }
             }
+            .onDelete(perform: { indexSet in
+                self.remove(at: indexSet)
+            })
+        }
+        .toolbar {
+            EditButton()
+                .tint(.fairyRed)
         }
         .listStyle(PlainListStyle())
         .navigationTitle(playlistEntity.name ?? "List")
+    }
+
+    private func remove(at offsets: IndexSet) {
+        for index in offsets {
+            if let file = playlistEntity.files?.array[index] as? ArchiveFileEntity{
+                playlistEntity.removeFromFiles(file)
+                PersistenceController.shared.save()
+            }
+        }
     }
 
     private func menuItems(archiveFileEntity: ArchiveFileEntity) -> [MenuAction] {
@@ -47,9 +58,18 @@ struct SingleListView: View {
         let details = MenuAction(name: "Archive details", action:  {
             PlayerControls.showPlayingDetails.send(archiveFileEntity)
         }, imageName: "info.circle")
-
         items.append(details)
+
+        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
+            Home.otherPlaylistPass.send(archiveFileEntity)
+        }, imageName: "music.note.list")
+        items.append(otherPlaylist)
 
         return items
     }
+}
+
+#Preview {
+    SingleListView(playlistEntity: PlaylistEntity.firstEntity(context: PersistenceController.shared.container.viewContext) as! PlaylistEntity)
+        .environmentObject(Player())
 }

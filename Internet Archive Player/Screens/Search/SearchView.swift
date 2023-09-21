@@ -39,7 +39,10 @@ struct SearchView: View {
                     viewModel.search(query: viewModel.searchText, loadMore: false)
                 }
 
-                HStack(alignment: .center , spacing:20) {
+                HStack(alignment: .center , spacing:5) {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                        .foregroundColor(.fairyRed)
+                        .font(.headline)
                     Text("Filter:")
                         .font(.subheadline)
 
@@ -47,18 +50,8 @@ struct SearchView: View {
                         showCollections = true
                     } label: {
                         Text("Collection: \(collectionName)")
-                            .font(.subheadline)
-                            .padding()
-                            .frame(height: 33)
-                            .foregroundColor(Color.fairyRed)
-                            .background(
-                                RoundedRectangle(
-                                     cornerRadius: 10,
-                                     style: .continuous
-                                 )
-                                .stroke(Color.fairyRed)
-                            )
                     }
+                    .buttonStyle(IAButton())
                 }
                 .padding(.horizontal, 20)
 

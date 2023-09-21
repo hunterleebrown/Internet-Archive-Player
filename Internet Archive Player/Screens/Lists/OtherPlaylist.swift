@@ -10,12 +10,12 @@ import iaAPI
 import SwiftUI
 import UIKit
 import Combine
+import CoreData
 
 struct OtherPlaylist: View {
     @Binding var isPresented: Bool
     var archiveFile: ArchiveFile?
     var archiveFileEntity: ArchiveFileEntity?
-    @StateObject var listViewModel = ListsView.ViewModel()
     @StateObject var viewModel = OtherPlaylist.ViewModel()
 
     init(isPresented: Binding<Bool>, archiveFile: ArchiveFile? = nil, archiveFileEntity: ArchiveFileEntity? = nil) {
@@ -32,7 +32,7 @@ struct OtherPlaylist: View {
                 .foregroundColor(.fairyRed)
                 .padding(10)
             List {
-                ForEach(listViewModel.lists, id: \.self) { list in
+                ForEach(viewModel.lists, id: \.self) { list in
                     HStack {
                         Text(list.name ?? "list name")
                         Spacer()
@@ -61,6 +61,10 @@ extension OtherPlaylist {
 
     final class ViewModel: NSObject, ObservableObject {
 
+        @Published var lists: [PlaylistEntity] = [PlaylistEntity]()
+        private let listsFetchController: NSFetchedResultsController<PlaylistEntity>
+
+
         public func addFileToPlaylist(archiveFile: ArchiveFile, playlist: PlaylistEntity) {
             do {
                 try PersistenceController.shared.appendPlaylistItem(file: archiveFile, playList: playlist)
@@ -77,6 +81,42 @@ extension OtherPlaylist {
             }
         }
 
+
+        override init() {
+            listsFetchController =
+            NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequestAllPlaylists(),
+                                       managedObjectContext: PersistenceController.shared.container.viewContext,
+                                       sectionNameKeyPath: nil,
+                                       cacheName: nil)
+
+            super.init()
+            listsFetchController.delegate = self
+
+            do {
+                try listsFetchController.performFetch()
+                if let playlists = listsFetchController.fetchedObjects {
+                    DispatchQueue.main.async {
+                        if playlists.count > 0 {
+                            self.lists = playlists.filter{!$0.permanent}
+                        }
+                    }
+                }
+            } catch {
+                print("failed to fetch items!")
+            }
+        }
     }
 
+}
+
+extension OtherPlaylist.ViewModel: NSFetchedResultsControllerDelegate {
+  func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+      guard let playlists = controller.fetchedObjects as? [PlaylistEntity]
+      else { return }
+      DispatchQueue.main.async {
+          if playlists.count > 0 {
+              self.lists = playlists.filter{!$0.permanent}
+          }
+      }
+  }
 }

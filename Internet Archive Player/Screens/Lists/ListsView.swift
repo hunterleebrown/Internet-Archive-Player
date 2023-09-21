@@ -59,11 +59,8 @@ struct ListsView: View {
 extension ListsView {
 
     final class ViewModel: NSObject, ObservableObject {
-
         @Published var lists: [PlaylistEntity] = [PlaylistEntity]()
-
         private let listsFetchController: NSFetchedResultsController<PlaylistEntity>
-
 
         override init() {
             listsFetchController =
@@ -102,4 +99,8 @@ extension ListsView.ViewModel: NSFetchedResultsControllerDelegate {
           }
       }
   }
+}
+
+#Preview {
+    ListsView()
 }
