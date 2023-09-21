@@ -19,16 +19,31 @@ struct NewPlaylist: View {
 
     var body: some View {
         VStack {
+            HStack(alignment: .center) {
+                Image(systemName: "music.note.list")
+                    .font(.headline)
+                    .foregroundColor(.fairyRed)
+                Text("Create a new playlist")
+                    .font(.headline)
+                    .foregroundColor(.fairyRed)
+            }
             TextField("New playlist name", text: $name)
                 .padding()
+                .cornerRadius(10)
+                .onSubmit {
+                    viewModel.createPlaylist(name: name)
+                    isPresented = false
+                }
             Button("Create") {
                 viewModel.createPlaylist(name: name)
                 isPresented = false
             }
+            .buttonStyle(IAButton())
             .padding()
             Spacer()
 
         }
+        .padding()
         .navigationTitle("Create new playlist")
 
     }
@@ -40,10 +55,10 @@ extension NewPlaylist {
         private let listCreateController: NSFetchedResultsController<PlaylistEntity>
 
         override init() {
-            listCreateController =             NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequestAllPlaylists(),
-                                                                          managedObjectContext: PersistenceController.shared.container.viewContext,
-                                                                          sectionNameKeyPath: nil,
-                                                                          cacheName: nil)
+            listCreateController = NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequestAllPlaylists(),
+                                                              managedObjectContext: PersistenceController.shared.container.viewContext,
+                                                              sectionNameKeyPath: nil,
+                                                              cacheName: nil)
             super.init()
         }
 
@@ -56,4 +71,22 @@ extension NewPlaylist {
         }
 
     }
+}
+struct NewPlaylistBindingPreview : View {
+     @State
+     private var value = false
+
+     var body: some View {
+         NewPlaylist(isPresented: $value)
+     }
+}
+
+struct NewPlaylist_Preview: PreviewProvider {
+
+    @State var showingNewPlaylist = false
+
+    static var previews: some View {
+        NewPlaylistBindingPreview()
+    }
+
 }

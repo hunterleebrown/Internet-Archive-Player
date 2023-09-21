@@ -101,21 +101,30 @@ struct Home: View {
                             }
 
                             ToolbarItem(placement: .navigationBarLeading) {
-
                                 Button(action: {
                                     presentingFavorites.toggle()
                                 }){
                                     NavigationLink(destination: NewFavoritesView()) {
-
                                         Image(systemName: "heart")
                                             .resizable()
                                             .frame(width: 30, height: 30)
                                     }
                                 }
                                 .tint(.fairyRed)
-
                             }
 
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button(action: {
+                                    print("debug tap")
+                                }){
+                                    NavigationLink(destination: DebugView()) {
+                                        Image(systemName: "ant.circle")
+                                            .resizable()
+                                            .frame(width: 30, height: 30)
+                                    }
+                                }
+                                .tint(.fairyRed)
+                            }
                         }
                         .sheet(item: $playingFile, content: { file in
                             if let identifier = file.identifier {

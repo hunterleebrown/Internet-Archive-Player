@@ -31,9 +31,14 @@ struct SearchFilters: View {
 
     var body: some View {
         VStack(alignment: .center, spacing:10){
-            Text("Filter by collection")
-                .font(.headline)
-                .foregroundColor(Color.fairyRed)
+            HStack {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+                    .foregroundColor(.fairyRed)
+                    .font(.headline)
+                Text("Filter by collection")
+                    .font(.headline)
+                    .foregroundColor(Color.fairyRed)
+            }
             List(searchFiltersViewModel.items, id: \.self, selection: $searchFilter ) { filter in
 
                 HStack(alignment:.top, spacing: 5.0) {
