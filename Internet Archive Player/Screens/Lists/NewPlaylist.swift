@@ -16,18 +16,18 @@ struct NewPlaylist: View {
     @State private var name: String = ""
     @Binding var isPresented: Bool
 
-
     var body: some View {
         VStack {
             HStack(alignment: .center) {
                 Image(systemName: "music.note.list")
                     .font(.headline)
                     .foregroundColor(.fairyRed)
-                Text("Create a new playlist")
+                Text("Create a new list")
                     .font(.headline)
                     .foregroundColor(.fairyRed)
             }
-            TextField("New playlist name", text: $name)
+            .padding()
+            TextField("New list name", text: $name)
                 .padding()
                 .cornerRadius(10)
                 .onSubmit {
@@ -44,8 +44,6 @@ struct NewPlaylist: View {
 
         }
         .padding()
-        .navigationTitle("Create new playlist")
-
     }
 }
 

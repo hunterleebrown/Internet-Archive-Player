@@ -41,6 +41,10 @@ struct SingleListView: View {
         }
         .listStyle(PlainListStyle())
         .navigationTitle(playlistEntity.name ?? "List")
+        .safeAreaInset(edge: .bottom) {
+            Spacer()
+                .frame(height: 160)
+        }
     }
 
     private func remove(at offsets: IndexSet) {

@@ -27,7 +27,7 @@ struct Detail: View {
     @State var hideNavigationBar: Bool = false
 
     @State var backgroundBlur: Double = 0.0
-    
+
     @State var backgroundURL: URL?
     static var backgroundPass = PassthroughSubject<URL, Never>()
 
@@ -37,7 +37,7 @@ struct Detail: View {
         self.identifier = identifier
         self.isPresented = isPresented
     }
-    
+
     var body: some View {
         ObservableScrollView(scrollOffset: $scrollOffset) {
             Spacer().frame(height: 300)
@@ -46,7 +46,7 @@ struct Detail: View {
                     .font(.headline)
                     .bold()
                     .foregroundColor(Color(.black))
-//                    .frame(alignment: .center)
+                //                    .frame(alignment: .center)
                     .multilineTextAlignment(.leading)
                     .padding(.top, 10)
                     .padding(.horizontal, 10)
@@ -87,13 +87,13 @@ struct Detail: View {
             }
             .background(
                 Color.white.opacity(0.5)
-//                Color(avgColor(viewModel) ?? .white).opacity(0.5)
+                //                Color(avgColor(viewModel) ?? .white).opacity(0.5)
             )
             .cornerRadius(detailCornerRadius)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
 
-            
+
 
             VStack(alignment: .center, spacing: 5.0) {
 
@@ -121,11 +121,12 @@ struct Detail: View {
                         Spacer()
                         Menu {
                             Button(action: {
-                                viewModel.addAllFilesToPlaylist(player: iaPlayer)
+                                viewModel.playlistArchiveFiles = viewModel.audioFiles + viewModel.movieFiles
+                                otherPlaylistPresented = true
                             }){
                                 HStack {
                                     Image(systemName: PlayerButtonType.list.rawValue)
-                                    Text("Add all to playlist")
+                                    Text("Add all to list ...")
                                 }
                             }
                             .frame(width: 44, height: 44)
@@ -287,11 +288,10 @@ struct Detail: View {
             }
         }
         .sheet(isPresented: $otherPlaylistPresented) {
-            if let file = viewModel.playlistArchiveFile {
-                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFile: file)
+            if let files = viewModel.playlistArchiveFiles {
+                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFiles: files)
             }
         }
-
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
@@ -308,6 +308,10 @@ struct Detail: View {
         .safeAreaInset(edge: .top, content: {
             Spacer()
                 .frame(height: 20)
+        })
+        .safeAreaInset(edge: .bottom, content: {
+            Spacer()
+                .frame(height: 160)
         })
     }
 
@@ -355,8 +359,8 @@ struct Detail: View {
         }, imageName: "heart")
 
 
-        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
-            viewModel.playlistArchiveFile = archiveFile
+        let otherPlaylist = MenuAction(name: "Add to list ...", action:  {
+            viewModel.playlistArchiveFiles = [archiveFile]
             otherPlaylistPresented = true
         }, imageName: "music.note.list")
 
@@ -372,7 +376,7 @@ struct Detail: View {
 struct Detail_Previews: PreviewProvider {
     static var previews: some View {
         Detail("wcd_ray-of-light_madonna_flac_lossless_522566", isPresented: false).environmentObject(Player())
-//        Detail("13BinarySunsetAlternate", isPresented: false).environmentObject(Player())
+        //        Detail("13BinarySunsetAlternate", isPresented: false).environmentObject(Player())
     }
 }
 

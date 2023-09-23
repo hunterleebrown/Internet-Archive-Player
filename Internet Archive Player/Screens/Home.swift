@@ -24,12 +24,16 @@ struct Home: View {
     @State var showNetworkAlert: Bool = false
     @State var showControls: Bool = false
     @State var maxControlHeight: Bool = true
-    @State var fileForPlaylist: ArchiveFileEntity?
     @State var otherPlaylistPresented: Bool = false
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var controlHeightPass = PassthroughSubject<Bool, Never>()
     static var otherPlaylistPass = PassthroughSubject<ArchiveFileEntity, Never>()
+    static var newPlaylistPass = PassthroughSubject<Bool, Never>()
+
+    @State var showingNewPlaylist = false
+
+    var viewModel: Home.ViewModel = Home.ViewModel()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -69,7 +73,7 @@ struct Home: View {
             NavigationStack {
                 VStack(spacing:0) {
                     Playlist()
-                        .navigationTitle("Now playing")
+                        .navigationTitle("Now Playing")
                         .toolbar {
 
                             ToolbarItem(placement: .navigationBarLeading) {
@@ -166,13 +170,19 @@ struct Home: View {
             }
         })
         .onReceive(Home.otherPlaylistPass, perform: { archiveFileEntiity in
-            fileForPlaylist = archiveFileEntiity
+            viewModel.archiveFileEntity = archiveFileEntiity
             otherPlaylistPresented = true
         })
+        .onReceive(Home.newPlaylistPass, perform: { show in
+            showingNewPlaylist = true
+        })
         .sheet(isPresented: $otherPlaylistPresented) {
-            if let f = fileForPlaylist {
-                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFileEntity: f)
+            if let f = viewModel.archiveFileEntity {
+                OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFileEntities: [f])
             }
+        }
+        .sheet(isPresented: $showingNewPlaylist) {
+            NewPlaylist(isPresented: $showingNewPlaylist)
         }
         .alert("There is no network connection", isPresented: $showNetworkAlert) {
             Button("OK") {
@@ -184,6 +194,13 @@ struct Home: View {
     }
 
 }
+
+extension Home {
+    class ViewModel {
+        var archiveFileEntity: ArchiveFileEntity?
+    }
+}
+
 struct Home_Preview: PreviewProvider {
     static var previews: some View {
         Home()

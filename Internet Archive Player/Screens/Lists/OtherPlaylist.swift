@@ -14,45 +14,67 @@ import CoreData
 
 struct OtherPlaylist: View {
     @Binding var isPresented: Bool
-    var archiveFile: ArchiveFile?
-    var archiveFileEntity: ArchiveFileEntity?
-    @StateObject var viewModel = OtherPlaylist.ViewModel()
+    var archiveFiles: [ArchiveFile]?
+    var archiveFileEntities: [ArchiveFileEntity]?
+    @ObservedObject var viewModel = OtherPlaylist.ViewModel()
+    @State var showingNewPlaylist = false
 
-    init(isPresented: Binding<Bool>, archiveFile: ArchiveFile? = nil, archiveFileEntity: ArchiveFileEntity? = nil) {
+    init(isPresented: Binding<Bool>, archiveFiles: [ArchiveFile]? = nil, archiveFileEntities: [ArchiveFileEntity]? = nil) {
         self._isPresented = isPresented
-        self.archiveFile = archiveFile
-        self.archiveFileEntity = archiveFileEntity
+        self.archiveFiles = archiveFiles
+        self.archiveFileEntities = archiveFileEntities
     }
 
     var body: some View {
-        VStack {
-            Text("Add to playlist")
-                .font(.body)
-                .fontWeight(.bold)
-                .foregroundColor(.fairyRed)
-                .padding(10)
-            List {
-                ForEach(viewModel.lists, id: \.self) { list in
-                    HStack {
-                        Text(list.name ?? "list name")
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        if let file = archiveFile {
-                            viewModel.addFileToPlaylist(archiveFile: file, playlist: list)
+        NavigationView {
+            VStack {
+                HStack {
+                    Text("Add to playlist")
+                        .font(.body)
+                        .fontWeight(.bold)
+                        .foregroundColor(.fairyRed)
+                        .padding(10)
+                    Spacer()
+                    Button(action: {
+                    }) {
+                        NavigationLink {
+                            NewPlaylist(isPresented: $showingNewPlaylist)
+                        } label: {
+                            Image(systemName: "plus")
+                                .foregroundColor(.fairyRed)
+
                         }
-                        if let entityFile = archiveFileEntity {
-                            viewModel.addFileToPlaylist(archiveEntityFile: entityFile, playlist: list)
-                        }
-                        isPresented = false
                     }
                 }
+                .padding()
+                List {
+                    ForEach(viewModel.lists, id: \.self) { list in
+                        HStack {
+                            Text(list.name ?? "list name")
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if let files = archiveFiles {
+                                viewModel.addFilesToPlaylist(archiveFiles: files, playlist: list)
+                            }
+                            if let entityFiles = archiveFileEntities {
+                                    viewModel.addFilesToPlaylist(archiveEntityFiles: entityFiles, playlist: list)
 
-
+                            }
+                            isPresented = false
+                        }
+                    }
+                }
+                .onAppear(perform: {
+                    viewModel.getOtherLists()
+                })
+                .listStyle(PlainListStyle())
             }
-            .listStyle(PlainListStyle())
-            .navigationTitle("Playlists")
+        }
+        .safeAreaInset(edge: .bottom) {
+            Spacer()
+                .frame(height: 160)
         }
     }
 }
@@ -65,19 +87,37 @@ extension OtherPlaylist {
         private let listsFetchController: NSFetchedResultsController<PlaylistEntity>
 
 
-        public func addFileToPlaylist(archiveFile: ArchiveFile, playlist: PlaylistEntity) {
-            do {
-                try PersistenceController.shared.appendPlaylistItem(file: archiveFile, playList: playlist)
-            } catch (let error) {
-                print(error)
+        public func addFilesToPlaylist(archiveFiles: [ArchiveFile], playlist: PlaylistEntity) {
+
+            var sorted = archiveFiles.sorted{
+                guard let track1 = Int($0.track ?? ""), let track2 = Int($1.track ?? "") else { return false}
+                return track1 < track2
+            }
+
+            sorted.forEach { f in
+                do {
+                    try PersistenceController.shared.appendPlaylistItem(file: f, playList: playlist)
+                } catch (let error) {
+                    print(error)
+                }
             }
         }
 
-        public func addFileToPlaylist(archiveEntityFile: ArchiveFileEntity, playlist: PlaylistEntity) {
-            do {
-                try PersistenceController.shared.appendPlaylistItem(archiveFileEntity: archiveEntityFile, playList: playlist)
-            } catch (let error) {
-                print(error)
+        public func addFilesToPlaylist(archiveEntityFiles: [ArchiveFileEntity], playlist: PlaylistEntity) {
+
+            var sorted = archiveEntityFiles.sorted{
+                guard let track1 = Int($0.track ?? ""), let track2 = Int($1.track ?? "") else { return false}
+                return track1 < track2
+            }
+
+            sorted.forEach { f in
+                do {
+                    try PersistenceController.shared.appendPlaylistItem(archiveFileEntity: f, playList: playlist)
+
+                } catch (let error) {
+                    print(error)
+                }
+
             }
         }
 
@@ -91,14 +131,14 @@ extension OtherPlaylist {
 
             super.init()
             listsFetchController.delegate = self
+        }
 
+        func getOtherLists() {
             do {
                 try listsFetchController.performFetch()
                 if let playlists = listsFetchController.fetchedObjects {
-                    DispatchQueue.main.async {
-                        if playlists.count > 0 {
-                            self.lists = playlists.filter{!$0.permanent}
-                        }
+                    if playlists.count > 0 {
+                        self.lists = playlists  //.filter{!$0.permanent}
                     }
                 }
             } catch {
@@ -106,17 +146,16 @@ extension OtherPlaylist {
             }
         }
     }
-
 }
 
 extension OtherPlaylist.ViewModel: NSFetchedResultsControllerDelegate {
-  func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-      guard let playlists = controller.fetchedObjects as? [PlaylistEntity]
-      else { return }
-      DispatchQueue.main.async {
-          if playlists.count > 0 {
-              self.lists = playlists.filter{!$0.permanent}
-          }
-      }
-  }
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        guard let playlists = controller.fetchedObjects as? [PlaylistEntity]
+        else { return }
+        DispatchQueue.main.async {
+            if playlists.count > 0 {
+                self.lists = playlists //.filter{!$0.permanent}
+            }
+        }
+    }
 }

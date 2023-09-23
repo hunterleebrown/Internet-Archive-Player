@@ -13,7 +13,7 @@ import CoreData
 
 struct ListsView: View {
     @StateObject var viewModel = ListsView.ViewModel()
-    @State var showingNewPlaylist = false
+//    @State var showingNewPlaylist = false
 
     var body: some View {
         NavigationStack {
@@ -27,22 +27,19 @@ struct ListsView: View {
                 }
                 .onDelete(perform: self.remove)
             }
-
             .listStyle(PlainListStyle())
-            .navigationTitle("Playlists")
+            .navigationTitle("Lists")
             .toolbar {
-
-
                 Button(action: {
-                    showingNewPlaylist = true
+                    Home.newPlaylistPass.send(true)
                 }) {
                     Image(systemName: "plus")
                         .foregroundColor(.fairyRed)
                 }
-
             }
-            .sheet(isPresented: $showingNewPlaylist) {
-                NewPlaylist(isPresented: $showingNewPlaylist)
+            .safeAreaInset(edge: .bottom) {
+                Spacer()
+                    .frame(height: 160)
             }
         }
     }
