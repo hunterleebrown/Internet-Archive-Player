@@ -60,6 +60,10 @@ struct NewFavoritesView: View {
             iaPlayer.sendPlayingFileForPlaylist()
 
         }
+        .safeAreaInset(edge: .bottom) {
+            Spacer()
+                .frame(height: 160)
+        }
     }
 
     private func remove(at offsets: IndexSet) {
@@ -73,17 +77,21 @@ struct NewFavoritesView: View {
     private func menuActions(archiveFile: ArchiveFileEntity) -> [MenuAction] {
         var actions = [MenuAction]()
 
-        let playlist = MenuAction(name: "Add to playlist", action:  {
+        let playlist = MenuAction(name: "Add to list", action:  {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFileEntity: archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
                 self.playlistErrorAlertShowing = true
             } catch {
-
             }
         }, imageName: "list.bullet.rectangle.portrait")
-
         actions.append(playlist)
+
+        let otherPlaylist = MenuAction(name: "Add to playlist ...", action:  {
+            Home.otherPlaylistPass.send(archiveFile)
+        }, imageName: "music.note.list")
+        actions.append(otherPlaylist)
+
 
         return actions
     }

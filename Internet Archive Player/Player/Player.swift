@@ -76,17 +76,19 @@ class Player: NSObject, ObservableObject {
     private let playlistFetchController: NSFetchedResultsController<PlaylistEntity>
     private let favoritesFetchController: NSFetchedResultsController<PlaylistEntity>
 
+    static var mainListName = "Now Playing"
+    static var favoritesListName = "Favorites"
 
     override init() {
 
         playlistFetchController =
-        NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequest(playlistName: "main"),
+        NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequest(playlistName: Self.mainListName),
                                    managedObjectContext: PersistenceController.shared.container.viewContext,
                                    sectionNameKeyPath: nil,
                                    cacheName: nil)
 
         favoritesFetchController =
-        NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequest(playlistName: "favorites"),
+        NSFetchedResultsController(fetchRequest:  PlaylistEntity.fetchRequest(playlistName: Self.favoritesListName),
                                    managedObjectContext: PersistenceController.shared.container.viewContext,
                                    sectionNameKeyPath: nil,
                                    cacheName: nil)
@@ -110,7 +112,7 @@ class Player: NSObject, ObservableObject {
                 }
             } else {
                 mainPlaylist = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
-                mainPlaylist?.name = "main"
+                mainPlaylist?.name = Self.mainListName
                 mainPlaylist?.permanent = true
                 PersistenceController.shared.save()
             }
@@ -127,7 +129,7 @@ class Player: NSObject, ObservableObject {
                 }
             } else {
                 favoritesPlaylist = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
-                favoritesPlaylist?.name = "favorites"
+                favoritesPlaylist?.name = Self.favoritesListName
                 favoritesPlaylist?.permanent = true
                 PersistenceController.shared.save()
             }
@@ -255,7 +257,7 @@ class Player: NSObject, ObservableObject {
     private func removePlayListEntities(list: PlaylistEntity?, at offsets: IndexSet) {
         guard let playlist = list else { return }
         for index in offsets {
-            let archiveFileEntity = playlist.name == "main" ? items[index] : favoriteItems[index]
+            let archiveFileEntity = playlist.name == Self.mainListName ? items[index] : favoriteItems[index]
             if let playingFile = self.playingFile, playingFile == archiveFileEntity{
                 self.stopPlaying()
                 self.playingFile = nil
@@ -550,9 +552,9 @@ extension Player: NSFetchedResultsControllerDelegate {
           if let files = playlist.files?.array as? [ArchiveFileEntity] {
 
               switch playlist.name {
-              case "main":
+              case Player.mainListName:
                   self.items = files
-              case "favorites":
+              case Player.favoritesListName:
                   self.favoriteItems = files
               case .none:
                   print("no playlist name")

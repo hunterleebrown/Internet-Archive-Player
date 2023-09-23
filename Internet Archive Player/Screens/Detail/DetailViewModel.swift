@@ -17,7 +17,7 @@ final class DetailViewModel: ObservableObject {
     @Published var audioFiles = [ArchiveFile]()
     @Published var movieFiles = [ArchiveFile]()
     @Published var playingFile: ArchiveFileEntity?
-    @Published var playlistArchiveFile: ArchiveFile?
+    @Published var playlistArchiveFiles: [ArchiveFile]?
     @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
     @Published var uiImage: UIImage?
 
