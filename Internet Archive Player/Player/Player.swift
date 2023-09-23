@@ -32,33 +32,32 @@ extension PlayerError: CustomStringConvertible {
 
 class Player: NSObject, ObservableObject {
 
-    static let shared = Player()
-
-    @Published var showPlayingDetailView = false
-
-    static var networkAlert = PassthroughSubject<Bool, Never>()
-
     public enum AdvanceDirection: Int {
         case forwards = 1
         case backwards = -1
     }
 
-    var mainPlaylist: PlaylistEntity? = nil
-    var favoritesPlaylist: PlaylistEntity? = nil
+    static let shared = Player()
+    static var networkAlert = PassthroughSubject<Bool, Never>()
+    static var mainListName = "Now Playing"
+    static var favoritesListName = "Favorites"
 
+    @Published var showPlayingDetailView = false
+    @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
+    @Published var favoriteItems: [ArchiveFileEntity] = [ArchiveFileEntity]()
+    @Published public var avPlayer: AVPlayer
     @Published public var playingFile: ArchiveFileEntity? {
         didSet {
             Home.showControlsPass.send(playingFile != nil)
             self.loadNowPlayingMediaArtwork()
         }
     }
+    @Published public var playerHeight: CGFloat = 160
+
+    var mainPlaylist: PlaylistEntity? = nil
+    var favoritesPlaylist: PlaylistEntity? = nil
 
     private var playingMediaType: MPNowPlayingInfoMediaType? = nil
-
-    @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
-    @Published var favoriteItems: [ArchiveFileEntity] = [ArchiveFileEntity]()
-
-    @Published public var avPlayer: AVPlayer
     public var nowPlayingSession: MPNowPlayingSession
 
     private var observing = false
@@ -75,9 +74,6 @@ class Player: NSObject, ObservableObject {
 
     private let playlistFetchController: NSFetchedResultsController<PlaylistEntity>
     private let favoritesFetchController: NSFetchedResultsController<PlaylistEntity>
-
-    static var mainListName = "Now Playing"
-    static var favoritesListName = "Favorites"
 
     override init() {
 

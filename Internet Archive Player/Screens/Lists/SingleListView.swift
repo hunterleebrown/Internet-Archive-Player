@@ -43,7 +43,7 @@ struct SingleListView: View {
         .navigationTitle(playlistEntity.name ?? "List")
         .safeAreaInset(edge: .bottom) {
             Spacer()
-                .frame(height: 160)
+                .frame(height: iaPlayer.playerHeight)
         }
     }
 

@@ -90,7 +90,7 @@ struct SearchFilters: View {
             .listStyle(PlainListStyle())
         }
         .offset(y:10)
-        .onChange(of: searchFilter) { newValue in
+        .onChange(of: searchFilter) { oldValue, newValue in
             if let val = newValue {
                 searchFiltersViewModel.collectionSelection = val
                 if let del = delegate {

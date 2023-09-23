@@ -43,12 +43,24 @@ struct DetailDescription: View {
                                 .bold()
                                 .multilineTextAlignment(.leading)
                                 .frame(alignment: .leading)
-
+                           
                             if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
                                 Text(artist)
                                     .foregroundColor(.black)
                                     .font(.subheadline)
                                     .multilineTextAlignment(.leading)
+                            }
+
+                            if let identifier = doc.identifier {
+                                HStack(alignment: .top, spacing: 5) {
+                                    Text("Identifier:")
+                                        .foregroundColor(.black)
+                                        .font(.caption)
+                                        .bold()
+                                    Text(identifier)
+                                        .foregroundColor(.black)
+                                        .font(.caption)
+                                }
                             }
 
                             if let publisher = doc.publisher, !publisher.isEmpty {
@@ -74,11 +86,15 @@ struct DetailDescription: View {
                                     .font(.caption)
                                     .multilineTextAlignment(.leading)
                             }
-                        }
-                }
 
-                    Spacer()
-                        .frame(height:44)
+                            if let identifier = doc.identifier {
+                                Link("View on archive.org", destination: URL(string: "https://archive.org/details/\(identifier)")!)
+                                    .foregroundColor(.fairyRed)
+                                    .font(.subheadline)
+                            }
+                        }
+                    }
+
 
                     Text(AttributedString(attString))
                         .textSelection(.enabled)
@@ -91,8 +107,6 @@ struct DetailDescription: View {
                 .foregroundColor(.black)
                 .frame(maxWidth:.infinity)
                 .padding(5)
-
-                Spacer()
             }
             .background(Color.white)
         }

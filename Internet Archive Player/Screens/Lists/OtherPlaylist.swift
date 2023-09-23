@@ -18,6 +18,7 @@ struct OtherPlaylist: View {
     var archiveFileEntities: [ArchiveFileEntity]?
     @ObservedObject var viewModel = OtherPlaylist.ViewModel()
     @State var showingNewPlaylist = false
+    @EnvironmentObject var iaPlayer: Player
 
     init(isPresented: Binding<Bool>, archiveFiles: [ArchiveFile]? = nil, archiveFileEntities: [ArchiveFileEntity]? = nil) {
         self._isPresented = isPresented
@@ -74,7 +75,7 @@ struct OtherPlaylist: View {
         }
         .safeAreaInset(edge: .bottom) {
             Spacer()
-                .frame(height: 160)
+                .frame(height: iaPlayer.playerHeight)
         }
     }
 }
@@ -89,7 +90,7 @@ extension OtherPlaylist {
 
         public func addFilesToPlaylist(archiveFiles: [ArchiveFile], playlist: PlaylistEntity) {
 
-            var sorted = archiveFiles.sorted{
+            let sorted = archiveFiles.sorted{
                 guard let track1 = Int($0.track ?? ""), let track2 = Int($1.track ?? "") else { return false}
                 return track1 < track2
             }
@@ -105,7 +106,7 @@ extension OtherPlaylist {
 
         public func addFilesToPlaylist(archiveEntityFiles: [ArchiveFileEntity], playlist: PlaylistEntity) {
 
-            var sorted = archiveEntityFiles.sorted{
+            let sorted = archiveEntityFiles.sorted{
                 guard let track1 = Int($0.track ?? ""), let track2 = Int($1.track ?? "") else { return false}
                 return track1 < track2
             }

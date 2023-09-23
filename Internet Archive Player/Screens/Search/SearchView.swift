@@ -35,7 +35,7 @@ struct SearchView: View {
                 .foregroundColor(.fairyRed)
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 20)
-                .onChange(of: viewModel.mediaType) { newValue in
+                .onChange(of: viewModel.mediaType) {
                     viewModel.search(query: viewModel.searchText, loadMore: false)
                 }
 

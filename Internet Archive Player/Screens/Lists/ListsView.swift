@@ -13,7 +13,7 @@ import CoreData
 
 struct ListsView: View {
     @StateObject var viewModel = ListsView.ViewModel()
-//    @State var showingNewPlaylist = false
+    @EnvironmentObject var iaPlayer: Player
 
     var body: some View {
         NavigationStack {
@@ -39,7 +39,7 @@ struct ListsView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 Spacer()
-                    .frame(height: 160)
+                    .frame(height: iaPlayer.playerHeight)
             }
         }
     }
