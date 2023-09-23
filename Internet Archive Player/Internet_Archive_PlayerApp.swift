@@ -16,7 +16,7 @@ struct Internet_Archive_PlayerApp: App {
             Home()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
-        .onChange(of: scenePhase) { _ in
+        .onChange(of: scenePhase) { 
             persistenceController.save()
         }
     }

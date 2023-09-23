@@ -43,15 +43,14 @@ struct Home: View {
                     CustomVideoPlayer()
                         .frame(height: showVideoPlayer ? 160 : 0 )
                         .zIndex(showVideoPlayer ? 1 : 0)
-//                        .padding(5)
-
                     PlayerControls()
                         .zIndex(showVideoPlayer ? 0 : 1)
                         .padding(5)
                 }
             }
+            // maxControlHeight ? 160 : 58
             .opacity(showControls ? 1 : 0)
-            .frame(maxWidth: 428, maxHeight: maxControlHeight ? 160 : 58, alignment: .top)
+            .frame(maxWidth: 428, maxHeight: iaPlayer.playerHeight, alignment: .top)
             .clipped()
             .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
                 .onEnded { value in
@@ -139,7 +138,7 @@ struct Home: View {
                 .safeAreaInset(edge: .bottom) {
                     VStack {
                         Spacer()
-                            .frame(height: showControls ? 200 : 0)
+                            .frame(height: showControls ? iaPlayer.playerHeight : 0)
                     }
                 }
 
@@ -165,6 +164,7 @@ struct Home: View {
             showNetworkAlert = true
         })
         .onReceive(Home.controlHeightPass, perform: { show in
+            iaPlayer.playerHeight = show ? 160 : 58
             withAnimation {
                 maxControlHeight = show
             }
@@ -189,7 +189,6 @@ struct Home: View {
                 showNetworkAlert = false
             }
         }
-
         .environmentObject(iaPlayer)
     }
 

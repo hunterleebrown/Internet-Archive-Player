@@ -38,6 +38,7 @@ struct DownloadReport {
         var id = UUID()
         var name: String
         var size: Int
+        var directoryPath: String
 
     }
 
@@ -73,6 +74,17 @@ class Downloader: NSObject {
             print("---> deleted local file: \(path.lastPathComponent)")
         } else {
             throw DownloaderError.fileDoesNotExist
+        }
+    }
+
+    public static func removeDownload(file: ArchiveFileEntity) throws {
+        if let url = file.workingUrl {
+            try Self.removeFile(at: url)
+            file.url = file.onlineUrl
+            PersistenceController.shared.save()
+            DispatchQueue.main.async {
+                Downloader.downloadedSubject.send(file)
+            }
         }
     }
 
@@ -138,8 +150,6 @@ class Downloader: NSObject {
     }
 
     static public func report() -> DownloadReport {
-        var totalFiles = 0
-        var totalDownloadSize = 0
         var dFiles = [DownloadReport.DownloadedFile]()
         do {
             let archivePath = Downloader.directory()
@@ -162,7 +172,7 @@ class Downloader: NSObject {
 //                        totalFiles = totalFiles + 1
                         if let fileSize = attributes[FileAttributeKey.size] as? Int {
 //                            totalDownloadSize = totalDownloadSize + fileSize
-                            dFiles.append(DownloadReport.DownloadedFile(name: file, size: fileSize))
+                            dFiles.append(DownloadReport.DownloadedFile(name: file, size: fileSize, directoryPath: dir))
                         }
                     }
                 }
@@ -170,10 +180,8 @@ class Downloader: NSObject {
         } catch {
             print("ERROR IN FILE FETCH -- or no contentsOfDirectoryAtPath  \(error)")
         }
-
         return DownloadReport(files: dFiles)
     }
-
 }
 
 extension Downloader: URLSessionTaskDelegate {
@@ -185,17 +193,7 @@ extension Downloader: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession,
                     downloadTask: URLSessionDownloadTask,
                     didFinishDownloadingTo location: URL) {
-        // check for and handle errors:
-           // * downloadTask.response should be an HTTPURLResponse with statusCode in 200..<299
-
            do {
-//               let documentsURL = try
-//                   FileManager.default.url(for: .documentDirectory,
-//                                           in: .userDomainMask,
-//                                           appropriateFor: nil,
-//                                           create: false)
-
-
                if let destinationUrl = downloadUrl {
                    guard let downloadDirectory = downloadDirectory else { throw DownloaderError.couldNotCreateDirectory }
                    if !FileManager.default.fileExists(atPath: downloadDirectory.path) {

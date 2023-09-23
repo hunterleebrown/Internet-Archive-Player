@@ -49,6 +49,11 @@ struct NewFavoritesView: View {
             }
             .listStyle(PlainListStyle())
             .tint(.fairyRed)
+            .safeAreaInset(edge: .bottom) {
+                Spacer()
+                    .frame(height: iaPlayer.playerHeight)
+            }
+
         }
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
@@ -58,11 +63,6 @@ struct NewFavoritesView: View {
         .onAppear() {
             viewModel.setUpSubscribers(iaPlayer)
             iaPlayer.sendPlayingFileForPlaylist()
-
-        }
-        .safeAreaInset(edge: .bottom) {
-            Spacer()
-                .frame(height: 160)
         }
     }
 

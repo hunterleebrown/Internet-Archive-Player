@@ -145,6 +145,20 @@ struct EntityFileView: View {
                                 Text("Download")
                             }
                             .frame(width: 44, height: 44)
+                        } else {
+                            Button(action: {
+                                do {
+                                    try Downloader.removeDownload(file: archiveFile)
+                                } catch let error {
+                                    print("Remove download error: \(error)")
+                                }
+                            }) {
+                                Image(systemName: "folder.badge.minus")
+                                    .aspectRatio(contentMode: .fill)
+                                    .foregroundColor(textColor)
+                                Text("Remove download")
+                            }
+                            .frame(width: 44, height: 44)
                         }
 
 
@@ -163,7 +177,7 @@ struct EntityFileView: View {
         .cornerRadius(5.0)
         .onReceive(Downloader.downloadedSubject) { file in
             guard file.id == archiveFile.id else { return }
-            showDownloadButton = false
+            showDownloadButton = !file.isLocalFile()
         }
         .onAppear() {
             showDownloadButton = !archiveFile.isLocalFile()

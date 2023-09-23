@@ -46,7 +46,6 @@ struct Detail: View {
                     .font(.headline)
                     .bold()
                     .foregroundColor(Color(.black))
-                //                    .frame(alignment: .center)
                     .multilineTextAlignment(.leading)
                     .padding(.top, 10)
                     .padding(.horizontal, 10)
@@ -218,8 +217,8 @@ struct Detail: View {
                 .padding(10)
             }
         }
-        .onChange(of: scrollOffset, perform: { scrollOfset in
-            let offset = scrollOfset + (self.hideNavigationBar ? 50 : 0) // note 1
+        .onChange(of: scrollOffset) { scrollOfset, newScrollOffset in
+            let offset = newScrollOffset + (self.hideNavigationBar ? 50 : 0) // note 1
             if offset > 25 {
                 DispatchQueue.main.async {
                     withAnimation(.easeIn(duration: 1), {
@@ -236,7 +235,7 @@ struct Detail: View {
                     })
                 }
             }
-        })
+        }
         .navigationBarHidden(hideNavigationBar)
         .background(
             ZStack (alignment: .top) {
@@ -311,7 +310,7 @@ struct Detail: View {
         })
         .safeAreaInset(edge: .bottom, content: {
             Spacer()
-                .frame(height: 160)
+                .frame(height: iaPlayer.playerHeight)
         })
     }
 

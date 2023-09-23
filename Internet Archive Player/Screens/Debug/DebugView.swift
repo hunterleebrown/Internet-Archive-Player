@@ -23,16 +23,26 @@ struct DebugView: View {
             }
             List{
                 ForEach(viewModel.report?.files ?? [], id: \.self) { downloadedFile in
-                    HStack(alignment: .top, spacing: 5){
-                        Text(downloadedFile.name)
+                    VStack(alignment: .leading) {
+                        Text(downloadedFile.directoryPath)
                             .font(.caption)
-                        Spacer()
-                        Text("\(downloadedFile.size)")
-                            .font(.caption)
+                            .bold()
+                            .frame(alignment: .leading)
+                        HStack(alignment: .top, spacing: 0){
+                            Text(downloadedFile.name)
+                                .font(.caption)
+                            Spacer()
+                            Text("\(downloadedFile.size)")
+                                .font(.caption)
+                        }
                     }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .frame(minHeight: 20)
+                    .listRowInsets(EdgeInsets())
+                    .padding(EdgeInsets())
                 }
+
             }
+            .environment(\.defaultMinListRowHeight, 20)
             .listStyle(PlainListStyle())
         }
         .onAppear(perform: {
