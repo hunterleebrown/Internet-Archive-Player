@@ -68,6 +68,12 @@ struct PlayerControls: View {
 
                     Spacer()
 
+                    PlayerButton(.hidePlay, CGSize(width: 20, height: 20)) {
+                        withAnimation{
+                            Home.showControlsPass.send(false)
+                        }
+                    }
+
                     PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 40, height: 40)) {
                         iaPlayer.didTapPlayButton()
                     }

@@ -19,7 +19,7 @@ enum PlayerButtonType: String {
     case listFill = "list.bullet.rectangle.portrait.fill"
     case tv = "tv.circle"
     case magnifyingGlass = "magnifyingGlass"
-
+    case hidePlay = "play.slash"
 }
 
 struct PlayerButton: View {
