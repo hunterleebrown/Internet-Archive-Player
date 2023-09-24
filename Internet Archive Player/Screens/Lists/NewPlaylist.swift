@@ -15,35 +15,40 @@ struct NewPlaylist: View {
     @StateObject var viewModel = NewPlaylist.ViewModel()
     @State private var name: String = ""
     @Binding var isPresented: Bool
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack {
-            HStack(alignment: .center) {
-                Image(systemName: "music.note.list")
-                    .font(.headline)
-                    .foregroundColor(.fairyRed)
-                Text("Create a new list")
-                    .font(.headline)
-                    .foregroundColor(.fairyRed)
-            }
-            .padding()
-            TextField("New list name", text: $name)
+        NavigationView {
+            VStack {
+                HStack(alignment: .center) {
+                    Image(systemName: "music.note.list")
+                        .font(.headline)
+                        .foregroundColor(.fairyRed)
+                    Text("Create a new list")
+                        .font(.headline)
+                        .foregroundColor(.fairyRed)
+                }
                 .padding()
-                .cornerRadius(10)
-                .onSubmit {
+                TextField("New list name", text: $name)
+                    .padding()
+                    .cornerRadius(10)
+                    .onSubmit {
+                        viewModel.createPlaylist(name: name)
+                        isPresented = false
+                        dismiss()
+                    }
+                Button("Create") {
                     viewModel.createPlaylist(name: name)
                     isPresented = false
+                    dismiss()
                 }
-            Button("Create") {
-                viewModel.createPlaylist(name: name)
-                isPresented = false
-            }
-            .buttonStyle(IAButton())
-            .padding()
-            Spacer()
+                .buttonStyle(IAButton())
+                .padding()
+                Spacer()
 
+            }
+            .padding()
         }
-        .padding()
     }
 }
 
@@ -61,8 +66,6 @@ extension NewPlaylist {
         }
 
         func createPlaylist(name: String) {
-            print(name)
-
             let newList = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
             newList.name = name
             PersistenceController.shared.save()
