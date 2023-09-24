@@ -38,11 +38,25 @@ struct Home: View {
     var body: some View {
         ZStack(alignment: .bottom) {
 
+
+
             VStack(spacing: 0) {
                 ZStack {
-                    CustomVideoPlayer()
-                        .frame(height: showVideoPlayer ? 160 : 0 )
-                        .zIndex(showVideoPlayer ? 1 : 0)
+                    ZStack(alignment: .topTrailing) {
+                        PlayerButton(.hidePlay, CGSize(width: 20, height: 20)) {
+                            withAnimation{
+                                Home.showControlsPass.send(false)
+                            }
+                        }
+                        .padding(.trailing, 20)
+                        .padding(.top, 40)
+                        .frame(width: 20, alignment: .trailing)
+                        .zIndex(5)
+
+                        CustomVideoPlayer()
+                            .frame(height: showVideoPlayer ? 160 : 0 )
+                    }
+                    .zIndex(showVideoPlayer ? 1 : 0)
                     PlayerControls()
                         .zIndex(showVideoPlayer ? 0 : 1)
                         .padding(5)
@@ -51,7 +65,7 @@ struct Home: View {
             // maxControlHeight ? 160 : 58
             .opacity(showControls ? 1 : 0)
             .frame(maxWidth: 428, maxHeight: iaPlayer.playerHeight, alignment: .top)
-            .clipped()
+//            .clipped()
             .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
                 .onEnded { value in
                     print(value.translation)
@@ -67,7 +81,29 @@ struct Home: View {
                     }
                 }
             )
-            .zIndex(showControls ? 1: 0)
+            .zIndex(showControls ? 3: 1)
+
+
+            if iaPlayer.playingFile != nil {
+                VStack(alignment: .trailing) {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            withAnimation {
+                                showControls.toggle()
+                            }
+                        }, label: {
+                            Image(systemName: "play")
+                                .foregroundColor(.fairyRed)
+                                .frame(maxWidth: 44, maxHeight: 44)
+                                .background(Color.fairyCream)
+                                .cornerRadius(10)
+                        })
+                    }
+                }
+                .padding(.trailing, 50)
+                .zIndex(showControls ? 0 : 3)
+            }
 
             NavigationStack {
                 VStack(spacing:0) {
@@ -144,6 +180,9 @@ struct Home: View {
 
                 .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
             }
+            .zIndex(1)
+
+
         }
         .onReceive(PlayerControls.showPlayingDetails) { file in
             withAnimation {
