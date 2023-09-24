@@ -27,7 +27,7 @@ struct OtherPlaylist: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 HStack {
                     Text("Add to playlist")
