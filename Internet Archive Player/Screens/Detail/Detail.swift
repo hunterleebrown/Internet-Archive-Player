@@ -169,18 +169,34 @@ struct Detail: View {
 
 
                         ForEach(self.viewModel.sortedAudioFiles(), id: \.self) { file in
-                            self.createFileView(file)
-                                .padding(.leading, 5.0)
-                                .padding(.trailing, 5.0)
-                                .onTapGesture {
-                                    do  {
-                                        try iaPlayer.checkDupes(archiveFile: file, list: iaPlayer.items, error: .alreadyOnPlaylist)
-                                    } catch PlayerError.alreadyOnPlaylist {
-                                        self.playlistErrorAlertShowing = true
-                                        return
-                                    } catch {}
-                                    iaPlayer.playFile(file)
-                                }
+                            HStack(alignment: .center, spacing: 5) {
+                                
+                                Image(systemName: PlayerButtonType.ear.rawValue)
+                                    .frame(width: 33, height: 33)
+                                    .background(Color.fairyRedAlpha)
+                                    .cornerRadius(10)
+                                    .foregroundColor(.fairyCreamAlpha)
+                                    .onTouchDownUp { pressed in
+                                        if pressed {
+                                            viewModel.previewAudio(file: file)
+                                        } else {
+                                            viewModel.stopPreview()
+                                        }
+                                    }
+
+                                self.createFileView(file)
+                                    .padding(.leading, 5.0)
+                                    .padding(.trailing, 5.0)
+                                    .onTapGesture {
+                                        do  {
+                                            try iaPlayer.checkDupes(archiveFile: file, list: iaPlayer.items, error: .alreadyOnPlaylist)
+                                        } catch PlayerError.alreadyOnPlaylist {
+                                            self.playlistErrorAlertShowing = true
+                                            return
+                                        } catch {}
+                                        iaPlayer.playFile(file)
+                                    }
+                            }
                         }
                     }
 
@@ -280,6 +296,7 @@ struct Detail: View {
         .onAppear() {
             self.viewModel.getArchiveDoc(identifier: self.identifier)
             self.viewModel.setSubscribers(iaPlayer)
+            self.viewModel.passInPlayer(iaPlayer: iaPlayer)
         }
         .sheet(isPresented: $descriptionExpanded) {
             if let doc = self.viewModel.archiveDoc {
