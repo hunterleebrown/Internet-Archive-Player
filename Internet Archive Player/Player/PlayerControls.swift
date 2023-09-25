@@ -128,20 +128,6 @@ struct PlayerControls: View {
         .padding(5)
         .background(
             backgroundColor
-
-            //            AsyncImage (
-            //                url: viewModel.playingFile?.iconUrl,
-            //                content: { image in
-            //                    image
-            //                        .resizable()
-            //                        .aspectRatio(contentMode: .fill)
-            //                },
-            //                placeholder: {
-            //                    Color.black
-            //                })
-            //            .overlay(Rectangle().fill(Color.white.opacity(0.3)), alignment: .topTrailing)
-            //            .clipped()
-
         )
         .coordinateSpace(name: "playerControls")
         .cornerRadius(10)
