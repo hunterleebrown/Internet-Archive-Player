@@ -10,8 +10,10 @@ import SwiftUI
 import iaAPI
 import UIKit
 import Combine
+import AVKit
 
 final class DetailViewModel: ObservableObject {
+    private var iaPlayer: Player?
     let service: PlayerArchiveService
     @Published var archiveDoc: ArchiveMetaData? = nil
     @Published var audioFiles = [ArchiveFile]()
@@ -21,10 +23,16 @@ final class DetailViewModel: ObservableObject {
     @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
     @Published var uiImage: UIImage?
 
+    var player: AVPlayer? = nil
+
     private var cancellables = Set<AnyCancellable>()
 
     init() {
         self.service = PlayerArchiveService()
+    }
+
+    public func passInPlayer(iaPlayer: Player) {
+        self.iaPlayer = iaPlayer
     }
 
     public func getArchiveDoc(identifier: String){
@@ -112,5 +120,23 @@ final class DetailViewModel: ObservableObject {
             }
             return false
         }
+    }
+
+    public func previewAudio(file: ArchiveFile) {
+        guard let url = file.url else { return }
+        let item = AVPlayerItem(url: url)
+        self.player = AVPlayer(playerItem: item)
+        if let player = self.player {
+            if let iaPlayer = self.iaPlayer {
+                iaPlayer.avPlayer.pause()
+            }
+            player.play()
+        }
+    }
+
+    public func stopPreview() {
+        guard let player = self.player else { return }
+        player.pause()
+        self.player = nil
     }
 }
