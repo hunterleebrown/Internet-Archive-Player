@@ -37,9 +37,6 @@ struct Home: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-
-
-
             VStack(spacing: 0) {
                 ZStack {
                     ZStack(alignment: .topTrailing) {
@@ -62,10 +59,9 @@ struct Home: View {
                         .padding(5)
                 }
             }
-            // maxControlHeight ? 160 : 58
             .opacity(showControls ? 1 : 0)
             .frame(maxWidth: 428, maxHeight: iaPlayer.playerHeight, alignment: .top)
-//            .clipped()
+            .clipped()
             .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
                 .onEnded { value in
                     print(value.translation)
