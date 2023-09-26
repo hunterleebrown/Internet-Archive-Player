@@ -41,25 +41,24 @@ struct Detail: View {
     var body: some View {
         ObservableScrollView(scrollOffset: $scrollOffset) {
             Spacer().frame(height: 300)
-            VStack(alignment: .leading, spacing:0) {
+            VStack(alignment: .leading, spacing:5) {
                 Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
                     .font(.headline)
                     .bold()
                     .foregroundColor(Color(.black))
-                    .multilineTextAlignment(.leading)
+                    .multilineTextAlignment(.center)
                     .padding(.top, 10)
                     .padding(.horizontal, 10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .center)
 
                 if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
-                    HStack(alignment: .top) {
                         Text(artist)
                             .font(.caption)
-                            .multilineTextAlignment(.leading)
+                            .multilineTextAlignment(.center)
                             .foregroundColor(.black)
                             .padding(.horizontal, 10)
+                            .frame(maxWidth: .infinity, alignment: .center)
 
-                    }
                 }
 
                 VStack(alignment: .center) {
