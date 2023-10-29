@@ -97,7 +97,7 @@ struct DetailDescription: View {
 
 
                     Text(AttributedString(attString))
-                        .textSelection(.enabled)
+//                        .textSelection(.enabled)
                         .background(Color.white)
                         .padding(10)
 

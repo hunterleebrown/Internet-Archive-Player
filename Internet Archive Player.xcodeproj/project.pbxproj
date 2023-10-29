@@ -14,6 +14,20 @@
 		5A33A4412A59CCD50010C6FA /* BetterDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A33A4402A59CCD50010C6FA /* BetterDetail.swift */; };
 		5A35A6D92ABBC34000A127D6 /* ViewBuilders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A35A6D82ABBC34000A127D6 /* ViewBuilders.swift */; };
 		5A35A6DC2ABBE8A800A127D6 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A35A6DB2ABBE8A800A127D6 /* DebugView.swift */; };
+		5A3AAA6D2AEDEAC6004A15BC /* Internet_Archive_Player_tvOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3AAA6C2AEDEAC6004A15BC /* Internet_Archive_Player_tvOSApp.swift */; };
+		5A3AAA6F2AEDEAC6004A15BC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3AAA6E2AEDEAC6004A15BC /* ContentView.swift */; };
+		5A3AAA712AEDEAC6004A15BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A3AAA702AEDEAC6004A15BC /* Assets.xcassets */; };
+		5A3AAA742AEDEAC6004A15BC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A3AAA732AEDEAC6004A15BC /* Preview Assets.xcassets */; };
+		5A3AAA762AEDEAC6004A15BC /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3AAA752AEDEAC6004A15BC /* Persistence.swift */; };
+		5A3AAA792AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5A3AAA772AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodeld */; };
+		5A3AAA802AEDFC47004A15BC /* TVSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3AAA7F2AEDFC47004A15BC /* TVSearchView.swift */; };
+		5A3AAA822AEDFEAF004A15BC /* PlayerArchiveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE1ACD512812FA8B00EF968A /* PlayerArchiveService.swift */; };
+		5A3AAA842AEDFF36004A15BC /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 5A3AAA832AEDFF36004A15BC /* iaAPI */; };
+		5A3AAA862AEDFFB0004A15BC /* TVDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3AAA852AEDFFB0004A15BC /* TVDetail.swift */; };
+		5A3AAA872AEE0922004A15BC /* IAMediaUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED06A279B603700FB2E6D /* IAMediaUtils.swift */; };
+		5A3AAA8C2AEE0AF3004A15BC /* ArchiveFile+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3AAA8B2AEE0AF3004A15BC /* ArchiveFile+Extensions.swift */; };
+		5A3AAA8D2AEE1622004A15BC /* AttString+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D5A2A53227C00DCDF95 /* AttString+Extension.swift */; };
+		5A3AAA8E2AEE18C0004A15BC /* DetailDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE69CD12A846DBE0062CC5D /* DetailDescription.swift */; };
 		5A4151B827B0FDF8007A3623 /* IAReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B727B0FDF8007A3623 /* IAReachability.swift */; };
 		5A4151BA27B0FEAA007A3623 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151B927B0FEAA007A3623 /* Player.swift */; };
 		5A4151BD27B3645E007A3623 /* Inject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4151BC27B3645E007A3623 /* Inject.swift */; };
@@ -83,6 +97,18 @@
 		5A33A4402A59CCD50010C6FA /* BetterDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetterDetail.swift; sourceTree = "<group>"; };
 		5A35A6D82ABBC34000A127D6 /* ViewBuilders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewBuilders.swift; sourceTree = "<group>"; };
 		5A35A6DB2ABBE8A800A127D6 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
+		5A3AAA6A2AEDEAC6004A15BC /* Internet Archive Player tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Internet Archive Player tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A3AAA6C2AEDEAC6004A15BC /* Internet_Archive_Player_tvOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet_Archive_Player_tvOSApp.swift; sourceTree = "<group>"; };
+		5A3AAA6E2AEDEAC6004A15BC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		5A3AAA702AEDEAC6004A15BC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5A3AAA732AEDEAC6004A15BC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5A3AAA752AEDEAC6004A15BC /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		5A3AAA782AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Internet_Archive_Player_tvOS.xcdatamodel; sourceTree = "<group>"; };
+		5A3AAA7A2AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Internet_Archive_Player_tvOS.entitlements; sourceTree = "<group>"; };
+		5A3AAA7B2AEDEAC6004A15BC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5A3AAA7F2AEDFC47004A15BC /* TVSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVSearchView.swift; sourceTree = "<group>"; };
+		5A3AAA852AEDFFB0004A15BC /* TVDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVDetail.swift; sourceTree = "<group>"; };
+		5A3AAA8B2AEE0AF3004A15BC /* ArchiveFile+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveFile+Extensions.swift"; sourceTree = "<group>"; };
 		5A4151B727B0FDF8007A3623 /* IAReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAReachability.swift; sourceTree = "<group>"; };
 		5A4151B927B0FEAA007A3623 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		5A4151BC27B3645E007A3623 /* Inject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inject.swift; sourceTree = "<group>"; };
@@ -135,6 +161,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5A3AAA672AEDEAC6004A15BC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A3AAA842AEDFF36004A15BC /* iaAPI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5ADED032279B56EE00FB2E6D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -174,6 +208,55 @@
 				5A35A6DB2ABBE8A800A127D6 /* DebugView.swift */,
 			);
 			path = Debug;
+			sourceTree = "<group>";
+		};
+		5A3AAA632AEDEA55004A15BC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5A3AAA6B2AEDEAC6004A15BC /* Internet Archive Player tvOS */ = {
+			isa = PBXGroup;
+			children = (
+				5A3AAA8A2AEE0AE0004A15BC /* Extensions */,
+				5A3AAA812AEDFC4D004A15BC /* Views */,
+				5A3AAA6C2AEDEAC6004A15BC /* Internet_Archive_Player_tvOSApp.swift */,
+				5A3AAA702AEDEAC6004A15BC /* Assets.xcassets */,
+				5A3AAA752AEDEAC6004A15BC /* Persistence.swift */,
+				5A3AAA7A2AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.entitlements */,
+				5A3AAA7B2AEDEAC6004A15BC /* Info.plist */,
+				5A3AAA772AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodeld */,
+				5A3AAA722AEDEAC6004A15BC /* Preview Content */,
+			);
+			path = "Internet Archive Player tvOS";
+			sourceTree = "<group>";
+		};
+		5A3AAA722AEDEAC6004A15BC /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				5A3AAA732AEDEAC6004A15BC /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		5A3AAA812AEDFC4D004A15BC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5A3AAA6E2AEDEAC6004A15BC /* ContentView.swift */,
+				5A3AAA7F2AEDFC47004A15BC /* TVSearchView.swift */,
+				5A3AAA852AEDFFB0004A15BC /* TVDetail.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5A3AAA8A2AEE0AE0004A15BC /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				5A3AAA8B2AEE0AF3004A15BC /* ArchiveFile+Extensions.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		5A4151BB27B3644E007A3623 /* Utility */ = {
@@ -225,7 +308,9 @@
 				5ADED037279B56EE00FB2E6D /* Internet Archive Player */,
 				5ADED048279B56F000FB2E6D /* Internet Archive PlayerTests */,
 				5ADED052279B56F000FB2E6D /* Internet Archive PlayerUITests */,
+				5A3AAA6B2AEDEAC6004A15BC /* Internet Archive Player tvOS */,
 				5ADED036279B56EE00FB2E6D /* Products */,
+				5A3AAA632AEDEA55004A15BC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -235,6 +320,7 @@
 				5ADED035279B56EE00FB2E6D /* ia-player.app */,
 				5ADED045279B56F000FB2E6D /* Internet Archive PlayerTests.xctest */,
 				5ADED04F279B56F000FB2E6D /* Internet Archive PlayerUITests.xctest */,
+				5A3AAA6A2AEDEAC6004A15BC /* Internet Archive Player tvOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -399,6 +485,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5A3AAA692AEDEAC6004A15BC /* Internet Archive Player tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A3AAA7C2AEDEAC6004A15BC /* Build configuration list for PBXNativeTarget "Internet Archive Player tvOS" */;
+			buildPhases = (
+				5A3AAA662AEDEAC6004A15BC /* Sources */,
+				5A3AAA672AEDEAC6004A15BC /* Frameworks */,
+				5A3AAA682AEDEAC6004A15BC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Internet Archive Player tvOS";
+			packageProductDependencies = (
+				5A3AAA832AEDFF36004A15BC /* iaAPI */,
+			);
+			productName = "Internet Archive Player tvOS";
+			productReference = 5A3AAA6A2AEDEAC6004A15BC /* Internet Archive Player tvOS.app */;
+			productType = "com.apple.product-type.application";
+		};
 		5ADED034279B56EE00FB2E6D /* Internet Archive Player */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5ADED059279B56F000FB2E6D /* Build configuration list for PBXNativeTarget "Internet Archive Player" */;
@@ -462,9 +568,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1320;
+				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1320;
 				TargetAttributes = {
+					5A3AAA692AEDEAC6004A15BC = {
+						CreatedOnToolsVersion = 15.0.1;
+					};
 					5ADED034279B56EE00FB2E6D = {
 						CreatedOnToolsVersion = 13.2.1;
 					};
@@ -497,11 +606,21 @@
 				5ADED034279B56EE00FB2E6D /* Internet Archive Player */,
 				5ADED044279B56F000FB2E6D /* Internet Archive PlayerTests */,
 				5ADED04E279B56F000FB2E6D /* Internet Archive PlayerUITests */,
+				5A3AAA692AEDEAC6004A15BC /* Internet Archive Player tvOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5A3AAA682AEDEAC6004A15BC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A3AAA742AEDEAC6004A15BC /* Preview Assets.xcassets in Resources */,
+				5A3AAA712AEDEAC6004A15BC /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5ADED033279B56EE00FB2E6D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -530,6 +649,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5A3AAA662AEDEAC6004A15BC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A3AAA8C2AEE0AF3004A15BC /* ArchiveFile+Extensions.swift in Sources */,
+				5A3AAA8E2AEE18C0004A15BC /* DetailDescription.swift in Sources */,
+				5A3AAA872AEE0922004A15BC /* IAMediaUtils.swift in Sources */,
+				5A3AAA762AEDEAC6004A15BC /* Persistence.swift in Sources */,
+				5A3AAA802AEDFC47004A15BC /* TVSearchView.swift in Sources */,
+				5A3AAA862AEDFFB0004A15BC /* TVDetail.swift in Sources */,
+				5A3AAA6F2AEDEAC6004A15BC /* ContentView.swift in Sources */,
+				5A3AAA8D2AEE1622004A15BC /* AttString+Extension.swift in Sources */,
+				5A3AAA792AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodeld in Sources */,
+				5A3AAA6D2AEDEAC6004A15BC /* Internet_Archive_Player_tvOSApp.swift in Sources */,
+				5A3AAA822AEDFEAF004A15BC /* PlayerArchiveService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5ADED031279B56EE00FB2E6D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -612,6 +749,77 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		5A3AAA7D2AEDEAC6004A15BC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = "Internet Archive Player tvOS/Internet_Archive_Player_tvOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Internet Archive Player tvOS/Preview Content\"";
+				DEVELOPMENT_TEAM = YB9HQM8F84;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Internet Archive Player tvOS/Info.plist";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "hunterleebrown.Internet-Archive-Player-tvOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+		5A3AAA7E2AEDEAC6004A15BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = "Internet Archive Player tvOS/Internet_Archive_Player_tvOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Internet Archive Player tvOS/Preview Content\"";
+				DEVELOPMENT_TEAM = YB9HQM8F84;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Internet Archive Player tvOS/Info.plist";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "hunterleebrown.Internet-Archive-Player-tvOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Release;
+		};
 		5ADED057279B56F000FB2E6D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -882,6 +1090,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5A3AAA7C2AEDEAC6004A15BC /* Build configuration list for PBXNativeTarget "Internet Archive Player tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A3AAA7D2AEDEAC6004A15BC /* Debug */,
+				5A3AAA7E2AEDEAC6004A15BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		5ADED030279B56EE00FB2E6D /* Build configuration list for PBXProject "Internet Archive Player" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -937,9 +1154,24 @@
 			package = 5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */;
 			productName = iaAPI;
 		};
+		5A3AAA832AEDFF36004A15BC /* iaAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5A305F502807BF5E00735FAA /* XCRemoteSwiftPackageReference "iaAPI" */;
+			productName = iaAPI;
+		};
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
+		5A3AAA772AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				5A3AAA782AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodel */,
+			);
+			currentVersion = 5A3AAA782AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodel */;
+			path = Internet_Archive_Player_tvOS.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
 		5AC10D59281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
