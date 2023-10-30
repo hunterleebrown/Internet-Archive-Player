@@ -13,19 +13,7 @@ struct Internet_Archive_Player_tvOSApp: App {
 
     var body: some Scene {
         WindowGroup {
-//            TabView {
-//                ContentView()
-//                    .environment(\.managedObjectContext, persistenceController.container.viewContext)
-//                    .tabItem {
-//                        Label("Yours", systemImage: "list.bullet")
-//                    }
-                TVSearchView()
-                    .environment(\.managedObjectContext, persistenceController.container.viewContext)
-//                    .tabItem {
-//                        Label("Search", systemImage: "magnifyingglass")
-//                    }
-
-//            }
+            TVSearchView()
         }
     }
 }

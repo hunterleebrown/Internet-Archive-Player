@@ -86,12 +86,13 @@ struct DetailDescription: View {
                                     .font(.caption)
                                     .multilineTextAlignment(.leading)
                             }
-
+                            #if !os(tvOS)
                             if let identifier = doc.identifier {
                                 Link("View on archive.org", destination: URL(string: "https://archive.org/details/\(identifier)")!)
                                     .foregroundColor(.fairyRed)
                                     .font(.subheadline)
                             }
+                            #endif
                         }
                     }
 

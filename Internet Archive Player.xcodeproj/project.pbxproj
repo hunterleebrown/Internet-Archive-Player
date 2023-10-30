@@ -53,6 +53,7 @@
 		5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC53279CCED100495070 /* PlayerButton.swift */; };
 		5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC55279CDE2100495070 /* AirPlayButton.swift */; };
 		5AD6BC58279CF31400495070 /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC57279CF31400495070 /* Playlist.swift */; };
+		5ADB8AD02AEF23DC0034B93B /* ArchiveMetaData+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */; };
 		5ADED039279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */; };
 		5ADED03D279B56F000FB2E6D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5ADED03C279B56F000FB2E6D /* Assets.xcassets */; };
 		5ADED040279B56F000FB2E6D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5ADED03F279B56F000FB2E6D /* Preview Assets.xcassets */; };
@@ -662,6 +663,7 @@
 				5A3AAA6F2AEDEAC6004A15BC /* ContentView.swift in Sources */,
 				5A3AAA8D2AEE1622004A15BC /* AttString+Extension.swift in Sources */,
 				5A3AAA792AEDEAC6004A15BC /* Internet_Archive_Player_tvOS.xcdatamodeld in Sources */,
+				5ADB8AD02AEF23DC0034B93B /* ArchiveMetaData+Extension.swift in Sources */,
 				5A3AAA6D2AEDEAC6004A15BC /* Internet_Archive_Player_tvOSApp.swift in Sources */,
 				5A3AAA822AEDFEAF004A15BC /* PlayerArchiveService.swift in Sources */,
 			);

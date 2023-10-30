@@ -14,54 +14,60 @@ struct TVSearchView: View {
     @State private var searchText = ""
     @StateObject var viewModel = TVSearchView.ViewModel()
 
+    let columns = [
+        GridItem(.fixed(400)),
+        GridItem(.fixed(400)),
+        GridItem(.fixed(400)),
+        GridItem(.fixed(400))
+    ]
 
     var body: some View {
-        NavigationView {
-
-
-            List{
-                ForEach(viewModel.items, id: \.self) { doc in
-                    NavigationLink(destination: TVDetail(doc: doc)) {
-                        HStack {
-                         
-                            AsyncImage(url: doc.iconUrl, transaction: Transaction(animation: .spring())) { phase in
-                                switch phase {
-                                case .empty:
-                                    Color.clear
-
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFit()
-                                case .failure(_):
-                                    EmptyView()
-
-                                @unknown default:
-                                    EmptyView()
+        NavigationStack {
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 20) {
+                    ForEach(viewModel.items, id: \.self) { doc in
+                        NavigationLink(destination: TVDetail(doc: doc)) {
+                            VStack(spacing: 0) {
+                                VStack(alignment: .leading, spacing: 0) {
+                                    Text(doc.archiveTitle ?? "")
+                                        .font(.caption)
+                                        .multilineTextAlignment(.leading)
+                                    
+                                    Text(doc.formatDateString() ?? "")
+                                        .font(.system(size: 20))
                                 }
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.black.opacity(0.55))
+                                .cornerRadius(10)
                             }
-                            .frame(height: 100, alignment: .center)
-
-                            Text(doc.archiveTitle ?? "")
-                                .onAppear {
-                                    if doc == viewModel.items.last {
-                                        viewModel.search(query: viewModel.searchText, loadMore: true)
+                            .frame(width: 300, height: 250, alignment: .bottomLeading)
+                            .background(
+                                AsyncImage(url: doc.iconUrl, transaction: Transaction(animation: .spring())) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        Color.clear
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                    case .failure(_):
+                                        EmptyView()
+                                    @unknown default:
+                                        EmptyView()
                                     }
                                 }
+                            )
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5))
-                    .listRowBackground(Color.clear)
                 }
             }
-            .listStyle(PlainListStyle())
             .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
             .onChange(of: viewModel.searchText) {
                 viewModel.search(query: viewModel.searchText, collection: nil, loadMore: false)
             }
-
         }
-
     }
 }
 
@@ -98,12 +104,12 @@ extension TVSearchView {
         init() {
             self.service = PlayerArchiveService()
 
-//            $searchText
-//                .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
-//                .sink(receiveValue: { [weak self] value in
-//                    self?.searchText = value
-//                })
-//                .store(in: &bag)
+            //            $searchText
+            //                .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
+            //                .sink(receiveValue: { [weak self] value in
+            //                    self?.searchText = value
+            //                })
+            //                .store(in: &bag)
         }
 
         func search(query: String, collection:String? = nil, loadMore: Bool) {
