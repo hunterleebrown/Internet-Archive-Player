@@ -23,120 +23,156 @@ struct TVDetail: View {
 
     var body: some View {
         NavigationView {
-            HStack(alignment: .top, spacing:20) {
-                VStack(alignment: .leading, spacing:10) {
-                    HStack(alignment: .top, spacing: 20) {
+            VStack(alignment: .leading, spacing:10) {
+                HStack(alignment: .center, spacing: 50) {
 
-                        Button {
-                            self.presentation.wrappedValue.dismiss()
-
-                        } label: {
-                            Image(systemName: "chevron.left")
-                        }
-
+                    VStack(alignment: .leading) {
                         Text(doc.archiveTitle ?? "")
                             .font(.largeTitle)
+                            .lineLimit(3)
                             .multilineTextAlignment(.leading)
-                            .frame(alignment: .center)
-                    }
-                    .frame(alignment: .topLeading)
-
-                    if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
-                        Text(artist)
-                            .font(.caption)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 10)
                             .frame(alignment: .leading)
 
-                    }
-
-
-                    if (self.viewModel.archiveDoc?.description) != nil {
-                        NavigationLink {
-                            if let goodDoc = viewModel.archiveDoc {
-                                DetailDescription(doc: goodDoc)
-                            }
-                        } label: {
-                            Image(systemName: "info.circle")
-                                .font(.largeTitle)
-                                .tint(.fairyRed)
-                                .padding(10)
+                        if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
+                            Text(artist)
+                                .font(.caption)
+                                .lineLimit(10)
+                                .multilineTextAlignment(.leading)
+                                .frame(alignment: .leading)
                         }
                     }
+                    .padding(30)
+                    .shadow(radius: 10)
+//                    .background(Color.black)
+                    .cornerRadius(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
 
-                    if self.viewModel.movieFiles.count > 0 {
-                        Text("Movies")
-                            .font(.subheadline)
-                            .bold()
-                            .foregroundColor(.black)
-                            .padding(5)
-                            .background(
-                                RoundedRectangle(
-                                    cornerRadius: 5.0,
-                                    style: .continuous
-                                )
-                                .fill(Color.white.opacity(0.5))
-                            )
-                        List {
-                            ForEach(self.viewModel.movieFiles, id: \.self) { file in
+                HStack(alignment: .top, spacing: 100) {
+                    AsyncImage(url: imageUrl, transaction: Transaction(animation: .spring())) { phase in
+                        switch phase {
+                        case .empty:
+                            Color.clear
 
-                                NavigationLink {
-                                    var player = AVPlayer(url: file.url!)
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .clipped()
+                                .cornerRadius(10)
 
-                                    VideoPlayer(player: player)
-                                        .ignoresSafeArea()
-                                        .onAppear() {
-                                            player.play()
-                                        }
-                                        .onDisappear() {
-                                            player.pause()
-                                        }
-                                } label: {
-                                    Text(file.displayTitle)
-                                        .padding(.leading, 5.0)
-                                        .padding(.trailing, 5.0)
-                                        .frame(alignment: .leading)
-                                        .multilineTextAlignment(.leading)
+                        case .failure(_):
+                            EmptyView()
+
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                    .frame(width:800, alignment: .leading)
+
+                    VStack(alignment: .leading) {
+
+                        if (self.viewModel.archiveDoc?.description) != nil {
+                            NavigationLink {
+                                if let goodDoc = viewModel.archiveDoc {
+                                    DetailDescription(doc: goodDoc)
+                                }
+                            } label: {
+                                Text("Description")
+                            }
+                        }
+
+                        Divider()
+
+                        if self.viewModel.movieFiles.count > 0 {
+                            Text("Files")
+                                .font(.subheadline)
+                                .bold()
+                                .foregroundColor(.white)
+                                .padding(5)
+
+                            List {
+                                ForEach(self.viewModel.movieFiles, id: \.self) { file in
+
+                                    NavigationLink {
+                                        let player = AVPlayer(url: file.url!)
+
+                                        VideoPlayer(player: player)
+                                            .ignoresSafeArea()
+                                            .onAppear() {
+                                                player.play()
+                                            }
+                                            .onDisappear() {
+                                                player.pause()
+                                            }
+                                    } label: {
+                                        Text(file.displayTitle)
+                                            .padding(.leading, 5.0)
+                                            .padding(.trailing, 5.0)
+                                            .frame(alignment: .leading)
+                                            .multilineTextAlignment(.leading)
+                                            .foregroundStyle(Color.fairyCream)
+
+                                    }
+                                    .listRowBackground(Color.fairyRed)
 
                                 }
                             }
-                        }
-                        .listStyle(PlainListStyle())
-                    }
-
-                    Spacer()
-
-
-
-
-                }
-
-                AsyncImage(url: imageUrl, transaction: Transaction(animation: .spring())) { phase in
-                    switch phase {
-                    case .empty:
-                        Color.clear
-
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .clipped()
                             .cornerRadius(10)
-
-                    case .failure(_):
-                        EmptyView()
-
-                    @unknown default:
-                        EmptyView()
+                        }
                     }
                 }
-                .frame(width:800)
-                .cornerRadius(10)
+                .frame(height: 500)
 
+                if let identifier = doc.identifier {
+                    HStack(alignment: .top, spacing: 5) {
+                        Text("Identifier:")
+                            .font(.caption)
+                            .bold()
+                        Text(identifier)
+                            .font(.caption)
+                    }
+                }
+
+                if let publisher = doc.publisher, !publisher.isEmpty {
+                    HStack(alignment: .top, spacing: 5) {
+                        Text("Publisher:")
+                            .font(.caption)
+                            .bold()
+                        Text(publisher.joined(separator: ", "))
+                            .font(.caption)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+
+                HStack(alignment: .top, spacing: 5) {
+                    Text("Collection:")
+                        .font(.caption)
+                        .bold()
+                    Text(doc.collection.joined(separator: ", "))
+                        .font(.caption)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer()
             }
-            .padding(50)
-            .frame(alignment: .topLeading)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(
+                        stops: [
+                            .init(color: .fairyRed, location: 0),
+                            .init(color: .fairyRed.opacity(0.75), location: 0.33),
+                            .init(color: .fairyRed.opacity(0.5), location: 0.66),
+                            .init(color: .fairyRed.opacity(0.25), location: 1),
+                        ]
+                    ),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .edgesIgnoringSafeArea(.all)
 
+            )
+            .frame(alignment: .topLeading)
         }
         .onReceive(TVDetail.backgroundPass) { url in
             withAnimation(.linear(duration: 0.3)) {
