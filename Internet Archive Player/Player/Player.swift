@@ -296,13 +296,17 @@ class Player: NSObject, ObservableObject {
     }
 
     // This should only be called by the playlist
-    public func playFile(_ archiveFileEntity: ArchiveFileEntity){
+    public func playFile(_ archiveFileEntity: ArchiveFileEntity, newItems: [ArchiveFileEntity]? = nil){
 
         if archiveFileEntity.isLocalFile() {
             guard archiveFileEntity.doesLocalFileExist() else {
                 // Alert user the local file doesn't exist, do they want to play it online?
                 return
             }
+        }
+
+        if let its = newItems {
+            self.items = its
         }
 
         self.fileTitle = archiveFileEntity.title ?? archiveFileEntity.name

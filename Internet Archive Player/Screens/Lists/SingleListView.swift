@@ -28,7 +28,7 @@ struct SingleListView: View {
                                ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .onTapGesture {
-                    iaPlayer.playFile(archiveFile)
+                    iaPlayer.playFile(archiveFile, newItems: playlistEntity.files?.array as? [ArchiveFileEntity] ?? [])
                 }
             }
             .onDelete(perform: { indexSet in
