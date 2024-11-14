@@ -105,14 +105,38 @@ struct PlayerControls: View {
 
                 Spacer()
 
-                PlayerButton(.backwards) {
+                PlayerButton(.backwards)  {
                     iaPlayer.advancePlayer(.backwards)
                 }
 
                 Spacer()
 
+                PlayerButton(.bb) {
+                }
+                .onTouchDownUp { pressed in
+                    if pressed {
+                        iaPlayer.seek(forward: false)
+                    } else {
+                        iaPlayer.stopSeeking()
+                    }
+                }
+                
+                Spacer()
+
                 AirPlayButton()
                     .frame(width: 44, height: 44)
+
+                Spacer()
+
+                PlayerButton(.ff) {
+                }
+                .onTouchDownUp { pressed in
+                    if pressed {
+                        iaPlayer.seek(forward: true)
+                    } else {
+                        iaPlayer.stopSeeking()
+                    }
+                }
 
                 Spacer()
 

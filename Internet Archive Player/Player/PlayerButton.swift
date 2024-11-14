@@ -13,6 +13,8 @@ enum PlayerButtonType: String {
     case play = "play.circle"
     case backwards = "backward.end.fill"
     case forwards = "forward.end.fill"
+    case ff = "forward.fill"
+    case bb = "backward.fill"
     case pause = "pause.circle"
     case expand = "arrow.up.left.and.arrow.down.right"
     case list = "list.bullet.rectangle.portrait"
