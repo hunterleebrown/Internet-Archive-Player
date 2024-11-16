@@ -54,6 +54,12 @@ class Player: NSObject, ObservableObject {
     }
     @Published public var playerHeight: CGFloat = 160
 
+    var playingPlaylist: PlaylistEntity? = nil {
+        didSet {
+            self.items = playingPlaylist?.files?.compactMap { $0 as? ArchiveFileEntity } ?? []
+        }
+    }
+
     var mainPlaylist: PlaylistEntity? = nil
     var favoritesPlaylist: PlaylistEntity? = nil
 
@@ -188,7 +194,8 @@ class Player: NSObject, ObservableObject {
         } catch (let error) {
             throw error
         }
-        self.playFile(archiveFileEntity)
+        guard let list = mainPlaylist else { return }
+        self.playFileFromPlaylist(archiveFileEntity, playlist: list)
     }
 
     public func appendPlaylistItem(archiveFileEntity: ArchiveFileEntity) throws {
@@ -280,11 +287,12 @@ class Player: NSObject, ObservableObject {
             NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
         }
 
-        if let playingFile = playingFile, let index = items.firstIndex(of: playingFile) {
-            guard items.indices.contains(index + 1) else { return }
-            playFile(items[index + 1])
-        }
+        guard let list = playingPlaylist, let files = self.playingPlaylist?.files as? [ArchiveFileEntity] else { return }
 
+        if let playingFile = playingFile, let index = files.firstIndex(of: playingFile) {
+            guard items.indices.contains(index + 1) else { return }
+            playFileFromPlaylist(items[index + 1], playlist: list)
+        }
     }
 
     public func playFile(_ archiveFile: ArchiveFile){
@@ -292,21 +300,17 @@ class Player: NSObject, ObservableObject {
         let archiveFileEntity = archiveFile.archiveFileEntity()
         playlist.addToFiles(archiveFileEntity)
         PersistenceController.shared.save()
-        playFile(archiveFileEntity)
+        self.playFileFromPlaylist(archiveFileEntity, playlist: playlist)
     }
 
-    // This should only be called by the playlist
-    public func playFile(_ archiveFileEntity: ArchiveFileEntity, newItems: [ArchiveFileEntity]? = nil){
+    public func playFileFromPlaylist(_ archiveFileEntity: ArchiveFileEntity, playlist: PlaylistEntity) {
 
+        self.playingPlaylist = playlist
         if archiveFileEntity.isLocalFile() {
             guard archiveFileEntity.doesLocalFileExist() else {
                 // Alert user the local file doesn't exist, do they want to play it online?
                 return
             }
-        }
-
-        if let its = newItems {
-            self.items = its
         }
 
         self.fileTitle = archiveFileEntity.title ?? archiveFileEntity.name
@@ -327,19 +331,22 @@ class Player: NSObject, ObservableObject {
 
 
     public func advancePlayer(_ advanceDirection: AdvanceDirection) {
-        if let playingFile = self.playingFile, let index = items.firstIndex(of: playingFile) {
+
+        guard let list = playingPlaylist, let files = self.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return }
+
+        if let playingFile = self.playingFile, let index = files.firstIndex(of: playingFile) {
             guard items.indices.contains(index + advanceDirection.rawValue) else { return }
-            playFile(items[index + advanceDirection.rawValue])
+            playFileFromPlaylist(items[index + advanceDirection.rawValue], playlist: list)
         }
     }
 
     private func loadAndPlay(_ playUrl: URL) {
 
-            avPlayer.pause()
-            if(self.observing) {
-                avPlayer.removeObserver(self, forKeyPath: "rate", context: &observerContext)
-                self.observing = false
-            }
+        avPlayer.pause()
+        if(self.observing) {
+            avPlayer.removeObserver(self, forKeyPath: "rate", context: &observerContext)
+            self.observing = false
+        }
 
         self.setActiveAudioSession()
         print(playUrl.absoluteString)
@@ -533,18 +540,26 @@ class Player: NSObject, ObservableObject {
         }
 
         session.remoteCommandCenter.nextTrackCommand.addTarget { event in
-            if let playingFile = self.playingFile, let index = self.items.firstIndex(of: playingFile) {
+
+            guard let list = self.playingPlaylist, let files = self.playingPlaylist?.files as? [ArchiveFileEntity] else { return .commandFailed }
+
+            if let playingFile = self.playingFile, let index = files.firstIndex(of: playingFile) {
                 guard self.items.indices.contains(index + 1) else { return .commandFailed }
-                self.playFile(self.items[index + 1])
+                self.playFileFromPlaylist(self.items[index + 1], playlist: list)
+
                 return .success
             }
             return .commandFailed
         }
 
         session.remoteCommandCenter.previousTrackCommand.addTarget { event in
-            if let playingFile = self.playingFile, let index = self.items.firstIndex(of: playingFile) {
+
+            guard let list = self.playingPlaylist, let files = self.playingPlaylist?.files as? [ArchiveFileEntity] else { return .commandFailed }
+
+
+            if let playingFile = self.playingFile, let index = files.firstIndex(of: playingFile) {
                 guard self.items.indices.contains(index - 1) else { return .commandFailed }
-                self.playFile(self.items[index - 1])
+                self.playFileFromPlaylist(self.items[index - 1], playlist: list)
                 return .success
             }
             return .commandFailed

@@ -23,9 +23,12 @@ struct Playlist: View {
 
     var filteredResorts: [ArchiveFileEntity] {
         if searchText.isEmpty {
-            return iaPlayer.items
+            return iaPlayer.mainPlaylist?.files?.array as? [ArchiveFileEntity] ?? []
         } else {
-            return iaPlayer.items.filter {
+
+            guard let files = iaPlayer.mainPlaylist?.files?.array as? [ArchiveFileEntity] else { return [] }
+
+            return files.filter {
                 guard let archiveTitle = $0.archiveTitle else { return false }
                 let title = "\($0.displayTitle)\(archiveTitle)"
                 return title.localizedCaseInsensitiveContains(searchText)
@@ -44,7 +47,9 @@ struct Playlist: View {
                                ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .onTapGesture {
-                    iaPlayer.playFile(archiveFile)
+                    if let playlist = iaPlayer.mainPlaylist {
+                        iaPlayer.playFileFromPlaylist(archiveFile, playlist: playlist)
+                    }
                 }
                 .padding(.horizontal, 5)
             }

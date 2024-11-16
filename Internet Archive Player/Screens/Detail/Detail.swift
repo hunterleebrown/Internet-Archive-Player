@@ -194,6 +194,7 @@ struct Detail: View {
                                             return
                                         } catch {}
                                         iaPlayer.playFile(file)
+
                                     }
                             }
                         }

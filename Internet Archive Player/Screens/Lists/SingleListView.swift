@@ -10,11 +10,17 @@ import SwiftUI
 import iaAPI
 import CoreData
 import CoreData
+import Combine
 
 struct SingleListView: View {
 
-    var playlistEntity: PlaylistEntity
+    @State var playlistEntity: PlaylistEntity
     @EnvironmentObject var iaPlayer: Player
+    @StateObject var viewModel = SingleListView.ViewModel()
+
+    init(playlistEntity: PlaylistEntity) {
+        _playlistEntity = State(initialValue: playlistEntity)
+    }
 
     var body: some View {
         List {
@@ -22,18 +28,19 @@ struct SingleListView: View {
 
                 EntityFileView(archiveFile,
                                showImage: true,
-                               backgroundColor: nil,
-                               textColor: .primary,
+                               backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
+                               textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
                                fileViewMode: .playlist,
                                ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .onTapGesture {
-                    iaPlayer.playFile(archiveFile, newItems: playlistEntity.files?.array as? [ArchiveFileEntity] ?? [])
+                    iaPlayer.playFileFromPlaylist(archiveFile, playlist: playlistEntity)
                 }
             }
             .onDelete(perform: { indexSet in
                 self.remove(at: indexSet)
             })
+            .onMove(perform: self.move)
         }
         .toolbar {
             EditButton()
@@ -45,6 +52,10 @@ struct SingleListView: View {
             Spacer()
                 .frame(height: iaPlayer.playerHeight)
         }
+        .onAppear {
+            viewModel.setUpSubscribers(iaPlayer)
+            iaPlayer.sendPlayingFileForPlaylist()
+        }
     }
 
     private func remove(at offsets: IndexSet) {
@@ -54,6 +65,10 @@ struct SingleListView: View {
                 PersistenceController.shared.save()
             }
         }
+    }
+
+    private func move(fromOffsets source: IndexSet, toOffset destination: Int) {
+        self.iaPlayer.rearrangeList(list: playlistEntity, fromOffsets: source, toOffset: destination)
     }
 
     private func menuItems(archiveFileEntity: ArchiveFileEntity) -> [MenuAction] {
@@ -70,6 +85,22 @@ struct SingleListView: View {
         items.append(otherPlaylist)
 
         return items
+    }
+}
+
+extension SingleListView {
+    final class ViewModel: ObservableObject {
+        @Published var playingFile: ArchiveFileEntity? = nil
+
+        var cancellables = Set<AnyCancellable>()
+
+        public func setUpSubscribers(_ iaPlayer: Player) {
+            iaPlayer.playingFilePublisher
+                .sink { file in
+                    self.playingFile = file
+                }
+                .store(in: &cancellables)
+        }
     }
 }
 
