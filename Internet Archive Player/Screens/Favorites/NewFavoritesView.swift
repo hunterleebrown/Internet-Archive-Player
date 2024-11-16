@@ -21,40 +21,43 @@ struct NewFavoritesView: View {
     @State var playlistErrorAlertShowing: Bool = false
 
     var body: some View {
-        NavigationView {
-            List{
-                ForEach(iaPlayer.favoriteItems, id: \.self) { archiveFile in
+        List{
+            ForEach(iaPlayer.favoriteItems, id: \.self) { archiveFile in
 
-                    EntityFileView(archiveFile,
-                                   showImage: true,
-                                   backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
-                                   textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
-                                   fileViewMode: .playlist,
-                                   ellipsisAction: self.menuActions(archiveFile: archiveFile))
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .onTapGesture {
-                        do {
-                            try iaPlayer.appendAndPlay(archiveFile)
-                        } catch PlayerError.alreadyOnPlaylist {
-                            self.playlistErrorAlertShowing = true
-                        } catch {
-
-                        }
-
-                    }
-                    .padding(.horizontal, 10)
+                EntityFileView(archiveFile,
+                               showImage: true,
+                               backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
+                               textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
+                               fileViewMode: .playlist,
+                               ellipsisAction: self.menuActions(archiveFile: archiveFile))
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .onTapGesture {
+                    //                        do {
+                    //                            try iaPlayer.appendAndPlay(archiveFile)
+                    //                        } catch PlayerError.alreadyOnPlaylist {
+                    //                            self.playlistErrorAlertShowing = true
+                    //                        } catch {
+                    //
+                    //                        }
+                    guard let playlist = iaPlayer.favoritesPlaylist else { return }
+                    iaPlayer.playFileFromPlaylist(archiveFile, playlist: playlist)
                 }
-                .onDelete(perform: self.remove)
-                .onMove(perform: self.move)
+                .padding(.horizontal, 10)
             }
-            .listStyle(PlainListStyle())
-            .tint(.fairyRed)
-            .safeAreaInset(edge: .bottom) {
-                Spacer()
-                    .frame(height: iaPlayer.playerHeight)
-            }
-
+            .onDelete(perform: self.remove)
+            .onMove(perform: self.move)
         }
+        .toolbar {
+            EditButton()
+                .tint(.fairyRed)
+        }
+        .listStyle(PlainListStyle())
+        .tint(.fairyRed)
+        .safeAreaInset(edge: .bottom) {
+            Spacer()
+                .frame(height: iaPlayer.playerHeight)
+        }
+
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
                 .tint(Color.fairyRed)
