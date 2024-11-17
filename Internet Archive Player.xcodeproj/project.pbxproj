@@ -53,6 +53,7 @@
 		5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC53279CCED100495070 /* PlayerButton.swift */; };
 		5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC55279CDE2100495070 /* AirPlayButton.swift */; };
 		5AD6BC58279CF31400495070 /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC57279CF31400495070 /* Playlist.swift */; };
+		5ADA9D832CE9802D00A18ED6 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADA9D822CE9802300A18ED6 /* WebView.swift */; };
 		5ADB8AD02AEF23DC0034B93B /* ArchiveMetaData+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */; };
 		5ADED039279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */; };
 		5ADED03D279B56F000FB2E6D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5ADED03C279B56F000FB2E6D /* Assets.xcassets */; };
@@ -138,6 +139,7 @@
 		5AD6BC53279CCED100495070 /* PlayerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButton.swift; sourceTree = "<group>"; };
 		5AD6BC55279CDE2100495070 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
 		5AD6BC57279CF31400495070 /* Playlist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
+		5ADA9D822CE9802300A18ED6 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		5ADED035279B56EE00FB2E6D /* ia-player.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ia-player.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet_Archive_PlayerApp.swift; sourceTree = "<group>"; };
 		5ADED03C279B56F000FB2E6D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -433,6 +435,7 @@
 		5AFD76022AACF5F600987D4E /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5ADA9D822CE9802300A18ED6 /* WebView.swift */,
 				CEF72C9927B5D72600B8AF15 /* FileView.swift */,
 				5AC5B2B3281CA4B000CDE937 /* EntityFileView.swift */,
 				5AD5DAF62AB92FAF00EDB749 /* EntityFileCardView.swift */,
@@ -697,6 +700,7 @@
 				5A71893F280B721400B1944B /* NavigationBarModifier.swift in Sources */,
 				5A9DCF932AA6647600F6EFDB /* OtherPlaylist.swift in Sources */,
 				5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */,
+				5ADA9D832CE9802D00A18ED6 /* WebView.swift in Sources */,
 				5A35A6DC2ABBE8A800A127D6 /* DebugView.swift in Sources */,
 				5AD5DAF72AB92FAF00EDB749 /* EntityFileCardView.swift in Sources */,
 				5AD216F22AA5770300325087 /* ListsView.swift in Sources */,
