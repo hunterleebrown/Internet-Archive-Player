@@ -287,7 +287,7 @@ class Player: NSObject, ObservableObject {
             NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
         }
 
-        guard let list = playingPlaylist, let files = self.playingPlaylist?.files as? [ArchiveFileEntity] else { return }
+        guard let list = playingPlaylist, let files = self.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return }
 
         if let playingFile = playingFile, let index = files.firstIndex(of: playingFile) {
             guard items.indices.contains(index + 1) else { return }
