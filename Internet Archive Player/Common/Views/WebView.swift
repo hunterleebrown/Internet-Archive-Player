@@ -23,7 +23,9 @@ struct WebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            webView.evaluateJavaScript("document.body.scrollHeight") { result, error in
+            webView.evaluateJavaScript("document.body.offsetHeight") {  [weak self] result, error in
+                guard let self = self else { return }
+
                 if let height = result as? CGFloat {
                     DispatchQueue.main.async {
                         self.parent.contentHeight = height
@@ -47,6 +49,7 @@ struct WebView: UIViewRepresentable {
         let htmlContent = """
         <html>
         <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
                 body {
                     font-size: \(bodyFontSize)px;
