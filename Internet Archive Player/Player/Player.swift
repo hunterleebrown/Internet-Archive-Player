@@ -541,7 +541,7 @@ class Player: NSObject, ObservableObject {
 
         session.remoteCommandCenter.nextTrackCommand.addTarget { event in
 
-            guard let list = self.playingPlaylist, let files = self.playingPlaylist?.files as? [ArchiveFileEntity] else { return .commandFailed }
+            guard let list = self.playingPlaylist, let files = self.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return .commandFailed }
 
             if let playingFile = self.playingFile, let index = files.firstIndex(of: playingFile) {
                 guard self.items.indices.contains(index + 1) else { return .commandFailed }
@@ -554,8 +554,7 @@ class Player: NSObject, ObservableObject {
 
         session.remoteCommandCenter.previousTrackCommand.addTarget { event in
 
-            guard let list = self.playingPlaylist, let files = self.playingPlaylist?.files as? [ArchiveFileEntity] else { return .commandFailed }
-
+            guard let list = self.playingPlaylist, let files = self.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return .commandFailed }
 
             if let playingFile = self.playingFile, let index = files.firstIndex(of: playingFile) {
                 guard self.items.indices.contains(index - 1) else { return .commandFailed }
