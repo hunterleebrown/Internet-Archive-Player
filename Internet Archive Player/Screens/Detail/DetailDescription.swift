@@ -17,9 +17,6 @@ struct DetailDescription: View {
     var doc: ArchiveMetaData
 
     var body: some View {
-
-        let attString = doc.description.joined(separator: "").html2AttributedString ?? nil
-
         let bodyFont = UIFont.preferredFont(forTextStyle: .body)
         let fontFamily = bodyFont.familyName
         let fontWeight: String = {
@@ -119,13 +116,11 @@ struct DetailDescription: View {
                         bodyFontWeight: fontWeight,
                         contentHeight: $webViewHeight
                 )
-                .edgesIgnoringSafeArea(.all)
-                .background(Color.yellow)
                 .frame(height: webViewHeight)
                 .padding()
-
 #else
-                if let at = attString {
+
+                if let att = doc.description.joined(separator: "").html2AttributedString {
                     Text(AttributedString(at))
                     //                        .textSelection(.enabled)
                         .background(Color.white)
