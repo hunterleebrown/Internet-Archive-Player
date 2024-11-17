@@ -503,18 +503,18 @@ class Player: NSObject, ObservableObject {
 
     private func sessionRemote(session: MPNowPlayingSession) {
 
-        session.remoteCommandCenter.playCommand.addTarget { event in
-            self.avPlayer.play()
+        session.remoteCommandCenter.playCommand.addTarget { [weak self] event in
+            self?.avPlayer.play()
             return .success
         }
 
-        session.remoteCommandCenter.pauseCommand.addTarget { event in
-            self.avPlayer.pause()
+        session.remoteCommandCenter.pauseCommand.addTarget { [weak self] event in
+            self?.avPlayer.pause()
             return .success
         }
 
-        session.remoteCommandCenter.togglePlayPauseCommand.addTarget { event in
-            self.playing ? self.avPlayer.pause() : self.avPlayer.play()
+        session.remoteCommandCenter.togglePlayPauseCommand.addTarget { [weak self] event in
+            self?.playing ?? false ? self?.avPlayer.pause() : self?.avPlayer.play()
             return .success
         }
 
@@ -539,26 +539,26 @@ class Player: NSObject, ObservableObject {
             return .commandFailed
         }
 
-        session.remoteCommandCenter.nextTrackCommand.addTarget { event in
+        session.remoteCommandCenter.nextTrackCommand.addTarget { [weak self] event in
 
-            guard let list = self.playingPlaylist, let files = self.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return .commandFailed }
+            guard let list = self?.playingPlaylist, let files = self?.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return .commandFailed }
 
-            if let playingFile = self.playingFile, let index = files.firstIndex(of: playingFile) {
-                guard self.items.indices.contains(index + 1) else { return .commandFailed }
-                self.playFileFromPlaylist(self.items[index + 1], playlist: list)
+            if let playingFile = self?.playingFile, let index = files.firstIndex(of: playingFile) {
+                guard self?.items.indices.contains(index + 1) ?? false, let fileEnt = self?.items[index + 1] else { return .commandFailed }
+                self?.playFileFromPlaylist(fileEnt, playlist: list)
 
                 return .success
             }
             return .commandFailed
         }
 
-        session.remoteCommandCenter.previousTrackCommand.addTarget { event in
+        session.remoteCommandCenter.previousTrackCommand.addTarget { [weak self] event in
 
-            guard let list = self.playingPlaylist, let files = self.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return .commandFailed }
+            guard let list = self?.playingPlaylist, let files = self?.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return .commandFailed }
 
-            if let playingFile = self.playingFile, let index = files.firstIndex(of: playingFile) {
-                guard self.items.indices.contains(index - 1) else { return .commandFailed }
-                self.playFileFromPlaylist(self.items[index - 1], playlist: list)
+            if let playingFile = self?.playingFile, let index = files.firstIndex(of: playingFile) {
+                guard self?.items.indices.contains(index - 1) ?? false, let fileEnt = self?.items[index - 1] else { return .commandFailed }
+                self?.playFileFromPlaylist(fileEnt, playlist: list)
                 return .success
             }
             return .commandFailed
