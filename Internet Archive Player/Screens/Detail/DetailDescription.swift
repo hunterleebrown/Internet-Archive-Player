@@ -121,7 +121,7 @@ struct DetailDescription: View {
 #else
 
                 if let att = doc.description.joined(separator: "").html2AttributedString {
-                    Text(AttributedString(at))
+                    Text(AttributedString(att))
                     //                        .textSelection(.enabled)
                         .background(Color.white)
                         .padding(10)
