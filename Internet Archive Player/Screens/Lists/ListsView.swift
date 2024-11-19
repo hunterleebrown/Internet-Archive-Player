@@ -48,6 +48,21 @@ struct ListsView: View {
     private func remove(at offsets: IndexSet) {
         for index in offsets {
             let list = viewModel.lists[index]
+
+            guard let files = list.files?.array as? [ArchiveFileEntity] else {
+                return
+            }
+
+            files.forEach { item in
+                if item.isLocalFile(), let workingUrl = item.workingUrl {
+                    do {
+                        try Downloader.removeFile(at: workingUrl)
+                    } catch let error {
+                        print(error.localizedDescription)
+                    }
+                }
+            }
+
             PersistenceController.shared.delete(list)
         }
     }
