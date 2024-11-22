@@ -21,22 +21,31 @@ struct NewPlaylist: View {
         NavigationView {
             VStack {
                 HStack(alignment: .center) {
+
                     Image(systemName: "music.note.list")
                         .font(.headline)
                         .foregroundColor(.fairyRed)
+
                     Text("Create a new list")
                         .font(.headline)
                         .foregroundColor(.fairyRed)
+
+                    Spacer()
                 }
-                .padding()
+                .frame(alignment: .leading)
+
                 TextField("New list name", text: $name)
-                    .padding()
-                    .cornerRadius(10)
+                    .padding(5) // Adds padding inside the TextField
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(UIColor.systemGray6)) // Fill with a light gray background
+                    )
                     .onSubmit {
                         viewModel.createPlaylist(name: name)
                         isPresented = false
                         dismiss()
                     }
+
                 Button("Create") {
                     viewModel.createPlaylist(name: name)
                     isPresented = false

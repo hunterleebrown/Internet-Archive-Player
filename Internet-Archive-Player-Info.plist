@@ -12,8 +12,12 @@
 	<dict>
 		<key>UIColorName</key>
 		<string>AccentColor</string>
-		<key>UIImageName</key>
-		<string>IA-Music-fairy-1024</string>
+        <key>UIImageName</key>
+        <string>IA-Music-fairy-1024</string> <!-- Name of the image in Assets.xcassets -->
+        <key>UIImagePosition</key>
+        <string>Center</string> <!-- Image positioning on the screen -->
+        <key>UIContentMode</key>
+        <string>AspectFit</string> <!-- Scaling mode for the image -->
 	</dict>
 </dict>
 </plist>
