@@ -23,6 +23,8 @@ final class DetailViewModel: ObservableObject {
     @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
     @Published var uiImage: UIImage?
 
+    @Published var pressedStates: [Int: Bool] = [:]
+
     var player: AVPlayer? = nil
 
     private var cancellables = Set<AnyCancellable>()

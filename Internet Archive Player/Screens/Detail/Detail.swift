@@ -167,15 +167,16 @@ struct Detail: View {
                             )
 
 
-                        ForEach(self.viewModel.sortedAudioFiles(), id: \.self) { file in
+                        ForEach(Array(self.viewModel.sortedAudioFiles().enumerated()), id: \.0) { index, file in
                             HStack(alignment: .center, spacing: 5) {
                                 
                                 Image(systemName: PlayerButtonType.ear.rawValue)
                                     .frame(width: 33, height: 33)
-                                    .background(Color.fairyRedAlpha)
+                                    .background(viewModel.pressedStates[index] == true ? Color.fairyCreamAlpha : Color.fairyRedAlpha)
                                     .cornerRadius(10)
-                                    .foregroundColor(.fairyCreamAlpha)
+                                    .foregroundColor(viewModel.pressedStates[index] == true ? Color.fairyRedAlpha : Color.fairyCreamAlpha)
                                     .onTouchDownUp { pressed in
+                                        viewModel.pressedStates[index] = pressed
                                         if pressed {
                                             viewModel.previewAudio(file: file)
                                         } else {
