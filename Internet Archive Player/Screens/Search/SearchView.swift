@@ -19,6 +19,8 @@ struct SearchView: View {
     @State var collectionName: String = "All"
     @State var collectionIdentifier: String?
 
+    @State var searchFilter: SearchFilter = SearchFilter(name: "All", identifier: "")
+
     init() {
         searchFocused = false
     }
@@ -40,20 +42,24 @@ struct SearchView: View {
                 }
 
                 HStack(alignment: .center , spacing:5) {
-                    Image(systemName: "line.3.horizontal.decrease.circle")
-                        .foregroundColor(.fairyRed)
-                        .font(.headline)
-                    Text("Filter:")
-                        .font(.subheadline)
+
 
                     Button {
                         showCollections = true
                     } label: {
-                        Text("Collection: \(collectionName)")
+                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
                     }
                     .buttonStyle(IAButton())
+
+                    Text("Collection: ")
+                        .font(.caption)
+
+                    collectionLabel(filter: searchFilter)
+
                 }
                 .padding(.horizontal, 20)
+
+                Divider()
 
                 List{
                     ForEach(viewModel.items, id: \.self) { doc in
@@ -88,6 +94,35 @@ struct SearchView: View {
         }
         .navigationViewStyle(.stack)
         .navigationTitle("Search")
+    }
+
+    @ViewBuilder
+    func collectionLabel(filter: SearchFilter) -> some View {
+        HStack(spacing: 5) {
+            if let imageUrl = filter.iconUrl {
+                AsyncImage(
+                    url: imageUrl,
+                    content: { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 20,
+                                   maxHeight: 20)
+                            .background(Color.black)
+                    },
+                    placeholder: {
+                        Color(.black)
+                            .frame(maxWidth: 20,
+                                   maxHeight: 20)
+                    })
+                .cornerRadius(5)
+                .frame(width: 20, height: 20)
+            }
+
+            Text(filter.name)
+                .font(.caption)
+
+            Spacer()
+        }
     }
 }
 

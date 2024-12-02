@@ -94,6 +94,7 @@ struct SearchFilters: View {
             if let val = newValue {
                 searchFiltersViewModel.collectionSelection = val
                 if let del = delegate {
+                    del.searchFilter = val
                     del.collectionName = val.name
                     del.collectionIdentifier = val.identifier
                     del.showCollections = false
