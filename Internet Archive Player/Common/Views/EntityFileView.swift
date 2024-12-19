@@ -16,6 +16,8 @@ public protocol FileViewDownloadDelegate {
 
 struct EntityFileView: View {
 
+    @Environment(\.colorScheme) var colorScheme // Access the color scheme
+
     @StateObject var viewModel: EntityFileView.ViewModel = EntityFileView.ViewModel()
 
     var archiveFile: ArchiveFileEntity
@@ -179,8 +181,8 @@ struct EntityFileView: View {
                 cornerRadius: 5,
                 style: .continuous
             )
-            .fill(backgroundColor ?? Color.white)
-            .shadow(color: .black.opacity(0.2), radius: 4, x: 2, y: 2)
+            .fill(backgroundColor ?? (colorScheme == .dark ? Color.droopy : Color.white))
+            .shadow(color: (colorScheme == .dark ? Color.droopy : .black.opacity(0.2)) , radius: 4, x: 2, y: 2)
         )
         .padding(10)
 //        .cornerRadius(5.0)
