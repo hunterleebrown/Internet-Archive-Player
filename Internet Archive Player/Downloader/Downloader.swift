@@ -149,6 +149,19 @@ class Downloader: NSObject {
         }
     }
 
+    static func entityDownloadedUrl(entity: ArchiveFileEntity) throws -> URL? {
+
+        guard entity.url?.lastPathComponent != nil, let identifier = entity.identifier else { return nil }
+        let dLoadDir =  Downloader.directory().appendingPathComponent(identifier)
+
+        guard let fileComponent = entity.url?.lastPathComponent else { return nil }
+        let ldownLoadUrl = dLoadDir.appendingPathComponent(fileComponent)
+
+        guard FileManager.default.fileExists(atPath: ldownLoadUrl.path) else { return nil }
+
+        return ldownLoadUrl
+    }
+
     static public func report() -> DownloadReport {
         var dFiles = [DownloadReport.DownloadedFile]()
         do {

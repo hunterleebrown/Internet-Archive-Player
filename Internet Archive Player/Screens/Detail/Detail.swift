@@ -255,37 +255,70 @@ struct Detail: View {
         }
         .navigationBarHidden(hideNavigationBar)
         .background(
-            ZStack (alignment: .top) {
+
+            VStack(spacing: 0) {
                 if let img = self.backgroundURL,
                    let avg = viewModel.uiImage,
                    let color = avg.averageColor {
 
-                    Rectangle().fill(
+//                    Rectangle().fill(
+
+//                        if let gradient = avg.gradientToBlack() {
+//                            LinearGradient(
+//                                gradient: gradient,
+//                                startPoint: .top,
+//                                endPoint: .bottom
+//                            )
+//                            .ignoresSafeArea() // Makes the gradient cover the entire screen
+//                        } else {
+//                            Color(color)
+//                        }
+
+//                    )
+//                    .ignoresSafeArea()
+
+                    ZStack(alignment: .top) {
+
                         Color(color)
-                    )
-                    .ignoresSafeArea()
 
+                        AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
+                            switch phase {
+                            case .empty:
+                                Color.clear
 
-                    AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
-                        switch phase {
-                        case .empty:
-                            Color.clear
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .transition(.opacity) // Apply the transition
 
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .overlay(Rectangle().fill(Color(color).opacity(0.5)), alignment: .topTrailing)
-                                .blur(radius: backgroundBlur)
+//                                    .ignoresSafeArea()
+//                                    .overlay(Rectangle().fill(Color(color).opacity(0.5)), alignment: .topTrailing)
+                                    .blur(radius: backgroundBlur)
+                                    .clipped()
 
-                        case .failure(_):
-                            EmptyView()
+                            case .failure(_):
+                                EmptyView()
 
-                        @unknown default:
-                            EmptyView()
+                            @unknown default:
+                                EmptyView()
+                            }
                         }
+                        .frame(minHeight: 200, alignment: .center)
                     }
-                    .frame(minHeight: 200, alignment: .center)
+
+
+                    if let gradient = avg.gradientToBlack() {
+                        LinearGradient(
+                            gradient: gradient,
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .ignoresSafeArea() // Makes the gradient cover the entire screen
+                    } else {
+                        Color(color)
+                    }
+
                 }
 
             }

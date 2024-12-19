@@ -22,7 +22,6 @@ struct EntityFileView: View {
     var textColor = Color.white
     var backgroundColor: Color? = Color.gray
     var showImage: Bool = false
-    @State var showDownloadButton = true
     var fileViewMode: FileViewMode = .detail
     var ellipsisAction: [MenuAction] = [MenuAction]()
 
@@ -95,9 +94,9 @@ struct EntityFileView: View {
                         .font(.caption2)
                         .foregroundColor(textColor)
                         .bold()
-                    Image(systemName: showDownloadButton ? "cloud" : "iphone")
+                    Image(systemName: viewModel.showDownloadButton ? "cloud" : "iphone")
                         .font(.caption2)
-                    Text(showDownloadButton ? "online" : "downloaded")
+                    Text(viewModel.showDownloadButton ? "online" : "downloaded")
                         .font(.caption2)
                         .foregroundColor(textColor)
                 }
@@ -135,7 +134,7 @@ struct EntityFileView: View {
 
                         }
 
-                        if (showDownloadButton && archiveFile.format == "VBR MP3") {
+                        if (viewModel.showDownloadButton && archiveFile.format == "VBR MP3") {
                             Button(action: {
                                 archiveFile.download(delegate: viewModel)
                             }) {
@@ -173,14 +172,25 @@ struct EntityFileView: View {
             .tint(textColor)
             .padding(5.0)
         }
-        .background(backgroundColor ?? nil)
-        .cornerRadius(5.0)
+        .listRowSeparator(.hidden) // Hides the separator for this row
+//        .background(backgroundColor ?? nil)
+        .background(
+            RoundedRectangle(
+                cornerRadius: 5,
+                style: .continuous
+            )
+            .fill(backgroundColor ?? Color.white)
+            .shadow(color: .black.opacity(0.2), radius: 4, x: 2, y: 2)
+        )
+        .padding(10)
+//        .cornerRadius(5.0)
         .onReceive(Downloader.downloadedSubject) { file in
             guard file.id == archiveFile.id else { return }
-            showDownloadButton = !file.isLocalFile()
+            viewModel.showDownloadButton = !file.isLocalFile()
         }
         .onAppear() {
-            showDownloadButton = !archiveFile.isLocalFile()
+            viewModel.showDownloadButton = !archiveFile.isLocalFile()
+            viewModel.fetchDownloadUrl(for: archiveFile)
         }
     }
 }
@@ -196,5 +206,38 @@ struct EntityFileView_Previews: PreviewProvider {
 extension EntityFileView {
     public class ViewModel: ObservableObject, FileViewDownloadDelegate {
         @Published var downloadProgress = 0.0
+
+        @Published var downloadUrl: URL?
+        @Published var errorMessage: String?
+
+        @Published var showDownloadButton = true
+
+
+        func fetchDownloadUrl(for file: ArchiveFileEntity) {
+            do {
+                if let url = try Downloader.entityDownloadedUrl(entity: file) {
+                    DispatchQueue.main.async {
+                        self.downloadUrl = url
+                        self.errorMessage = nil
+
+                        file.url = url
+                        PersistenceController.shared.save()
+
+                        self.showDownloadButton = false
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.errorMessage = "URL could not be retrieved."
+                        self.downloadUrl = nil
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = "An error occurred: \(error.localizedDescription)"
+                    self.downloadUrl = nil
+                }
+            }
+        }
+
     }
 }

@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import SwiftUI
 //import iaAPI
+import CoreImage
 
 struct IAFontMapping
 {
@@ -519,5 +520,64 @@ extension UIImage {
         context.render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: .RGBA8, colorSpace: nil)
 
         return UIColor(red: CGFloat(bitmap[0]) / 255, green: CGFloat(bitmap[1]) / 255, blue: CGFloat(bitmap[2]) / 255, alpha: CGFloat(bitmap[3]) / 255)
+    }
+}
+
+extension UIImage {
+    func gradientToBlack() -> Gradient? {
+        guard let inputImage = CIImage(image: self) else { return nil }
+        let extentVector = CIVector(x: inputImage.extent.origin.x, y: inputImage.extent.origin.y, z: inputImage.extent.size.width, w: inputImage.extent.size.height)
+
+        // Use a color reduction filter to find the dominant color
+        guard let filter = CIFilter(name: "CIAreaAverage", parameters: [kCIInputImageKey: inputImage, kCIInputExtentKey: extentVector]),
+              let outputImage = filter.outputImage else { return nil }
+
+        var bitmap = [UInt8](repeating: 0, count: 4)
+        let context = CIContext(options: [.workingColorSpace: kCFNull as Any])
+        context.render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: .RGBA8, colorSpace: nil)
+
+        let dominantColor = Color(
+            red: Double(bitmap[0]) / 255.0,
+            green: Double(bitmap[1]) / 255.0,
+            blue: Double(bitmap[2]) / 255.0,
+            opacity: Double(bitmap[3]) / 255.0
+        )
+
+        // Create a gradient from the dominant color to black
+        let gradientColors = (0..<10).map { step -> Color in
+            let factor = Double(step) / 9.0 // Gradual transition factor
+            return Color(
+                red: dominantColor.redComponent * (1.0 - factor),
+                green: dominantColor.greenComponent * (1.0 - factor),
+                blue: dominantColor.blueComponent * (1.0 - factor),
+                opacity: 1.0
+            )
+        }
+
+        return Gradient(colors: gradientColors)
+    }
+}
+
+// SwiftUI Color extension for RGB components
+extension Color {
+    var redComponent: Double {
+        let uiColor = UIColor(self)
+        var red: CGFloat = 0
+        uiColor.getRed(&red, green: nil, blue: nil, alpha: nil)
+        return Double(red)
+    }
+
+    var greenComponent: Double {
+        let uiColor = UIColor(self)
+        var green: CGFloat = 0
+        uiColor.getRed(nil, green: &green, blue: nil, alpha: nil)
+        return Double(green)
+    }
+
+    var blueComponent: Double {
+        let uiColor = UIColor(self)
+        var blue: CGFloat = 0
+        uiColor.getRed(nil, green: nil, blue: &blue, alpha: nil)
+        return Double(blue)
     }
 }

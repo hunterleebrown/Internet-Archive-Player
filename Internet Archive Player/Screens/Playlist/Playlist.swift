@@ -56,6 +56,7 @@ struct Playlist: View {
             .onDelete(perform: self.remove)
             .onMove(perform: self.move)
         }
+        .listStyle(PlainListStyle())
         .alert(PlayerError.alreadyOnFavorites.description, isPresented: $favoritesErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
@@ -76,11 +77,11 @@ struct Playlist: View {
             }
         }
         .searchable(text: $searchText, prompt: "Filter")
-        .listStyle(PlainListStyle())
         .onAppear() {
             viewModel.setUpSubscribers(iaPlayer)
             iaPlayer.sendPlayingFileForPlaylist()
         }
+        .scrollContentBackground(.hidden)
         .tint(.fairyRed)
 
     }

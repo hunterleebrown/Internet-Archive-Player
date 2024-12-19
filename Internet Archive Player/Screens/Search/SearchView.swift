@@ -26,7 +26,19 @@ struct SearchView: View {
     }
 
     var body: some View {
-        NavigationView {
+        VStack {
+//            HStack {
+//                Image(systemName: "magnifyingglass")
+//                    .foregroundColor(.gray)
+//                TextField("Search the Internet Archive", text: $viewModel.searchText)
+//                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//                    .autocapitalization(.none) // Optional: For case-insensitive searches
+//                    .disableAutocorrection(true) // Optional: Disable autocorrection if unnecessary
+//                    .onSubmit {
+//                        viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
+//                    }
+//            }
+//            .padding(.horizontal)
 
             VStack(alignment: .leading, spacing: 5) {
 
@@ -92,8 +104,6 @@ struct SearchView: View {
                 }
             }
         }
-        .navigationViewStyle(.stack)
-        .navigationTitle("Search")
     }
 
     @ViewBuilder
@@ -147,6 +157,8 @@ extension SearchView {
         @Published var archiveError: String?
 
         @Published var mediaType: Int = 0
+
+        @Published var identifier: String?
 
         public let mediaTypes: [ArchiveMediaType] = [.audio, .movies]
         private var isLoadingMore: Bool = false
