@@ -103,7 +103,7 @@ struct Home: View {
 
             NavigationStack {
                 VStack(spacing:0) {
-                    Playlist()
+                    topView()
                         .navigationTitle("Now Playing")
                         .toolbar {
 
@@ -225,6 +225,28 @@ struct Home: View {
             }
         }
         .environmentObject(iaPlayer)
+    }
+
+    @ViewBuilder func topView() -> some View {
+        if iaPlayer.mainPlaylist?.files?.count == 0 {
+            ZStack(alignment: .top) {
+                VStack {
+                    // Your combined Text view
+                    Text("Use the search icon ")
+                        + Text(Image(systemName: "magnifyingglass"))
+                        + Text(" to find and add files to your library.")
+                }
+                .padding(10)
+                .background(Color.fairyRed)
+                .cornerRadius(10)
+            }
+            .foregroundColor(.fairyCream)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+
+
+        } else {
+            Playlist()
+        }
     }
 
 }
