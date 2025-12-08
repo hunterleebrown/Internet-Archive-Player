@@ -76,7 +76,7 @@ struct Playlist: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Filter")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Filter")
         .onAppear() {
             viewModel.setUpSubscribers(iaPlayer)
             iaPlayer.sendPlayingFileForPlaylist()
