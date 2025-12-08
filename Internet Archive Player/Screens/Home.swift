@@ -176,6 +176,7 @@ struct Home: View {
 
                 .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
             }
+            .tint(.fairyRed)
             .zIndex(1)
 
 

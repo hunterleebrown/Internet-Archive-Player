@@ -88,7 +88,7 @@ struct SearchView: View {
                     }
                 }
                 .listStyle(PlainListStyle())
-                .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
+                .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search The Internet Archive")
                 .onSubmit(of: .search, {
                     viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
                 })
@@ -104,6 +104,8 @@ struct SearchView: View {
                 }
             }
         }
+        .navigationTitle("Search")
+        .tint(.fairyRed)
     }
 
     @ViewBuilder
