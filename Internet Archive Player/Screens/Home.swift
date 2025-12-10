@@ -114,13 +114,18 @@ struct Home: View {
                 .tag(4)
 
             }
-            .safeAreaInset(edge: .bottom) {
+            .tint(.fairyRed)
+            .zIndex(1)
+
+            // PlayerControls above the tab bar
+            VStack {
+                Spacer()
                 VStack(spacing: 0) {
                     PlayerControls(showVideoPlayer: $showVideoPlayer)
                         .padding(5)
                 }
                 .opacity(showControls ? 1 : 0)
-                .frame(maxWidth: 428, alignment: .top)
+                .frame(maxWidth: 428, maxHeight: iaPlayer.playerHeight, alignment: .top)
                 .clipped()
                 .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
                     .onEnded { value in
@@ -137,12 +142,9 @@ struct Home: View {
                         }
                     }
                 )
-                .zIndex(showControls ? 3: 1)
                 .padding(.bottom, 49)
-
             }
-            .tint(.fairyRed)
-            .zIndex(1)
+            .zIndex(showControls ? 3: 1)
 
 
         }
