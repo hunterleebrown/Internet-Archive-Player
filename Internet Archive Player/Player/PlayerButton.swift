@@ -21,8 +21,9 @@ enum PlayerButtonType: String {
     case listFill = "list.bullet.rectangle.portrait.fill"
     case tv = "tv.circle"
     case magnifyingGlass = "magnifyingGlass"
-    case hidePlay = "play.slash"
+    case hidePlay = "rectangle.expand.vertical"
     case ear = "ear"
+    case x = "xmark.circle"
 }
 
 struct PlayerButton: View {
@@ -42,6 +43,7 @@ struct PlayerButton: View {
         }){
             Image(systemName: type.rawValue)
                 .resizable()
+                .aspectRatio(contentMode: .fit)
                 .frame(width: size?.width, height: size?.height)
         }
         .tint(.fairyCream)
