@@ -10,21 +10,15 @@ import SwiftUI
 import AVKit
 import Combine
 
-enum PresentedSheet {
-    case search
-    case favorites
-}
-
 struct Home: View {
     @StateObject var iaPlayer = Player()
-    @State private var presentingSearch = false
-    @State private var presentingFavorites = false
     @State var playingFile: ArchiveFileEntity? = nil
     @State var showVideoPlayer: Bool = false
     @State var showNetworkAlert: Bool = false
     @State var showControls: Bool = false
     @State var maxControlHeight: Bool = true
     @State var otherPlaylistPresented: Bool = false
+    @State var selectedTab: Int = 2  // Default to Now Playing tab (index 2)
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var controlHeightPass = PassthroughSubject<Bool, Never>()
@@ -37,144 +31,115 @@ struct Home: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            VStack(spacing: 0) {
-                ZStack {
-                    ZStack(alignment: .topTrailing) {
-                        PlayerButton(.hidePlay, CGSize(width: 20, height: 20)) {
-                            withAnimation{
-                                Home.showControlsPass.send(false)
-                            }
-                        }
-                        .padding(.trailing, 20)
-                        .padding(.top, 40)
-                        .frame(width: 20, alignment: .trailing)
-                        .zIndex(5)
-
-                        CustomVideoPlayer()
-                            .frame(height: showVideoPlayer ? 160 : 0 )
-                    }
-                    .zIndex(showVideoPlayer ? 1 : 0)
-                    PlayerControls()
-                        .zIndex(showVideoPlayer ? 0 : 1)
-                        .padding(5)
-                }
-            }
-            .opacity(showControls ? 1 : 0)
-            .frame(maxWidth: 428, maxHeight: iaPlayer.playerHeight, alignment: .top)
-            .clipped()
-            .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
-                .onEnded { value in
-                    print(value.translation)
-                    switch(value.translation.width, value.translation.height) {
-                    case (...0, -30...30):  print("left swipe")
-                    case (0..., -30...30):  print("right swipe")
-                    case (-100...100, ...0):
-                        print("up swipe")
-                        Home.controlHeightPass.send(true)
-                    case (-100...100, 0...):  print("down swipe")
-                        Home.controlHeightPass.send(false)
-                    default:  print("no clue")
-                    }
-                }
-            )
-            .zIndex(showControls ? 3: 1)
-
 
             if iaPlayer.playingFile != nil {
                 VStack(alignment: .trailing) {
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            withAnimation {
-                                showControls.toggle()
-                            }
-                        }, label: {
-                            Image(systemName: "play")
-                                .foregroundColor(.fairyRed)
-                                .frame(maxWidth: 44, maxHeight: 44)
-                                .background(Color.fairyCream)
-                                .cornerRadius(10)
-                        })
-                    }
+
+                    Button(action: {
+                        withAnimation {
+                            showControls.toggle()
+                        }
+                    }, label: {
+                        Image(systemName: "rectangle.expand.vertical")
+                            .foregroundColor(.fairyRed)
+                            .frame(maxWidth: 44, maxHeight: 44)
+                            .background(Color.fairyCream)
+                            .cornerRadius(10)
+                    })
                 }
-                .padding(.trailing, 50)
+                .padding(.trailing, 10)
+                .padding(.bottom, 59)
                 .zIndex(showControls ? 0 : 3)
             }
 
-            NavigationStack {
-                VStack(spacing:0) {
-                    topView()
-                        .navigationTitle("Now Playing")
-                        .toolbar {
-
-                            ToolbarItem(placement: .navigationBarLeading) {
-
-                                Button(action: {
-                                    presentingSearch.toggle()
-                                }){
-                                    NavigationLink(destination: SearchView()) {
-                                        Image(systemName: "magnifyingglass")
-                                            .resizable()
-                                            .frame(width: 30, height: 30)
-                                    }
-                                }
-                                .tint(.fairyRed)
-                            }
-
-                            ToolbarItem(placement: .navigationBarLeading) {
-
-                                Button(action: {
-                                    print("lists tapped")
-                                }){
-                                    NavigationLink(destination: ListsView()) {
-                                        Image(systemName: "music.note.list")
-                                            .resizable()
-                                            .frame(width: 30, height: 30)
-                                    }
-                                }
-                                .tint(.fairyRed)
-                            }
-
-                            ToolbarItem(placement: .navigationBarLeading) {
-                                Button(action: {
-                                    presentingFavorites.toggle()
-                                }){
-                                    NavigationLink(destination: NewFavoritesView()) {
-                                        Image(systemName: "heart")
-                                            .resizable()
-                                            .frame(width: 30, height: 30)
-                                    }
-                                }
-                                .tint(.fairyRed)
-                            }
-
-                            ToolbarItem(placement: .navigationBarLeading) {
-                                Button(action: {
-                                    print("debug tap")
-                                }){
-                                    NavigationLink(destination: DebugView()) {
-                                        Image(systemName: "ant.circle")
-                                            .resizable()
-                                            .frame(width: 30, height: 30)
-                                    }
-                                }
-                                .tint(.fairyRed)
-                            }
-                        }
-                        .sheet(item: $playingFile, content: { file in
-                            if let identifier = file.identifier {
-                                Detail(identifier, isPresented: true)
-                            }
-                        })
+            TabView(selection: $selectedTab) {
+                // Search Tab
+                NavigationStack {
+                    SearchView()
                 }
-                .safeAreaInset(edge: .bottom) {
-                    VStack {
-                        Spacer()
-                            .frame(height: showControls ? iaPlayer.playerHeight : 0)
+                .tabItem {
+                    Label("Search", systemImage: "magnifyingglass")
+                }
+                .tag(0)
+                
+                // Lists Tab
+                NavigationStack {
+                    ListsView()
+                }
+                .tabItem {
+                    Label("Lists", systemImage: "music.note.list")
+                }
+                .tag(1)
+                
+                // Now Playing Tab (Center - Most Prominent)
+                NavigationStack {
+                    VStack(spacing:0) {
+                        topView()
+                            .navigationTitle("Now Playing")
+                            .sheet(item: $playingFile, content: { file in
+                                if let identifier = file.identifier {
+                                    Detail(identifier, isPresented: true)
+                                }
+                            })
                     }
+                    .safeAreaInset(edge: .bottom) {
+                        if showControls {
+                            Color.clear
+                                .frame(height: iaPlayer.playerHeight)
+                        }
+                    }
+                    .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
                 }
+                .tabItem {
+                    Label("Now Playing", systemImage: "music.note.square.stack.fill")
+                }
+                .tag(2)
+                
+                // Favorites Tab
+                NavigationStack {
+                    NewFavoritesView()
+                }
+                .tabItem {
+                    Label("Favorites", systemImage: "heart")
+                }
+                .tag(3)
+                
+                // Debug Tab
+                NavigationStack {
+                    DebugView()
+                }
+                .tabItem {
+                    Label("Debug", systemImage: "ant.circle")
+                }
+                .tag(4)
 
-                .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
+            }
+            .safeAreaInset(edge: .bottom) {
+                VStack(spacing: 0) {
+                    PlayerControls(showVideoPlayer: $showVideoPlayer)
+                        .padding(5)
+                }
+                .opacity(showControls ? 1 : 0)
+                .frame(maxWidth: 428, alignment: .top)
+                .clipped()
+                .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
+                    .onEnded { value in
+                        print(value.translation)
+                        switch(value.translation.width, value.translation.height) {
+                        case (...0, -30...30):  print("left swipe")
+                        case (0..., -30...30):  print("right swipe")
+                        case (-100...100, ...0):
+                            print("up swipe")
+                            Home.controlHeightPass.send(true)
+                        case (-100...100, 0...):  print("down swipe")
+                            Home.controlHeightPass.send(false)
+                        default:  print("no clue")
+                        }
+                    }
+                )
+                .zIndex(showControls ? 3: 1)
+                .padding(.bottom, 49)
+
             }
             .tint(.fairyRed)
             .zIndex(1)
@@ -190,6 +155,13 @@ struct Home: View {
             withAnimation {
                 showVideoPlayer = show
             }
+        }
+        .sheet(isPresented: $showVideoPlayer) {
+            VideoPlayer(player: iaPlayer.avPlayer)
+                .ignoresSafeArea()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .interactiveDismissDisabled(false)  // Allow swipe to dismiss
         }
         .onReceive(Home.showControlsPass) { show in
             withAnimation {

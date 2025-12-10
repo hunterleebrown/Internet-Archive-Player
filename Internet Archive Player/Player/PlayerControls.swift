@@ -13,6 +13,7 @@ import AVKit
 struct PlayerControls: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
+    @Binding var showVideoPlayer: Bool
 
     static var showPlayingDetails = PassthroughSubject<ArchiveFileEntity, Never>()
     static var showVideo = PassthroughSubject<Bool, Never>()
@@ -68,16 +69,22 @@ struct PlayerControls: View {
 
                     Spacer()
 
-                    PlayerButton(.hidePlay, CGSize(width: 20, height: 20)) {
-                        withAnimation{
-                            Home.showControlsPass.send(false)
+                    HStack(alignment: .center, spacing: 15) {
+                        if viewModel.isPlayingVideo {
+                            PlayerButton(.video, CGSize(width: 20, height: 20)) {
+                                showVideoPlayer = true
+                            }
                         }
-                    }
 
-                    PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 40, height: 40)) {
-                        iaPlayer.didTapPlayButton()
-                    }
+                        PlayerButton(.hidePlay, CGSize(width: 20, height: 20)) {
+                            withAnimation{
+                                Home.showControlsPass.send(false)
+                            }
+                        }
 
+                        AirPlayButton()
+                            .frame(width: 44, height: 44)
+                    }
                 }
             }
 
@@ -90,14 +97,14 @@ struct PlayerControls: View {
             HStack(alignment: .center, spacing: 5.0){
                 Text(viewModel.minimumValue)
                     .foregroundColor(foregroundColor)
-                    .font(.system(size:9.0))
+                    .font(.caption)
                     .frame(width: 44.0)
 
                 Spacer()
 
                 Text(viewModel.remainingValue)
                     .foregroundColor(foregroundColor)
-                    .font(.system(size:9.0))
+                    .font(.caption)
                     .frame(width: 44.0)
             }
 
@@ -123,8 +130,9 @@ struct PlayerControls: View {
                 
                 Spacer()
 
-                AirPlayButton()
-                    .frame(width: 44, height: 44)
+                PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 40, height: 40)) {
+                    iaPlayer.didTapPlayButton()
+                }
 
                 Spacer()
 
@@ -215,6 +223,14 @@ extension PlayerControls {
 
         }
 
+        var isPlayingVideo: Bool {
+            guard let file = playingFile else { return false }
+            // Check if format is video-related
+            // Video formats include: h.264, h264 HD, MPEG4, etc.
+            // Audio format is typically "VBR MP3"
+            return file.format != "VBR MP3" && file.format != nil
+        }
+
         var minimumValue: String {
             if !duration.isNaN {
                 return IAStringUtils.timeFormatted(minimumCalc)
@@ -244,10 +260,17 @@ extension PlayerControls {
 }
 
 struct PlayerControls_Previews: PreviewProvider {
-
     static var previews: some View {
-        PlayerControls()
+        PreviewWrapper()
             .environmentObject(Player())
+    }
+    
+    struct PreviewWrapper: View {
+        @State private var showVideoPlayer: Bool = false
+        
+        var body: some View {
+            PlayerControls(showVideoPlayer: $showVideoPlayer)
+        }
     }
 }
 
