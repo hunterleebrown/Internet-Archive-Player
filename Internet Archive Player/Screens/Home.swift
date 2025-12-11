@@ -61,16 +61,16 @@ struct Home: View {
                     Label("Search", systemImage: "magnifyingglass")
                 }
                 .tag(0)
-                
-                // Lists Tab
+
+                // Favorites Tab
                 NavigationStack {
-                    ListsView()
+                    NewFavoritesView()
                 }
                 .tabItem {
-                    Label("Lists", systemImage: "music.note.list")
+                    Label("Favorites", systemImage: "heart")
                 }
                 .tag(1)
-                
+
                 // Now Playing Tab (Center - Most Prominent)
                 NavigationStack {
                     VStack(spacing:0) {
@@ -84,7 +84,7 @@ struct Home: View {
                     }
                     .safeAreaInset(edge: .bottom) {
                         if showControls {
-                            Color.clear
+                            Spacer()
                                 .frame(height: iaPlayer.playerHeight)
                         }
                     }
@@ -95,15 +95,15 @@ struct Home: View {
                 }
                 .tag(2)
                 
-                // Favorites Tab
+                // Lists Tab
                 NavigationStack {
-                    NewFavoritesView()
+                    ListsView()
                 }
                 .tabItem {
-                    Label("Favorites", systemImage: "heart")
+                    Label("Lists", systemImage: "music.note.list")
                 }
                 .tag(3)
-                
+
                 // Debug Tab
                 NavigationStack {
                     DebugView()
@@ -125,24 +125,24 @@ struct Home: View {
                         .padding(5)
                 }
                 .opacity(showControls ? 1 : 0)
-                .frame(maxWidth: 428, maxHeight: iaPlayer.playerHeight, alignment: .top)
-                .clipped()
-                .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
-                    .onEnded { value in
-                        print(value.translation)
-                        switch(value.translation.width, value.translation.height) {
-                        case (...0, -30...30):  print("left swipe")
-                        case (0..., -30...30):  print("right swipe")
-                        case (-100...100, ...0):
-                            print("up swipe")
-                            Home.controlHeightPass.send(true)
-                        case (-100...100, 0...):  print("down swipe")
-                            Home.controlHeightPass.send(false)
-                        default:  print("no clue")
-                        }
-                    }
-                )
-                .padding(.bottom, 49)
+                .frame(maxWidth: 428, minHeight: iaPlayer.playerHeight, maxHeight: iaPlayer.playerHeight, alignment: .top)
+//                .clipped()
+//                .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
+//                    .onEnded { value in
+//                        print(value.translation)
+//                        switch(value.translation.width, value.translation.height) {
+//                        case (...0, -30...30):  print("left swipe")
+//                        case (0..., -30...30):  print("right swipe")
+//                        case (-100...100, ...0):
+//                            print("up swipe")
+//                            Home.controlHeightPass.send(true)
+//                        case (-100...100, 0...):  print("down swipe")
+//                            Home.controlHeightPass.send(false)
+//                        default:  print("no clue")
+//                        }
+//                    }
+//                )
+                .padding(.bottom, 59)
             }
             .zIndex(showControls ? 3: 1)
 
@@ -204,20 +204,18 @@ struct Home: View {
 
     @ViewBuilder func topView() -> some View {
         if iaPlayer.mainPlaylist?.files?.count == 0 {
-            ZStack(alignment: .top) {
-                VStack {
-                    // Your combined Text view
-                    Text("Use the search icon ")
-                        + Text(Image(systemName: "magnifyingglass"))
-                        + Text(" to find and add files to your library.")
-                }
-                .padding(10)
-                .background(Color.fairyRed)
-                .cornerRadius(10)
+            VStack(alignment: .leading, spacing: 0) {
+                // Your combined Text view
+                Text("Use the search icon ")
+                    + Text(Image(systemName: "magnifyingglass"))
+                    + Text(" to find and add files to your library.")
             }
+            .padding(10)
+            .background(Color.fairyRed)
+            .cornerRadius(10)
             .foregroundColor(.fairyCream)
+            .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-
 
         } else {
             Playlist()

@@ -171,7 +171,7 @@ struct EntityFileView: View {
                     }
                     .highPriorityGesture(TapGesture())
             }
-            .tint(textColor)
+//            .tint(textColor)
             .padding(5.0)
         }
         .listRowSeparator(.hidden) // Hides the separator for this row

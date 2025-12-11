@@ -104,6 +104,10 @@ struct SearchView: View {
                 }
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            Spacer()
+                .frame(height: iaPlayer.playingFile != nil ? iaPlayer.playerHeight + 10 : 0)
+        }
         .navigationTitle("Search")
         .tint(.fairyRed)
     }
