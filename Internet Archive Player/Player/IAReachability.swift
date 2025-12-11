@@ -7,27 +7,28 @@
 //
 
 import Foundation
-import SystemConfiguration
-
+import Network
 
 open class IAReachability {
     
     class func isConnectedToNetwork() -> Bool {
-        var zeroAddress = sockaddr_in()
-        zeroAddress.sin_len = UInt8(MemoryLayout.size(ofValue: zeroAddress))
-        zeroAddress.sin_family = sa_family_t(AF_INET)
+        let monitor = NWPathMonitor()
+        let semaphore = DispatchSemaphore(value: 0)
+        var isConnected = false
         
-        let nodename = ("archive.org" as NSString).utf8String
-
-        let defaultRouteReachability = SCNetworkReachabilityCreateWithName(nil, nodename!)
-            
-        var flags = SCNetworkReachabilityFlags()
-        if !SCNetworkReachabilityGetFlags(defaultRouteReachability!, &flags) {
-            return false
+        monitor.pathUpdateHandler = { path in
+            isConnected = path.status == .satisfied
+            semaphore.signal()
         }
-        let isReachable = (flags.rawValue & UInt32(kSCNetworkFlagsReachable)) != 0
-        let needsConnection = (flags.rawValue & UInt32(kSCNetworkFlagsConnectionRequired)) != 0
-        return (isReachable && !needsConnection)
+        
+        let queue = DispatchQueue(label: "IAReachability")
+        monitor.start(queue: queue)
+        
+        // Wait for the first path update with a timeout
+        _ = semaphore.wait(timeout: .now() + 1.0)
+        monitor.cancel()
+        
+        return isConnected
     }
     
 }
