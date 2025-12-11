@@ -182,6 +182,12 @@ extension SearchView {
         }
 
         func search(query: String, collection:String? = nil, loadMore: Bool) {
+
+            guard IAReachability.isConnectedToNetwork() else {
+                Player.networkAlert.send(true)
+                return
+            }
+
             guard !searchText.isEmpty, searchText.count > 2, !searchStarted  else { return }
             self.isSearching = true
             self.noDataFound = false

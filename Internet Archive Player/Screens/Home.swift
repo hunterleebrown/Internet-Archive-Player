@@ -205,10 +205,8 @@ struct Home: View {
     @ViewBuilder func topView() -> some View {
         if iaPlayer.mainPlaylist?.files?.count == 0 {
             VStack(alignment: .leading, spacing: 0) {
-                // Your combined Text view
-                Text("Use the search icon ")
-                    + Text(Image(systemName: "magnifyingglass"))
-                    + Text(" to find and add files to your library.")
+                // Your combined Text view using string interpolation
+                Text("Use the search icon \(Image(systemName: "magnifyingglass")) to find and add files to your library.")
             }
             .padding(10)
             .background(Color.fairyRed)

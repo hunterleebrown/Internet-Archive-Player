@@ -2,18 +2,16 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>
-        <key>UIImageName</key>
-        <string>IA-Launch</string> <!-- Name of the image in Assets.xcassets -->
-        <key>UIColorName</key>
-        <string>AccentColor</string>
+		<key>UIColorName</key>
+		<string>AccentColor</string>
+		<key>UIImageName</key>
+		<string>IA-Launch</string>
 	</dict>
 </dict>
 </plist>
