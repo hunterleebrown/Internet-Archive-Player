@@ -22,6 +22,7 @@ final class DetailViewModel: ObservableObject {
     @Published var playlistArchiveFiles: [ArchiveFile]?
     @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
     @Published var uiImage: UIImage?
+    @Published var isFavoriteArchive: Bool = false
 
     @Published var pressedStates: [Int: Bool] = [:]
 
@@ -140,5 +141,36 @@ final class DetailViewModel: ObservableObject {
         guard let player = self.player else { return }
         player.pause()
         self.player = nil
+    }
+    
+    // MARK: - Favorite Archive Management
+    
+    public func checkFavoriteStatus(identifier: String) {
+        guard let player = iaPlayer else { return }
+        isFavoriteArchive = player.isFavoriteArchive(identifier: identifier)
+    }
+    
+    public func toggleFavoriteArchive(identifier: String) -> PlayerError? {
+        guard let archiveDoc = archiveDoc,
+              let player = iaPlayer else { return nil }
+        
+        if isFavoriteArchive {
+            // Remove from favorites
+            player.removeFavoriteArchive(identifier: identifier)
+            isFavoriteArchive = false
+            return nil
+        } else {
+            // Add to favorites
+            do {
+                try player.addFavoriteArchive(archiveDoc)
+                isFavoriteArchive = true
+                return nil
+            } catch PlayerError.alreadyOnFavoriteArchives {
+                return .alreadyOnFavoriteArchives
+            } catch {
+                print("Error adding favorite archive: \(error)")
+                return nil
+            }
+        }
     }
 }

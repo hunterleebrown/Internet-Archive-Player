@@ -17,6 +17,7 @@ import CoreData
 enum PlayerError: Error {
     case alreadyOnPlaylist
     case alreadyOnFavorites
+    case alreadyOnFavoriteArchives
 }
 
 extension PlayerError: CustomStringConvertible {
@@ -26,6 +27,8 @@ extension PlayerError: CustomStringConvertible {
             return "Item is already on the playlist."
         case .alreadyOnFavorites:
             return "Items is already favorited."
+        case .alreadyOnFavoriteArchives:
+            return "Archive is already in Favorite Archives."
         }
     }
 }
@@ -45,6 +48,7 @@ class Player: NSObject, ObservableObject {
     @Published var showPlayingDetailView = false
     @Published var items: [ArchiveFileEntity] = [ArchiveFileEntity]()
     @Published var favoriteItems: [ArchiveFileEntity] = [ArchiveFileEntity]()
+    @Published var favoriteArchives: [ArchiveMetaDataEntity] = [ArchiveMetaDataEntity]()
     @Published public var avPlayer: AVPlayer
     @Published public var playingFile: ArchiveFileEntity? {
         didSet {
@@ -139,6 +143,9 @@ class Player: NSObject, ObservableObject {
           print("failed to fetch favorite items!")
         }
 
+        // Load favorite archives
+        favoriteArchives = PersistenceController.shared.fetchAllFavoriteArchives()
+
 
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
     }
@@ -216,6 +223,26 @@ class Player: NSObject, ObservableObject {
 
         playlist.addToFiles(archiveFileEntity)
         PersistenceController.shared.save()
+    }
+
+    // MARK: - Favorite Archives Management
+    
+    public func addFavoriteArchive(_ metaData: ArchiveMetaData) throws {
+        try PersistenceController.shared.saveFavoriteArchive(metaData)
+        refreshFavoriteArchives()
+    }
+    
+    public func removeFavoriteArchive(identifier: String) {
+        PersistenceController.shared.removeFavoriteArchive(identifier: identifier)
+        refreshFavoriteArchives()
+    }
+    
+    public func isFavoriteArchive(identifier: String) -> Bool {
+        return PersistenceController.shared.isFavoriteArchive(identifier: identifier)
+    }
+    
+    public func refreshFavoriteArchives() {
+        favoriteArchives = PersistenceController.shared.fetchAllFavoriteArchives()
     }
 
     public func checkDupes(archiveFile: ArchiveFileEntity, list: [ArchiveFileEntity], error: PlayerError) throws {

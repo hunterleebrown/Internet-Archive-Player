@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22222" systemVersion="22G91" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24411" systemVersion="25B78" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="ArchiveFileEntity" representedClassName="ArchiveFileEntity" syncable="YES" codeGenerationType="class">
         <attribute name="archiveTitle" optional="YES" attributeType="String"/>
         <attribute name="artist" optional="YES" attributeType="String"/>
@@ -13,6 +13,17 @@
         <attribute name="track" optional="YES" attributeType="String"/>
         <attribute name="url" optional="YES" attributeType="URI"/>
         <relationship name="playlist" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PlaylistEntity" inverseName="files" inverseEntity="PlaylistEntity"/>
+    </entity>
+    <entity name="ArchiveMetaDataEntity" representedClassName="ArchiveMetaDataEntity" syncable="YES">
+        <attribute name="archiveTitle" optional="YES" attributeType="String"/>
+        <attribute name="creator" optional="YES" attributeType="String"/>
+        <attribute name="dateAdded" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="desc" optional="YES" attributeType="String"/>
+        <attribute name="iconUrlString" optional="YES" attributeType="String"/>
+        <attribute name="identifier" attributeType="String" spotlightIndexingEnabled="YES"/>
+        <attribute name="mediatype" optional="YES" attributeType="String"/>
+        <attribute name="publisher" optional="YES" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
     </entity>
     <entity name="PlaylistEntity" representedClassName="PlaylistEntity" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>

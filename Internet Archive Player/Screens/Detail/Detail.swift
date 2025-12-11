@@ -20,6 +20,7 @@ struct Detail: View {
 
     @State var playlistErrorAlertShowing: Bool = false
     @State var favoritesErrorAlertShowing: Bool = false
+    @State var favoriteArchivesErrorAlertShowing: Bool = false
 
     @State var otherPlaylistPresented = false
 
@@ -73,6 +74,18 @@ struct Detail: View {
                                     .padding(10)
                             }
                         }
+                        
+                        Button {
+                            if let error = viewModel.toggleFavoriteArchive(identifier: identifier) {
+                                favoriteArchivesErrorAlertShowing = true
+                            }
+                        } label: {
+                            Image(systemName: viewModel.isFavoriteArchive ? "heart.fill" : "heart")
+                                .font(.largeTitle)
+                                .tint(.fairyRed)
+                                .padding(10)
+                        }
+                        
                         ShareLink(item: URL(string: "https://archive.org/details/\(identifier)")!) {
                             Image(systemName: "square.and.arrow.up.circle")
                                 .font(.largeTitle)
@@ -331,6 +344,7 @@ struct Detail: View {
             self.viewModel.getArchiveDoc(identifier: self.identifier)
             self.viewModel.setSubscribers(iaPlayer)
             self.viewModel.passInPlayer(iaPlayer: iaPlayer)
+            self.viewModel.checkFavoriteStatus(identifier: self.identifier)
         }
         .sheet(isPresented: $descriptionExpanded) {
             if let doc = self.viewModel.archiveDoc {
@@ -346,6 +360,9 @@ struct Detail: View {
             Button("Okay", role: .cancel) { }
         }
         .alert(PlayerError.alreadyOnFavorites.description, isPresented: $favoritesErrorAlertShowing) {
+            Button("Okay", role: .cancel) { }
+        }
+        .alert(PlayerError.alreadyOnFavoriteArchives.description, isPresented: $favoriteArchivesErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
         .onReceive(Detail.backgroundPass) { url in

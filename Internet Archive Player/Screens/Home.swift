@@ -18,7 +18,7 @@ struct Home: View {
     @State var showControls: Bool = false
     @State var maxControlHeight: Bool = true
     @State var otherPlaylistPresented: Bool = false
-    @State var selectedTab: Int = 2  // Default to Now Playing tab (index 2)
+    @State var selectedTab: Int = 2  // Default to Now Playing tab (index 3)
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var controlHeightPass = PassthroughSubject<Bool, Never>()
@@ -62,12 +62,21 @@ struct Home: View {
                 }
                 .tag(0)
 
-                // Favorites Tab
+//                // Favorites Tab
+//                NavigationStack {
+//                    NewFavoritesView()
+//                }
+//                .tabItem {
+//                    Label("Favorites", systemImage: "heart")
+//                }
+//                .tag(1)
+
+                // Favorite Archives Tab
                 NavigationStack {
-                    NewFavoritesView()
+                    FavoriteArchivesView()
                 }
                 .tabItem {
-                    Label("Favorites", systemImage: "heart")
+                    Label("Archives", systemImage: "books.vertical")
                 }
                 .tag(1)
 
@@ -94,13 +103,13 @@ struct Home: View {
                     Label("Now Playing", systemImage: "music.note.square.stack.fill")
                 }
                 .tag(2)
-                
+
                 // Lists Tab
                 NavigationStack {
                     ListsView()
                 }
                 .tabItem {
-                    Label("Lists", systemImage: "music.note.list")
+                    Label("Playlists", systemImage: "music.note.list")
                 }
                 .tag(3)
 
