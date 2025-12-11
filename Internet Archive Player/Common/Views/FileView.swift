@@ -143,7 +143,6 @@ struct FileView: View {
 
                 if ellipsisAction.count > 0 {
                     Menu {
-
                         ForEach(self.ellipsisAction, id: \.self) { menuItem in
                             Button(action: {
                                 menuItem.action()
@@ -154,9 +153,7 @@ struct FileView: View {
                                 }
                             }
                             .frame(width: 44, height: 44)
-
                         }
-
 
                     } label: {
                         Image(systemName: "ellipsis")
@@ -167,7 +164,6 @@ struct FileView: View {
                     .highPriorityGesture(TapGesture())
                 }
             }
-            .tint(textColor)
             .padding(5.0)
         }
         .background(backgroundColor ?? nil)
