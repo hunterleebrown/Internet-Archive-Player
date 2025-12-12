@@ -20,6 +20,7 @@ struct Detail: View {
 
     @State var playlistErrorAlertShowing: Bool = false
     @State var favoritesErrorAlertShowing: Bool = false
+    @State var favoriteArchivesErrorAlertShowing: Bool = false
 
     @State var otherPlaylistPresented = false
 
@@ -62,25 +63,66 @@ struct Detail: View {
                 }
 
                 VStack(alignment: .center) {
-                    HStack(spacing:20) {
+                    HStack(spacing: 0) {
                         if (self.viewModel.archiveDoc?.description) != nil {
                             Button {
                                 descriptionExpanded = true
                             } label: {
-                                Image(systemName: "info.circle")
-                                    .font(.largeTitle)
-                                    .tint(.fairyRed)
-                                    .padding(10)
+                                VStack(spacing: 4) {
+                                    Image(systemName: "info.circle")
+                                        .font(.title2)
+                                        .tint(.fairyRed)
+                                    Text("Description")
+                                        .font(.caption2)
+                                        .foregroundColor(.black)
+                                }
+                                .frame(width: 80)
+                                .padding(.vertical, 12)
                             }
+                            
+                            Divider()
+                                .frame(height: 44)
                         }
+                        
+                        Button {
+                            if viewModel.toggleFavoriteArchive(identifier: identifier) != nil {
+                                favoriteArchivesErrorAlertShowing = true
+                            }
+                        } label: {
+                            VStack(spacing: 4) {
+                                Image(systemName: viewModel.isFavoriteArchive ? "heart.fill" : "heart")
+                                    .font(.title2)
+                                    .tint(.fairyRed)
+                                Text("Bookmark")
+                                    .font(.caption2)
+                                    .foregroundColor(.black)
+                            }
+                            .frame(width: 80)
+                            .padding(.vertical, 12)
+                        }
+                        
+                        Divider()
+                            .frame(height: 44)
+                        
                         ShareLink(item: URL(string: "https://archive.org/details/\(identifier)")!) {
-                            Image(systemName: "square.and.arrow.up.circle")
-                                .font(.largeTitle)
+                            VStack(spacing: 4) {
+                                Image(systemName: "square.and.arrow.up.circle")
+                                    .font(.title2)
+                                Text("Share")
+                                    .font(.caption2)
+                                    .foregroundColor(.black)
+                            }
+                            .frame(width: 80)
+                            .padding(.vertical, 12)
                         }
-
-
                     }
                     .frame(maxWidth: .infinity)
+                    .background(Color.white.opacity(0.3))
+                    .cornerRadius(detailCornerRadius)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: detailCornerRadius)
+                            .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
+                    )
                 }
             }
             .background(
@@ -124,7 +166,7 @@ struct Detail: View {
                             }){
                                 HStack {
                                     Image(systemName: PlayerButtonType.list.rawValue)
-                                    Text("Add all to list ...")
+                                    Text("Add all to a playlist ...")
                                 }
                             }
                             .frame(width: 44, height: 44)
@@ -261,22 +303,6 @@ struct Detail: View {
                    let avg = viewModel.uiImage,
                    let color = avg.averageColor {
 
-//                    Rectangle().fill(
-
-//                        if let gradient = avg.gradientToBlack() {
-//                            LinearGradient(
-//                                gradient: gradient,
-//                                startPoint: .top,
-//                                endPoint: .bottom
-//                            )
-//                            .ignoresSafeArea() // Makes the gradient cover the entire screen
-//                        } else {
-//                            Color(color)
-//                        }
-
-//                    )
-//                    .ignoresSafeArea()
-
                     ZStack(alignment: .top) {
 
                         Color(color)
@@ -331,6 +357,7 @@ struct Detail: View {
             self.viewModel.getArchiveDoc(identifier: self.identifier)
             self.viewModel.setSubscribers(iaPlayer)
             self.viewModel.passInPlayer(iaPlayer: iaPlayer)
+            self.viewModel.checkFavoriteStatus(identifier: self.identifier)
         }
         .sheet(isPresented: $descriptionExpanded) {
             if let doc = self.viewModel.archiveDoc {
@@ -346,6 +373,9 @@ struct Detail: View {
             Button("Okay", role: .cancel) { }
         }
         .alert(PlayerError.alreadyOnFavorites.description, isPresented: $favoritesErrorAlertShowing) {
+            Button("Okay", role: .cancel) { }
+        }
+        .alert(PlayerError.alreadyOnFavoriteArchives.description, isPresented: $favoriteArchivesErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
         .onReceive(Detail.backgroundPass) { url in
@@ -388,7 +418,7 @@ struct Detail: View {
     private func menuActions(archiveFile: ArchiveFile) -> [MenuAction] {
         var actions = [MenuAction]()
 
-        let playlist = MenuAction(name: "Add to Now Playing", action:  {
+        let playlist = MenuAction(name: "Add file to Now Playing", action:  {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
@@ -398,7 +428,7 @@ struct Detail: View {
             }
         }, imageName: "list.bullet.rectangle.portrait")
 
-        let favorites = MenuAction(name: "Add to Favorites", action:  {
+        let favorites = MenuAction(name: "Add file to Favorites", action:  {
             do  {
                 try iaPlayer.appendFavoriteItem(file: archiveFile)
             } catch PlayerError.alreadyOnFavorites {
@@ -409,7 +439,7 @@ struct Detail: View {
         }, imageName: "heart")
 
 
-        let otherPlaylist = MenuAction(name: "Add to list ...", action:  {
+        let otherPlaylist = MenuAction(name: "Add to a playlist ...", action:  {
             viewModel.playlistArchiveFiles = [archiveFile]
             otherPlaylistPresented = true
         }, imageName: "music.note.list")

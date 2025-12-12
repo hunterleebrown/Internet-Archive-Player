@@ -46,7 +46,7 @@ struct ObservableScrollView<Content>: View where Content : View {
     }
 
     var body: some View {
-        ScrollView {
+        ScrollView(.vertical) {
                 content()
                     .background(GeometryReader { geo in
                         let offset = -geo.frame(in: .named(scrollSpace)).minY

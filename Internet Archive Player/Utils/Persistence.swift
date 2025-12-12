@@ -113,6 +113,69 @@ struct PersistenceController {
         return false
     }
 
+    // MARK: - Favorite Archives
+    
+    public func saveFavoriteArchive(_ metaData: ArchiveMetaData) throws {
+        // Ensure we have a valid identifier
+        guard let identifier = metaData.identifier else {
+            print("Cannot save favorite archive without identifier")
+            return
+        }
+        
+        // Check if already exists
+        if isFavoriteArchive(identifier: identifier) {
+            throw PlayerError.alreadyOnFavoriteArchives
+        }
+        
+        // Create the entity (returns nil if identifier is missing, but we already checked above)
+        guard let _ = metaData.archiveMetaDataEntity() else {
+            print("Failed to create ArchiveMetaDataEntity")
+            return
+        }
+        
+        save()
+    }
+    
+    public func removeFavoriteArchive(identifier: String) {
+        let fetchRequest: NSFetchRequest<ArchiveMetaDataEntity> = ArchiveMetaDataEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "identifier == %@", identifier)
+        
+        do {
+            let results = try container.viewContext.fetch(fetchRequest)
+            for entity in results {
+                delete(entity, false)
+            }
+            save()
+        } catch {
+            print("Error removing favorite archive: \(error)")
+        }
+    }
+    
+    public func isFavoriteArchive(identifier: String) -> Bool {
+        let fetchRequest: NSFetchRequest<ArchiveMetaDataEntity> = ArchiveMetaDataEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "identifier == %@", identifier)
+        fetchRequest.fetchLimit = 1
+        
+        do {
+            let count = try container.viewContext.count(for: fetchRequest)
+            return count > 0
+        } catch {
+            print("Error checking favorite archive: \(error)")
+            return false
+        }
+    }
+    
+    public func fetchAllFavoriteArchives() -> [ArchiveMetaDataEntity] {
+        let fetchRequest = ArchiveMetaDataEntity.archiveMetaDataFetchRequest
+        
+        do {
+            return try container.viewContext.fetch(fetchRequest)
+        } catch {
+            print("Error fetching favorite archives: \(error)")
+            return []
+        }
+    }
+
 }
 
 extension NSManagedObject {
