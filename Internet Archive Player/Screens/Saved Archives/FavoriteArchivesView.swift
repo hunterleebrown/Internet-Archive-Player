@@ -20,10 +20,10 @@ struct FavoriteArchivesView: View {
                         Image(systemName: "heart.slash")
                             .font(.largeTitle)
                             .foregroundColor(.gray)
-                        Text("No Favorite Archives")
+                        Text("No Bookmarked Archives")
                             .font(.headline)
                             .foregroundColor(.gray)
-                        Text("Add archives to your favorites from the detail view")
+                        Text("Add archives to your bookmarks by tapping the heart icon from the detail view")
                             .font(.caption)
                             .foregroundColor(.gray)
                             .multilineTextAlignment(.center)
@@ -33,22 +33,18 @@ struct FavoriteArchivesView: View {
                 } else {
                     ForEach(iaPlayer.favoriteArchives, id: \.identifier) { archive in
                         NavigationLink(destination: Detail(archive.identifier ?? "")) {
-                            FavoriteArchiveRow(archive: archive)
+                            SearchItemView(item: archive)
                         }
+                        .listRowInsets(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5))
+                        .listRowBackground(Color.clear)
                     }
                     .onDelete(perform: deleteArchives)
                 }
             }
             .listStyle(PlainListStyle())
-            .navigationTitle("Favorite Archives")
-//            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Bookmarks")
             .toolbar {
-//                ToolbarItem(placement: .navigationBarLeading) {
-//                    Button("Done") {
-//                        dismiss()
-//                    }
-//                }
-                
+
                 if !iaPlayer.favoriteArchives.isEmpty {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         EditButton()
@@ -67,71 +63,6 @@ struct FavoriteArchivesView: View {
             if let identifier = archive.identifier {
                 iaPlayer.removeFavoriteArchive(identifier: identifier)
             }
-        }
-    }
-}
-
-struct FavoriteArchiveRow: View {
-    let archive: ArchiveMetaDataEntity
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            AsyncImage(
-                url: archive.iconUrl,
-                content: { image in
-                    image.resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 60, height: 60)
-                        .background(Color.black)
-                },
-                placeholder: {
-                    Color(.black)
-                        .frame(width: 60, height: 60)
-                })
-            .cornerRadius(8)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(archive.displayTitle)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
-                
-                if let creator = archive.displayCreator {
-                    Text(creator)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-                
-                if let publisher = archive.displayPublisher {
-                    Text(publisher)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-                
-                if let mediatype = archive.mediatype {
-                    HStack {
-                        Image(systemName: mediatypeIcon(mediatype))
-                            .font(.caption)
-                        Text(mediatype.capitalized)
-                            .font(.caption)
-                    }
-                    .foregroundColor(.fairyRed)
-                }
-            }
-        }
-        .padding(.vertical, 4)
-    }
-    
-    private func mediatypeIcon(_ mediatype: String) -> String {
-        switch mediatype.lowercased() {
-        case "audio", "etree":
-            return "hifispeaker"
-        case "movies":
-            return "video"
-        default:
-            return "questionmark.circle"
         }
     }
 }

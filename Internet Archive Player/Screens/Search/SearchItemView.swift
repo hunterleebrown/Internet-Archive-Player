@@ -9,14 +9,14 @@ import Foundation
 import SwiftUI
 import iaAPI
 
-struct SearchItemView: View {
-    var item: ArchiveMetaData
+struct SearchItemView<Item: SearchItemDisplayable>: View {
+    var item: Item
     var textColor: Color = .droopy
     var body: some View {
         HStack(alignment:.top, spacing: 5.0) {
 
             AsyncImage(
-                url: item.iconUrl,
+                url: item.displayIconUrl,
                 content: { image in
                     image.resizable()
                         .aspectRatio(contentMode: .fit)
@@ -33,7 +33,7 @@ struct SearchItemView: View {
             .cornerRadius(5)
             .frame(width: 44, height: 44, alignment: .leading)
 
-            Image(systemName: item.mediatype == .audio ||  item.mediatype == .etree ? "hifispeaker" : item.mediatype == .movies ? "video" : "questionmark")
+            Image(systemName: item.mediatypeDisplay == .audio ||  item.mediatypeDisplay == .etree ? "hifispeaker" : item.mediatypeDisplay == .movies ? "video" : "questionmark")
                 .frame(width: 22.0, height: 22.0, alignment: .center)
                 .tint(.black)
 
@@ -45,7 +45,7 @@ struct SearchItemView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .multilineTextAlignment(.leading)
 
-                if let publisher = item.publisher, !publisher.isEmpty {
+                if let publisher = item.publisherDisplay, !publisher.isEmpty {
                     HStack(alignment: .top, spacing: 5.0) {
                         Text("Publisher: ")
                             .font(.caption2)
@@ -59,7 +59,7 @@ struct SearchItemView: View {
                     }
                 }
 
-                if !(item.creator?.isEmpty ?? false) {
+                if !(item.creatorDisplay?.isEmpty ?? false) {
                     HStack(alignment: .top, spacing: 5.0) {
                         Text(getCreators())
                             .font(.caption2)
@@ -76,11 +76,11 @@ struct SearchItemView: View {
     }
 
     private func getCreators() -> String {
-        if let creators = item.creator {
+        if let creators = item.creatorDisplay {
             if creators.count > 1 {
-                return item.creator?[0...1].joined(separator: ", ") ?? ""
+                return item.creatorDisplay?[0...1].joined(separator: ", ") ?? ""
             } else {
-                return item.creator?.first ?? ""
+                return item.creatorDisplay?.first ?? ""
             }
         }
 

@@ -68,10 +68,15 @@ struct Detail: View {
                             Button {
                                 descriptionExpanded = true
                             } label: {
-                                Image(systemName: "info.circle")
-                                    .font(.largeTitle)
-                                    .tint(.fairyRed)
-                                    .padding(10)
+                                VStack(spacing: 4) {
+                                    Image(systemName: "info.circle")
+                                        .font(.largeTitle)
+                                        .tint(.fairyRed)
+                                    Text("Description")
+                                        .font(.caption2)
+                                        .foregroundColor(.black)
+                                }
+                                .padding(10)
                             }
                         }
                         
@@ -80,15 +85,26 @@ struct Detail: View {
                                 favoriteArchivesErrorAlertShowing = true
                             }
                         } label: {
-                            Image(systemName: viewModel.isFavoriteArchive ? "heart.fill" : "heart")
-                                .font(.largeTitle)
-                                .tint(.fairyRed)
-                                .padding(10)
+                            VStack(spacing: 4) {
+                                Image(systemName: viewModel.isFavoriteArchive ? "heart.fill" : "heart")
+                                    .font(.largeTitle)
+                                    .tint(.fairyRed)
+                                Text("Bookmark")
+                                    .font(.caption2)
+                                    .foregroundColor(.black)
+                            }
+                            .padding(10)
                         }
                         
                         ShareLink(item: URL(string: "https://archive.org/details/\(identifier)")!) {
-                            Image(systemName: "square.and.arrow.up.circle")
-                                .font(.largeTitle)
+                            VStack(spacing: 4) {
+                                Image(systemName: "square.and.arrow.up.circle")
+                                    .font(.largeTitle)
+                                Text("Share")
+                                    .font(.caption2)
+                                    .foregroundColor(.black)
+                            }
+                            .padding(10)
                         }
 
 
@@ -137,7 +153,7 @@ struct Detail: View {
                             }){
                                 HStack {
                                     Image(systemName: PlayerButtonType.list.rawValue)
-                                    Text("Add all to list ...")
+                                    Text("Add all to a playlist ...")
                                 }
                             }
                             .frame(width: 44, height: 44)
@@ -405,7 +421,7 @@ struct Detail: View {
     private func menuActions(archiveFile: ArchiveFile) -> [MenuAction] {
         var actions = [MenuAction]()
 
-        let playlist = MenuAction(name: "Add to Now Playing", action:  {
+        let playlist = MenuAction(name: "Add file to Now Playing", action:  {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
@@ -415,7 +431,7 @@ struct Detail: View {
             }
         }, imageName: "list.bullet.rectangle.portrait")
 
-        let favorites = MenuAction(name: "Add to Favorites", action:  {
+        let favorites = MenuAction(name: "Add file to Favorites", action:  {
             do  {
                 try iaPlayer.appendFavoriteItem(file: archiveFile)
             } catch PlayerError.alreadyOnFavorites {
@@ -426,7 +442,7 @@ struct Detail: View {
         }, imageName: "heart")
 
 
-        let otherPlaylist = MenuAction(name: "Add to list ...", action:  {
+        let otherPlaylist = MenuAction(name: "Add to a playlist ...", action:  {
             viewModel.playlistArchiveFiles = [archiveFile]
             otherPlaylistPresented = true
         }, imageName: "music.note.list")

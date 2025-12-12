@@ -76,7 +76,7 @@ struct Home: View {
                     FavoriteArchivesView()
                 }
                 .tabItem {
-                    Label("Archives", systemImage: "books.vertical")
+                    Label("Bookmarks", systemImage: "books.vertical")
                 }
                 .tag(1)
 
