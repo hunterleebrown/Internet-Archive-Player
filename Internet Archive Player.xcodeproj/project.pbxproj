@@ -11,7 +11,6 @@
 		5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2FACD227A10FB200D02945 /* SearchItemView.swift */; };
 		5A305F522807BF5E00735FAA /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 5A305F512807BF5E00735FAA /* iaAPI */; };
 		5A33A43F2A59CC520010C6FA /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */; };
-		5A33A4412A59CCD50010C6FA /* BetterDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A33A4402A59CCD50010C6FA /* BetterDetail.swift */; };
 		5A35A6D92ABBC34000A127D6 /* ViewBuilders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A35A6D82ABBC34000A127D6 /* ViewBuilders.swift */; };
 		5A35A6DC2ABBE8A800A127D6 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A35A6DB2ABBE8A800A127D6 /* DebugView.swift */; };
 		5A3AAA6D2AEDEAC6004A15BC /* Internet_Archive_Player_tvOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3AAA6C2AEDEAC6004A15BC /* Internet_Archive_Player_tvOSApp.swift */; };
@@ -108,7 +107,6 @@
 		5A012CAD282B54C800785420 /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
 		5A2FACD227A10FB200D02945 /* SearchItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchItemView.swift; sourceTree = "<group>"; };
 		5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
-		5A33A4402A59CCD50010C6FA /* BetterDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetterDetail.swift; sourceTree = "<group>"; };
 		5A35A6D82ABBC34000A127D6 /* ViewBuilders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewBuilders.swift; sourceTree = "<group>"; };
 		5A35A6DB2ABBE8A800A127D6 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		5A3AAA6A2AEDEAC6004A15BC /* Internet Archive Player tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Internet Archive Player tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -528,7 +526,6 @@
 			children = (
 				CE16141A279E9EE900ED0055 /* Detail.swift */,
 				5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */,
-				5A33A4402A59CCD50010C6FA /* BetterDetail.swift */,
 				5AE69CD12A846DBE0062CC5D /* DetailDescription.swift */,
 			);
 			path = Detail;
@@ -765,7 +762,6 @@
 				5A6D68A32EEB895200301357 /* SearchItemDisplayable.swift in Sources */,
 				5AD216F22AA5770300325087 /* ListsView.swift in Sources */,
 				5AC5B2B4281CA4B000CDE937 /* EntityFileView.swift in Sources */,
-				5A33A4412A59CCD50010C6FA /* BetterDetail.swift in Sources */,
 				5AA391A52A4F4C8A00C65A48 /* Home.swift in Sources */,
 				5AFD76062AAD330F00987D4E /* DraggableModifier.swift in Sources */,
 				5A4F2D5D2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift in Sources */,

@@ -22,9 +22,22 @@ final class DetailViewModel: ObservableObject {
     @Published var playlistArchiveFiles: [ArchiveFile]?
     @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
     @Published var uiImage: UIImage?
+    @Published var averageColor: UIColor?
+    @Published var gradient: Gradient?
     @Published var isFavoriteArchive: Bool = false
+    @Published var createdPlaylist: PlaylistEntity?
 
     @Published var pressedStates: [Int: Bool] = [:]
+    
+    // Cached sorted audio files
+    var sortedAudioFilesCache: [ArchiveFile] {
+        audioFiles.sorted { lf, rf in
+            if let lTrack = Int(lf.track ?? ""), let rTrack = Int(rf.track ?? "") {
+                return lTrack < rTrack
+            }
+            return false
+        }
+    }
 
     var player: AVPlayer? = nil
 
@@ -38,29 +51,35 @@ final class DetailViewModel: ObservableObject {
         self.iaPlayer = iaPlayer
     }
 
-    public func getArchiveDoc(identifier: String){
-        Task { @MainActor in
-            do {
-                let doc = try await self.service.getArchiveAsync(with: identifier)
-                self.archiveDoc = doc.metadata
-                self.audioFiles = doc.non78Audio.sorted{
-                    guard let track1 = $0.track, let track2 = $1.track else { return false}
-                    return track1 < track2
-                }
-
-                let video = doc.files.filter{ $0.isVideo }
-                if video.count > 0 {
-                    self.movieFiles = desiredVideo(files:video)
-                }
-
-                if let art = doc.preferredAlbumArt {
-                    //self.backgroundIconUrl = icon
-                    Detail.backgroundPass.send(art)
-                    self.uiImage = await IAMediaUtils.getImage(url: art)
-                }
-            } catch {
-                print(error)
+    @MainActor
+    public func getArchiveDoc(identifier: String) async {
+        do {
+            let doc = try await self.service.getArchiveAsync(with: identifier)
+            self.archiveDoc = doc.metadata
+            self.audioFiles = doc.non78Audio.sorted{
+                guard let track1 = $0.track, let track2 = $1.track else { return false}
+                return track1 < track2
             }
+
+            let video = doc.files.filter{ $0.isVideo }
+            if video.count > 0 {
+                self.movieFiles = desiredVideo(files:video)
+            }
+
+            if let art = doc.preferredAlbumArt {
+                //self.backgroundIconUrl = icon
+                Detail.backgroundPass.send(art)
+                let image = await IAMediaUtils.getImage(url: art)
+                self.uiImage = image
+                
+                // Process color and gradient once, in background
+                if let image = image {
+                    self.averageColor = image.averageColor
+                    self.gradient = image.gradientToBlack()
+                }
+            }
+        } catch {
+            print(error)
         }
     }
 
@@ -172,5 +191,99 @@ final class DetailViewModel: ObservableObject {
                 return nil
             }
         }
+    }
+    
+    // MARK: - Play All Audio
+    
+    public func playAllAudio() {
+        guard let player = iaPlayer else { return }
+        
+        let sortedFiles = sortedAudioFilesCache
+        guard !sortedFiles.isEmpty else { return }
+        
+        let playlistName = archiveDoc?.archiveTitle ?? "Playlist"
+        let context = PersistenceController.shared.container.viewContext
+        
+        // Check if a playlist with this name already exists
+        let fetchRequest = PlaylistEntity.fetchRequest(playlistName: playlistName)
+        
+        var playlistToUse: PlaylistEntity?
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            
+            if let existingPlaylist = results.first {
+                // Playlist exists - reorder it to match the original track order
+                let existingFiles = existingPlaylist.files?.array as? [ArchiveFileEntity] ?? []
+                let existingURLs = Set(existingFiles.compactMap { $0.url?.absoluteString })
+                let newURLs = Set(sortedFiles.compactMap { $0.url?.absoluteString })
+                
+                // Check if the existing playlist is missing any files
+                let missingURLs = newURLs.subtracting(existingURLs)
+                
+                // Add any missing files first
+                if !missingURLs.isEmpty {
+                    for file in sortedFiles {
+                        if let urlString = file.url?.absoluteString, missingURLs.contains(urlString) {
+                            let entity = file.archiveFileEntity()
+                            existingPlaylist.addToFiles(entity)
+                        }
+                    }
+                }
+                
+                // Now reorder the playlist to match the original track order from Details
+                let allFiles = existingPlaylist.files?.array as? [ArchiveFileEntity] ?? []
+                
+                // Create a map of URL to entity for quick lookup
+                var urlToEntity: [String: ArchiveFileEntity] = [:]
+                for entity in allFiles {
+                    if let urlString = entity.url?.absoluteString {
+                        urlToEntity[urlString] = entity
+                    }
+                }
+                
+                // Build the new ordered array based on sortedFiles order
+                var reorderedEntities: [ArchiveFileEntity] = []
+                for file in sortedFiles {
+                    if let urlString = file.url?.absoluteString,
+                       let entity = urlToEntity[urlString] {
+                        reorderedEntities.append(entity)
+                    }
+                }
+                
+                // Update the playlist with the reordered files
+                existingPlaylist.files = NSOrderedSet(array: reorderedEntities)
+                PersistenceController.shared.save()
+                
+                playlistToUse = existingPlaylist
+            } else {
+                // Create a new playlist
+                let newPlaylist = PlaylistEntity(context: context)
+                newPlaylist.name = playlistName
+                
+                // Add all sorted audio files to the new playlist
+                for file in sortedFiles {
+                    let entity = file.archiveFileEntity()
+                    newPlaylist.addToFiles(entity)
+                }
+                
+                PersistenceController.shared.save()
+                playlistToUse = newPlaylist
+            }
+        } catch {
+            print("Error fetching playlist: \(error)")
+            return
+        }
+        
+        // Start playing the first track from the playlist
+        guard let playlist = playlistToUse,
+              let files = playlist.files?.array as? [ArchiveFileEntity],
+              let firstEntity = files.first else { return }
+        
+        // Use the actual entity from the playlist, not a newly created one
+        player.playFileFromPlaylist(firstEntity, playlist: playlist)
+        
+        // Store the playlist for navigation
+        createdPlaylist = playlist
     }
 }

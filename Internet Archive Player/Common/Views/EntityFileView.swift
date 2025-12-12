@@ -174,7 +174,7 @@ struct EntityFileView: View {
 //            .tint(textColor)
             .padding(5.0)
         }
-        .listRowSeparator(.hidden) // Hides the separator for this row
+        .listRowSeparator(.visible) // Hides the separator for this row
 //        .background(backgroundColor ?? nil)
         .background(
             RoundedRectangle(
@@ -182,7 +182,7 @@ struct EntityFileView: View {
                 style: .continuous
             )
             .fill(backgroundColor ?? (colorScheme == .dark ? Color.droopy : Color.white))
-            .shadow(color: (colorScheme == .dark ? Color.droopy : .black.opacity(0.2)) , radius: 4, x: 2, y: 2)
+//            .shadow(color: (colorScheme == .dark ? Color.droopy : .black.opacity(0.2)) , radius: 4, x: 2, y: 2)
         )
         .padding(10)
 //        .cornerRadius(5.0)

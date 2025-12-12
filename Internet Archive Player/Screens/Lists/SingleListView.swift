@@ -14,17 +14,17 @@ import Combine
 
 struct SingleListView: View {
 
-    @State var playlistEntity: PlaylistEntity
+    @ObservedObject var playlistEntity: PlaylistEntity
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel = SingleListView.ViewModel()
 
     init(playlistEntity: PlaylistEntity) {
-        _playlistEntity = State(initialValue: playlistEntity)
+        _playlistEntity = ObservedObject(initialValue: playlistEntity)
     }
 
     var body: some View {
         List {
-            ForEach(playlistEntity.files?.array as? [ArchiveFileEntity] ?? [], id: \.self) { archiveFile in
+            ForEach(viewModel.files, id: \.self) { archiveFile in
 
                 EntityFileView(archiveFile,
                                showImage: true,
@@ -54,21 +54,20 @@ struct SingleListView: View {
         }
         .onAppear {
             viewModel.setUpSubscribers(iaPlayer)
+            viewModel.loadFiles(from: playlistEntity)
             iaPlayer.sendPlayingFileForPlaylist()
+        }
+        .onChange(of: playlistEntity.files) { _, _ in
+            viewModel.loadFiles(from: playlistEntity)
         }
     }
 
     private func remove(at offsets: IndexSet) {
-        for index in offsets {
-            if let file = playlistEntity.files?.array[index] as? ArchiveFileEntity{
-                playlistEntity.removeFromFiles(file)
-                PersistenceController.shared.save()
-            }
-        }
+        viewModel.removeFiles(at: offsets, from: playlistEntity, player: iaPlayer)
     }
 
     private func move(fromOffsets source: IndexSet, toOffset destination: Int) {
-        self.iaPlayer.rearrangeList(list: playlistEntity, fromOffsets: source, toOffset: destination)
+        viewModel.moveFiles(fromOffsets: source, toOffset: destination, in: playlistEntity)
     }
 
     private func menuItems(archiveFileEntity: ArchiveFileEntity) -> [MenuAction] {
@@ -91,6 +90,7 @@ struct SingleListView: View {
 extension SingleListView {
     final class ViewModel: ObservableObject {
         @Published var playingFile: ArchiveFileEntity? = nil
+        @Published var files: [ArchiveFileEntity] = []
 
         var cancellables = Set<AnyCancellable>()
 
@@ -100,6 +100,25 @@ extension SingleListView {
                     self.playingFile = file
                 }
                 .store(in: &cancellables)
+        }
+        
+        public func loadFiles(from playlist: PlaylistEntity) {
+            files = playlist.files?.array as? [ArchiveFileEntity] ?? []
+        }
+        
+        public func removeFiles(at offsets: IndexSet, from playlist: PlaylistEntity, player: Player) {
+            // Use the Player's method which handles cleanup properly
+            // This will trigger a Core Data change, which we'll pick up in onChange
+            player.removeListItem(list: playlist, at: offsets)
+        }
+        
+        public func moveFiles(fromOffsets source: IndexSet, toOffset destination: Int, in playlist: PlaylistEntity) {
+            // First update the local array to keep UI in sync immediately
+            files.move(fromOffsets: source, toOffset: destination)
+            
+            // Then update Core Data
+            playlist.moveObject(indexes: source, toIndex: destination)
+            PersistenceController.shared.save()
         }
     }
 }

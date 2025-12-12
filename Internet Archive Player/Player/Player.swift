@@ -202,7 +202,17 @@ class Player: NSObject, ObservableObject {
             throw error
         }
         guard let list = mainPlaylist else { return }
-        self.playFileFromPlaylist(archiveFileEntity, playlist: list)
+        
+        // Retrieve the actual entity from the playlist after saving
+        // to ensure we're using the same object reference that exists in the playlist
+        guard let files = list.files?.array as? [ArchiveFileEntity],
+              let entityFromPlaylist = files.first(where: { $0.onlineUrl?.absoluteString == archiveFileEntity.onlineUrl?.absoluteString }) else {
+            // Fallback to the passed entity if we can't find it
+            self.playFileFromPlaylist(archiveFileEntity, playlist: list)
+            return
+        }
+        
+        self.playFileFromPlaylist(entityFromPlaylist, playlist: list)
     }
 
     public func appendPlaylistItem(archiveFileEntity: ArchiveFileEntity) throws {
@@ -317,8 +327,8 @@ class Player: NSObject, ObservableObject {
         guard let list = playingPlaylist, let files = self.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return }
 
         if let playingFile = playingFile, let index = files.firstIndex(of: playingFile) {
-            guard items.indices.contains(index + 1) else { return }
-            playFileFromPlaylist(items[index + 1], playlist: list)
+            guard files.indices.contains(index + 1) else { return }
+            playFileFromPlaylist(files[index + 1], playlist: list)
         }
     }
 
@@ -327,7 +337,17 @@ class Player: NSObject, ObservableObject {
         let archiveFileEntity = archiveFile.archiveFileEntity()
         playlist.addToFiles(archiveFileEntity)
         PersistenceController.shared.save()
-        self.playFileFromPlaylist(archiveFileEntity, playlist: playlist)
+        
+        // Retrieve the actual entity from the playlist after saving
+        // to ensure we're using the same object reference that exists in the playlist
+        guard let files = playlist.files?.array as? [ArchiveFileEntity],
+              let entityFromPlaylist = files.first(where: { $0.onlineUrl?.absoluteString == archiveFile.url?.absoluteString }) else {
+            // Fallback to the created entity if we can't find it
+            self.playFileFromPlaylist(archiveFileEntity, playlist: playlist)
+            return
+        }
+        
+        self.playFileFromPlaylist(entityFromPlaylist, playlist: playlist)
     }
 
     public func playFileFromPlaylist(_ archiveFileEntity: ArchiveFileEntity, playlist: PlaylistEntity) {
@@ -362,8 +382,8 @@ class Player: NSObject, ObservableObject {
         guard let list = playingPlaylist, let files = self.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return }
 
         if let playingFile = self.playingFile, let index = files.firstIndex(of: playingFile) {
-            guard items.indices.contains(index + advanceDirection.rawValue) else { return }
-            playFileFromPlaylist(items[index + advanceDirection.rawValue], playlist: list)
+            guard files.indices.contains(index + advanceDirection.rawValue) else { return }
+            playFileFromPlaylist(files[index + advanceDirection.rawValue], playlist: list)
         }
     }
 
@@ -571,7 +591,8 @@ class Player: NSObject, ObservableObject {
             guard let list = self?.playingPlaylist, let files = self?.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return .commandFailed }
 
             if let playingFile = self?.playingFile, let index = files.firstIndex(of: playingFile) {
-                guard self?.items.indices.contains(index + 1) ?? false, let fileEnt = self?.items[index + 1] else { return .commandFailed }
+                guard files.indices.contains(index + 1) else { return .commandFailed }
+                let fileEnt = files[index + 1]
                 self?.playFileFromPlaylist(fileEnt, playlist: list)
 
                 return .success
@@ -584,7 +605,8 @@ class Player: NSObject, ObservableObject {
             guard let list = self?.playingPlaylist, let files = self?.playingPlaylist?.files?.array as? [ArchiveFileEntity] else { return .commandFailed }
 
             if let playingFile = self?.playingFile, let index = files.firstIndex(of: playingFile) {
-                guard self?.items.indices.contains(index - 1) ?? false, let fileEnt = self?.items[index - 1] else { return .commandFailed }
+                guard files.indices.contains(index - 1) else { return .commandFailed }
+                let fileEnt = files[index - 1]
                 self?.playFileFromPlaylist(fileEnt, playlist: list)
                 return .success
             }
