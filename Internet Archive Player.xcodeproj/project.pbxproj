@@ -51,7 +51,6 @@
 		5AC8A6B92EEB737200D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B02EEB675E00D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift */; };
 		5AC8A6BA2EEB737200D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B02EEB675E00D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift */; };
 		5AC8A6BB2EEB737A00D962B9 /* FavoriteArchivesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B12EEB67F100D962B9 /* FavoriteArchivesView.swift */; };
-		5AC8A6BC2EEB737A00D962B9 /* FavoriteArchivesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B12EEB67F100D962B9 /* FavoriteArchivesView.swift */; };
 		5AC8A6BD2EEB738D00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B32EEB681F00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift */; };
 		5AC8A6BE2EEB738D00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B32EEB681F00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift */; };
 		5AC8A6BF2EEB739B00D962B9 /* ArchiveMetaDataEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B72EEB712C00D962B9 /* ArchiveMetaDataEntity+CoreDataClass.swift */; };
@@ -708,7 +707,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A3AAA8C2AEE0AF3004A15BC /* ArchiveFile+Extensions.swift in Sources */,
-				5AC8A6BC2EEB737A00D962B9 /* FavoriteArchivesView.swift in Sources */,
 				5A3AAA8E2AEE18C0004A15BC /* DetailDescription.swift in Sources */,
 				5A3AAA872AEE0922004A15BC /* IAMediaUtils.swift in Sources */,
 				5AC8A6BE2EEB738D00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift in Sources */,

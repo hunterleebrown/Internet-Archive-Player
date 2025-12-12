@@ -87,6 +87,7 @@ struct SearchView: View {
                         .listRowBackground(Color.clear)
                     }
                 }
+                .padding()
                 .listStyle(PlainListStyle())
                 .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search The Internet Archive")
                 .onSubmit(of: .search, {

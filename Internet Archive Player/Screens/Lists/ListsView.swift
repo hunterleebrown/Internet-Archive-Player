@@ -17,7 +17,14 @@ struct ListsView: View {
 
     var body: some View {
         NavigationStack {
+
             List {
+                NavigationLink {
+                    NewFavoritesView()
+                }   label: {
+                    Text("Favorites")
+                }
+
                 ForEach(viewModel.lists, id: \.self) { list in
                     NavigationLink {
                         SingleListView(playlistEntity: list)
@@ -25,10 +32,10 @@ struct ListsView: View {
                         Text(list.name ?? "list name")
                     }
                 }
-                .onDelete(perform: self.remove)
+                .onDelete(perform: viewModel.remove)
             }
             .listStyle(PlainListStyle())
-            .navigationTitle("Lists")
+            .navigationTitle("Playlists")
             .toolbar {
                 Button(action: {
                     Home.newPlaylistPass.send(true)
@@ -41,29 +48,6 @@ struct ListsView: View {
                 Spacer()
                     .frame(height: iaPlayer.playerHeight)
             }
-        }
-    }
-
-
-    private func remove(at offsets: IndexSet) {
-        for index in offsets {
-            let list = viewModel.lists[index]
-
-            guard let files = list.files?.array as? [ArchiveFileEntity] else {
-                return
-            }
-
-            files.forEach { item in
-                if item.isLocalFile(), let workingUrl = item.workingUrl {
-                    do {
-                        try Downloader.removeFile(at: workingUrl)
-                    } catch let error {
-                        print(error.localizedDescription)
-                    }
-                }
-            }
-
-            PersistenceController.shared.delete(list)
         }
     }
 }
@@ -97,20 +81,43 @@ extension ListsView {
                 print("failed to fetch items!")
             }
         }
+
+
+        func remove(at offsets: IndexSet) {
+            for index in offsets {
+                let list = lists[index]
+
+                guard let files = list.files?.array as? [ArchiveFileEntity] else {
+                    return
+                }
+
+                files.forEach { item in
+                    if item.isLocalFile(), let workingUrl = item.workingUrl {
+                        do {
+                            try Downloader.removeFile(at: workingUrl)
+                        } catch let error {
+                            print(error.localizedDescription)
+                        }
+                    }
+                }
+
+                PersistenceController.shared.delete(list)
+            }
+        }
     }
 
 }
 
 extension ListsView.ViewModel: NSFetchedResultsControllerDelegate {
-  func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-      guard let playlists = controller.fetchedObjects as? [PlaylistEntity]
-      else { return }
-      DispatchQueue.main.async {
-          if playlists.count > 0 {
-              self.lists = playlists.filter{!$0.permanent}
-          }
-      }
-  }
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        guard let playlists = controller.fetchedObjects as? [PlaylistEntity]
+        else { return }
+        DispatchQueue.main.async {
+            if playlists.count > 0 {
+                self.lists = playlists.filter{!$0.permanent}
+            }
+        }
+    }
 }
 
 #Preview {

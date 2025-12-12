@@ -41,6 +41,7 @@ struct FavoriteArchivesView: View {
                     .onDelete(perform: deleteArchives)
                 }
             }
+            .padding()
             .listStyle(PlainListStyle())
             .navigationTitle("Bookmarks")
             .toolbar {
