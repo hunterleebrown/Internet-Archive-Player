@@ -40,6 +40,7 @@
 		5A9DCF932AA6647600F6EFDB /* OtherPlaylist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DCF922AA6647600F6EFDB /* OtherPlaylist.swift */; };
 		5A9DCF952AA6796E00F6EFDB /* SingleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DCF942AA6796E00F6EFDB /* SingleListView.swift */; };
 		5AA391A52A4F4C8A00C65A48 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA391A42A4F4C8A00C65A48 /* Home.swift */; };
+		5AA73BF02EEF51730047B904 /* HistoryDrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */; };
 		5ABF75692AAFC4D8001B158B /* ci_post_xcodebuild.sh in Resources */ = {isa = PBXBuildFile; fileRef = 5ABF75682AAFC4D7001B158B /* ci_post_xcodebuild.sh */; };
 		5AC10D5B281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5AC10D59281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld */; };
 		5AC10D5D281C98B200119C4E /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC10D5C281C98B200119C4E /* Persistence.swift */; };
@@ -134,6 +135,7 @@
 		5A9DCF922AA6647600F6EFDB /* OtherPlaylist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherPlaylist.swift; sourceTree = "<group>"; };
 		5A9DCF942AA6796E00F6EFDB /* SingleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleListView.swift; sourceTree = "<group>"; };
 		5AA391A42A4F4C8A00C65A48 /* Home.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Home.swift; sourceTree = "<group>"; };
+		5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryDrawerView.swift; sourceTree = "<group>"; };
 		5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Internet-Archive-Player-Info.plist"; sourceTree = SOURCE_ROOT; };
 		5AAF2F952AB4F37C00886641 /* ci_post_clone.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_clone.sh; sourceTree = "<group>"; };
 		5ABF75682AAFC4D7001B158B /* ci_post_xcodebuild.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ci_post_xcodebuild.sh; sourceTree = "<group>"; };
@@ -473,6 +475,7 @@
 				5AD6BC53279CCED100495070 /* PlayerButton.swift */,
 				5AD6BC55279CDE2100495070 /* AirPlayButton.swift */,
 				5A4151B927B0FEAA007A3623 /* Player.swift */,
+				5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */,
 			);
 			path = Player;
 			sourceTree = "<group>";
@@ -738,6 +741,7 @@
 				5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */,
 				5A012CAE282B54C800785420 /* Downloader.swift in Sources */,
 				5AE69CD22A846DBE0062CC5D /* DetailDescription.swift in Sources */,
+				5AA73BF02EEF51730047B904 /* HistoryDrawerView.swift in Sources */,
 				5AC8A6BB2EEB737A00D962B9 /* FavoriteArchivesView.swift in Sources */,
 				CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */,
 				5A4F2D5B2A53227C00DCDF95 /* AttString+Extension.swift in Sources */,

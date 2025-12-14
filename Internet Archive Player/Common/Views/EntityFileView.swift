@@ -109,6 +109,7 @@ struct EntityFileView: View {
                     ProgressView("Downloading", value: viewModel.downloadProgress, total:1)
                         .tint(textColor)
                         .font(.caption2)
+                        .foregroundColor(textColor)
                 }
             }
             .padding(5.0)

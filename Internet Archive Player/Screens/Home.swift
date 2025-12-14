@@ -17,6 +17,7 @@ struct Home: View {
     @State var showVideoPlayerIPad: Bool = false
     @State var showNetworkAlert: Bool = false
     @State var showControls: Bool = false
+    @State var showHistory: Bool = false
     @State var maxControlHeight: Bool = true
     @State var otherPlaylistPresented: Bool = false
     @State var selectedTab: Int = 2  // Default to Now Playing tab (index 3)
@@ -86,6 +87,17 @@ struct Home: View {
                     VStack(spacing:0) {
                         topView()
                             .navigationTitle("Now Playing")
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    NavigationLink(destination: ListsView()) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "music.note.list")
+                                            Text("Playlists")
+                                        }
+                                        .foregroundColor(.fairyRed)
+                                    }
+                                }
+                            }
                             .sheet(item: $playingFile, content: { file in
                                 if let identifier = file.identifier {
                                     Detail(identifier, isPresented: true)
@@ -105,15 +117,6 @@ struct Home: View {
                 }
                 .tag(2)
 
-                // Lists Tab
-                NavigationStack {
-                    ListsView()
-                }
-                .tabItem {
-                    Label("Playlists", systemImage: "music.note.list")
-                }
-                .tag(3)
-
                 // Debug Tab
                 NavigationStack {
                     DebugView()
@@ -121,7 +124,7 @@ struct Home: View {
                 .tabItem {
                     Label("Debug", systemImage: "ant.circle")
                 }
-                .tag(4)
+                .tag(3)
 
             }
             .tint(.fairyRed)
@@ -220,6 +223,12 @@ struct Home: View {
         .onReceive(Home.newPlaylistPass, perform: { show in
             showingNewPlaylist = true
         })
+        .onReceive(PlayerControls.toggleHistory, perform: { _ in
+            showHistory.toggle()
+        })
+        .sheet(isPresented: $showHistory) {
+            HistoryDrawerView(isPresented: $showHistory)
+        }
         .sheet(isPresented: $otherPlaylistPresented) {
             if let f = viewModel.archiveFileEntity {
                 OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFileEntities: [f])
@@ -227,6 +236,8 @@ struct Home: View {
         }
         .sheet(isPresented: $showingNewPlaylist) {
             NewPlaylist(isPresented: $showingNewPlaylist)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         }
         .alert("There is no network connection", isPresented: $showNetworkAlert) {
             Button("OK") {
