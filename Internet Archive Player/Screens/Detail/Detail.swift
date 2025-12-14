@@ -33,6 +33,8 @@ struct Detail: View {
 
     @State var backgroundURL: URL?
     static var backgroundPass = PassthroughSubject<URL, Never>()
+    
+    @State private var showFullscreenImage = false
 
     var detailCornerRadius: CGFloat = 5.0
 
@@ -90,6 +92,11 @@ struct Detail: View {
         .alert(PlayerError.alreadyOnFavoriteArchives.description, isPresented: $favoriteArchivesErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
         }
+        .fullScreenCover(isPresented: $showFullscreenImage) {
+            if let url = backgroundURL {
+                FullscreenImageViewer(imageURL: url, isPresented: $showFullscreenImage)
+            }
+        }
         .onReceive(Detail.backgroundPass) { url in
             withAnimation(.linear(duration: 0.3)) {
                 self.backgroundURL = url
@@ -111,14 +118,34 @@ struct Detail: View {
             ObservableScrollView(scrollOffset: $scrollOffset) {
                 Spacer().frame(height: 300)
                 VStack(alignment: .leading, spacing:5) {
-                    Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
-                        .font(.headline)
-                        .bold()
-                        .foregroundColor(Color(.black))
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 10)
-                        .padding(.horizontal, 10)
-                        .frame(maxWidth: .infinity, alignment: .center)
+                    HStack(alignment: .top, spacing: 8) {
+                        if backgroundURL != nil {
+                            Button {
+                                showFullscreenImage = true
+                            } label: {
+                                Image(systemName: "photo")
+                                    .font(.title3)
+                                    .foregroundColor(.black)
+                                    .padding(8)
+                                    .background(Color.white.opacity(0.3))
+                                    .clipShape(Circle())
+                            }
+                        }
+                        
+                        Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
+                            .font(.headline)
+                            .bold()
+                            .foregroundColor(Color(.black))
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        
+                        if backgroundURL != nil {
+                            Spacer()
+                                .frame(width: 40)
+                        }
+                    }
+                    .padding(.top, 10)
+                    .padding(.horizontal, 10)
 
                 if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
                         Text(artist)
@@ -131,7 +158,8 @@ struct Detail: View {
                 }
 
                 VStack(alignment: .center) {
-                    HStack(spacing: 0) {
+                    HStack(spacing: 10) {
+
                         if (self.viewModel.archiveDoc?.description) != nil {
                             Button {
                                 descriptionExpanded = true
@@ -139,15 +167,15 @@ struct Detail: View {
                                 VStack(spacing: 4) {
                                     Image(systemName: "info.circle")
                                         .font(.title2)
+                                        .frame(height: 28)
                                         .tint(.black)
                                     Text("Description")
                                         .font(.caption2)
                                         .foregroundColor(.black)
                                 }
-                                .frame(width: 80)
-                                .padding(.vertical, 12)
                             }
-                            
+                            .frame(minWidth: 100)
+
                             Divider()
                                 .frame(height: 44)
                         }
@@ -160,15 +188,16 @@ struct Detail: View {
                             VStack(spacing: 4) {
                                 Image(systemName: viewModel.isFavoriteArchive ? "heart.fill" : "heart")
                                     .font(.title2)
+                                    .frame(height: 28)
                                     .tint(.black)
                                 Text("Bookmark")
                                     .font(.caption2)
                                     .foregroundColor(.black)
                             }
-                            .frame(width: 80)
-                            .padding(.vertical, 12)
                         }
-                        
+                        .frame(minWidth: 100)
+
+
                         Divider()
                             .frame(height: 44)
                         
@@ -176,15 +205,18 @@ struct Detail: View {
                             VStack(spacing: 4) {
                                 Image(systemName: "square.and.arrow.up.circle")
                                     .font(.title2)
+                                    .frame(height: 28)
                                     .tint(.black)
                                 Text("Share")
                                     .font(.caption2)
                                     .foregroundColor(.black)
                             }
-                            .frame(width: 80)
-                            .padding(.vertical, 12)
                         }
+                        .frame(minWidth: 100)
+
+
                     }
+                    .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
                     .background(Color.white.opacity(0.3))
                     .cornerRadius(detailCornerRadius)
@@ -192,7 +224,13 @@ struct Detail: View {
                         RoundedRectangle(cornerRadius: detailCornerRadius)
                             .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
                     )
+
+                    Spacer()
+                        .frame(height:10)
+
                 }
+                .padding(.horizontal, 10)
+
             }
             .background(
                 Color.white.opacity(0.5)
@@ -281,7 +319,7 @@ struct Detail: View {
                             }
                             .tint(Color.black)
 
-                            Text("Tapping a track individually will play it and add it to the Now Playing list.  Play all creates a new playlist with all tracks, and starts playing the first one.")
+                            Text("Select a track to start playing, or use Play all to queue everything.")
                                 .font(.caption)
                                 .multilineTextAlignment(.center)
                                 .frame(maxWidth: .infinity, alignment: .center)
@@ -398,13 +436,9 @@ struct Detail: View {
                             case .success(let image):
                                 image
                                     .resizable()
-                                    .scaledToFit()
-                                    .transition(.opacity) // Apply the transition
-
-//                                    .ignoresSafeArea()
-//                                    .overlay(Rectangle().fill(Color(color).opacity(0.5)), alignment: .topTrailing)
+                                    .scaledToFill()
+                                    .transition(.opacity)
                                     .blur(radius: backgroundBlur)
-                                    .clipped()
 
                             case .failure(_):
                                 EmptyView()
@@ -413,7 +447,8 @@ struct Detail: View {
                                 EmptyView()
                             }
                         }
-                        .frame(minHeight: 200, alignment: .center)
+                        .frame(height: 400)
+                        .clipped()
                     }
 
 
@@ -486,6 +521,66 @@ struct Detail_Previews: PreviewProvider {
     static var previews: some View {
         Detail("wcd_ray-of-light_madonna_flac_lossless_522566").environmentObject(Player())
         //        Detail("13BinarySunsetAlternate").environmentObject(Player())
+    }
+}
+
+struct FullscreenImageViewer: View {
+    let imageURL: URL
+    @Binding var isPresented: Bool
+    @State private var showControls = true
+    
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            AsyncImage(url: imageURL) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                        .tint(.white)
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFit()
+                case .failure(_):
+                    VStack(spacing: 10) {
+                        Image(systemName: "photo")
+                            .font(.largeTitle)
+                            .foregroundColor(.gray)
+                        Text("Failed to load image")
+                            .foregroundColor(.gray)
+                    }
+                @unknown default:
+                    EmptyView()
+                }
+            }
+            .onTapGesture {
+                withAnimation {
+                    showControls.toggle()
+                }
+            }
+            
+            if showControls {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            isPresented = false
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Circle())
+                        }
+                        .padding()
+                    }
+                    Spacer()
+                }
+                .transition(.opacity)
+            }
+        }
     }
 }
 

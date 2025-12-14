@@ -103,13 +103,11 @@ struct EntityFileView: View {
                         .foregroundColor(textColor)
                 }
 
-
-
                 if viewModel.downloadProgress > 0 &&
                     viewModel.downloadProgress < 1 &&
                     !archiveFile.isLocalFile() {
                     ProgressView("Downloading", value: viewModel.downloadProgress, total:1)
-                        .tint(.fairyRed)
+                        .tint(textColor)
                         .font(.caption2)
                 }
             }
@@ -171,21 +169,17 @@ struct EntityFileView: View {
                     }
                     .highPriorityGesture(TapGesture())
             }
-//            .tint(textColor)
             .padding(5.0)
         }
         .listRowSeparator(.visible) // Hides the separator for this row
-//        .background(backgroundColor ?? nil)
         .background(
             RoundedRectangle(
                 cornerRadius: 5,
                 style: .continuous
             )
             .fill(backgroundColor ?? (colorScheme == .dark ? Color.droopy : Color.white))
-//            .shadow(color: (colorScheme == .dark ? Color.droopy : .black.opacity(0.2)) , radius: 4, x: 2, y: 2)
         )
         .padding(10)
-//        .cornerRadius(5.0)
         .onReceive(Downloader.downloadedSubject) { file in
             guard file.id == archiveFile.id else { return }
             viewModel.showDownloadButton = !file.isLocalFile()
