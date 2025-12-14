@@ -13,7 +13,7 @@ struct FavoriteArchivesView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 if iaPlayer.favoriteArchives.isEmpty {
                     VStack(alignment: .center, spacing: 10) {
@@ -32,7 +32,7 @@ struct FavoriteArchivesView: View {
                     .padding()
                 } else {
                     ForEach(iaPlayer.favoriteArchives, id: \.identifier) { archive in
-                        NavigationLink(destination: Detail(archive.identifier ?? "")) {
+                        NavigationLink(value: archive) {
                             SearchItemView(item: archive)
                         }
                         .listRowInsets(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5))
@@ -44,6 +44,9 @@ struct FavoriteArchivesView: View {
             .padding()
             .listStyle(PlainListStyle())
             .navigationTitle("Bookmarks")
+            .navigationDestination(for: ArchiveMetaDataEntity.self) { archive in
+                Detail(archive.identifier ?? "")
+            }
             .toolbar {
 
                 if !iaPlayer.favoriteArchives.isEmpty {

@@ -14,6 +14,7 @@ struct Home: View {
     @StateObject var iaPlayer = Player()
     @State var playingFile: ArchiveFileEntity? = nil
     @State var showVideoPlayer: Bool = false
+    @State var showVideoPlayerIPad: Bool = false
     @State var showNetworkAlert: Bool = false
     @State var showControls: Bool = false
     @State var maxControlHeight: Bool = true
@@ -164,15 +165,39 @@ struct Home: View {
         }
         .onReceive(PlayerControls.showVideo) { show in
             withAnimation {
-                showVideoPlayer = show
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    showVideoPlayerIPad = show
+                } else {
+                    showVideoPlayer = show
+                }
             }
         }
         .sheet(isPresented: $showVideoPlayer) {
+            // iPhone: Use sheet for better experience
             VideoPlayer(player: iaPlayer.avPlayer)
                 .ignoresSafeArea()
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
                 .interactiveDismissDisabled(false)  // Allow swipe to dismiss
+        }
+        .fullScreenCover(isPresented: $showVideoPlayerIPad) {
+            // iPad: Full-screen video player with custom dismiss button
+            ZStack(alignment: .top) {
+                VideoPlayer(player: iaPlayer.avPlayer)
+                    .ignoresSafeArea()
+                
+                // Dismiss button - always visible
+                Button(action: {
+                    showVideoPlayerIPad = false
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 36))
+                        .foregroundStyle(.white, .black.opacity(0.6))
+                        .shadow(radius: 4)
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
         }
         .onReceive(Home.showControlsPass) { show in
             withAnimation {
