@@ -33,13 +33,17 @@ struct FavoriteArchivesView: View {
                 } else {
                     ForEach(iaPlayer.favoriteArchives, id: \.identifier) { archive in
                         NavigationLink(value: archive) {
-                            SearchItemView(item: archive)
+                            FavoriteArchiveItemView(item: archive)
                         }
                         .listRowInsets(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5))
                         .listRowBackground(Color.clear)
                     }
                     .onDelete(perform: deleteArchives)
                 }
+            }
+            .safeAreaInset(edge: .bottom) {
+                Spacer()
+                    .frame(height: iaPlayer.playerHeight)
             }
             .padding()
             .listStyle(PlainListStyle())
