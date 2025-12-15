@@ -29,7 +29,7 @@ struct SearchItemView<Item: SearchItemDisplayable>: View {
             .background(Color.black)
             .cornerRadius(8)
             
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 2) {
                 // Title with media type icon
                 HStack(spacing: 6) {
                     Text(item.archiveTitle ?? "Untitled")

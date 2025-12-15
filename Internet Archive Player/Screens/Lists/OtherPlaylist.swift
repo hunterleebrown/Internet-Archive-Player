@@ -28,31 +28,54 @@ struct OtherPlaylist: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(spacing: 0) {
+                // Header with title and new playlist button
                 HStack {
-                    Text("Add to playlist")
-                        .font(.body)
+                    Text("Add to Playlist")
+                        .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.fairyRed)
-                        .padding(10)
                     Spacer()
-                    Button(action: {
-                    }) {
-                        NavigationLink {
-                            NewPlaylist(isPresented: $showingNewPlaylist)
-                        } label: {
-                            Image(systemName: "plus")
-                                .foregroundColor(.fairyRed)
-
-                        }
+                    NavigationLink {
+                        NewPlaylist(isPresented: $showingNewPlaylist)
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.fairyRed)
                     }
                 }
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                
+                // List content
                 List {
-                    ForEach(viewModel.lists, id: \.self) { list in
-                        HStack {
-                            Text(list.name ?? "list name")
+                    ForEach(viewModel.sortedLists, id: \.self) { list in
+                        HStack(spacing: 12) {
+                            // Special icons for Favorites and Now Playing
+                            if list.name == "Favorites" {
+                                Image(systemName: "heart.fill")
+                                    .foregroundColor(.fairyRed)
+                                    .font(.body)
+                            } else if list.name == "Now Playing" {
+                                Image(systemName: "play.circle.fill")
+                                    .foregroundColor(.fairyRed)
+                                    .font(.body)
+                            } else {
+                                Image(systemName: "music.note.list")
+                                    .foregroundColor(.secondary)
+                                    .font(.body)
+                            }
+                            
+                            Text(list.name ?? "Untitled Playlist")
+                                .font(.body)
+                                .foregroundColor((list.name == "Favorites" || list.name == "Now Playing") ? .fairyRed : .primary)
+                                .fontWeight((list.name == "Favorites" || list.name == "Now Playing") ? .semibold : .regular)
+                            
                             Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -60,17 +83,16 @@ struct OtherPlaylist: View {
                                 viewModel.addFilesToPlaylist(archiveFiles: files, playlist: list)
                             }
                             if let entityFiles = archiveFileEntities {
-                                    viewModel.addFilesToPlaylist(archiveEntityFiles: entityFiles, playlist: list)
-
+                                viewModel.addFilesToPlaylist(archiveEntityFiles: entityFiles, playlist: list)
                             }
                             isPresented = false
                         }
                     }
                 }
-                .onAppear(perform: {
-                    viewModel.getOtherLists()
-                })
                 .listStyle(PlainListStyle())
+            }
+            .onAppear {
+                viewModel.getOtherLists()
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -87,6 +109,32 @@ extension OtherPlaylist {
         @Published var lists: [PlaylistEntity] = [PlaylistEntity]()
         private let listsFetchController: NSFetchedResultsController<PlaylistEntity>
 
+        // Computed property to sort lists with Favorites first, then Now Playing, then alphabetically
+        var sortedLists: [PlaylistEntity] {
+            lists.sorted { list1, list2 in
+                let isList1Favorites = list1.name == "Favorites"
+                let isList2Favorites = list2.name == "Favorites"
+                let isList1NowPlaying = list1.name == "Now Playing"
+                let isList2NowPlaying = list2.name == "Now Playing"
+                
+                // Favorites always comes first
+                if isList1Favorites && !isList2Favorites {
+                    return true
+                } else if !isList1Favorites && isList2Favorites {
+                    return false
+                }
+                
+                // Now Playing comes second (after Favorites)
+                if isList1NowPlaying && !isList2NowPlaying {
+                    return true
+                } else if !isList1NowPlaying && isList2NowPlaying {
+                    return false
+                }
+                
+                // Otherwise sort alphabetically by name
+                return (list1.name ?? "") < (list2.name ?? "")
+            }
+        }
 
         public func addFilesToPlaylist(archiveFiles: [ArchiveFile], playlist: PlaylistEntity) {
 

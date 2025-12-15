@@ -23,31 +23,62 @@ struct SingleListView: View {
     }
 
     var body: some View {
-        List {
-            ForEach(viewModel.files, id: \.self) { archiveFile in
-
-                EntityFileView(archiveFile,
-                               showImage: true,
-                               backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
-                               textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
-                               fileViewMode: .playlist,
-                               ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .onTapGesture {
-                    iaPlayer.playFileFromPlaylist(archiveFile, playlist: playlistEntity)
+        Group {
+            if viewModel.files.isEmpty {
+                // Empty state
+                VStack(alignment: .center, spacing: 16) {
+                    Spacer()
+                        .frame(height: 80)
+                    
+                    Image(systemName: "music.note.list")
+                        .font(.system(size: 60))
+                        .foregroundColor(.secondary.opacity(0.5))
+                    
+                    Text("Playlist is Empty")
+                        .font(.title3)
+                        .bold()
+                        .foregroundColor(.primary)
+                    
+                    Text("Add files from the Internet Archive to build your playlist")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    
+                    Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List {
+                    ForEach(viewModel.files, id: \.self) { archiveFile in
+
+                        EntityFileView(archiveFile,
+                                       showImage: true,
+                                       backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
+                                       textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
+                                       fileViewMode: .playlist,
+                                       ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .onTapGesture {
+                            iaPlayer.playFileFromPlaylist(archiveFile, playlist: playlistEntity)
+                        }
+                    }
+                    .onDelete(perform: { indexSet in
+                        self.remove(at: indexSet)
+                    })
+                    .onMove(perform: self.move)
+                }
+                .listStyle(PlainListStyle())
             }
-            .onDelete(perform: { indexSet in
-                self.remove(at: indexSet)
-            })
-            .onMove(perform: self.move)
         }
         .toolbar {
-            EditButton()
-                .tint(.fairyRed)
+            if !viewModel.files.isEmpty {
+                EditButton()
+                    .tint(.fairyRed)
+            }
         }
-        .listStyle(PlainListStyle())
         .navigationTitle(playlistEntity.name ?? "List")
+        .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom) {
             Spacer()
                 .frame(height: iaPlayer.playerHeight)

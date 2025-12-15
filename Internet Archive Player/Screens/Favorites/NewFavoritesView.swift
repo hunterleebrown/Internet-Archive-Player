@@ -21,43 +21,63 @@ struct NewFavoritesView: View {
     @State var playlistErrorAlertShowing: Bool = false
 
     var body: some View {
-        List{
-            ForEach(iaPlayer.favoriteItems, id: \.self) { archiveFile in
-
-                EntityFileView(archiveFile,
-                               showImage: true,
-                               backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
-                               textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
-                               fileViewMode: .playlist,
-                               ellipsisAction: self.menuActions(archiveFile: archiveFile))
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .onTapGesture {
-                    //                        do {
-                    //                            try iaPlayer.appendAndPlay(archiveFile)
-                    //                        } catch PlayerError.alreadyOnPlaylist {
-                    //                            self.playlistErrorAlertShowing = true
-                    //                        } catch {
-                    //
-                    //                        }
-                    guard let playlist = iaPlayer.favoritesPlaylist else { return }
-                    iaPlayer.playFileFromPlaylist(archiveFile, playlist: playlist)
+        Group {
+            if iaPlayer.favoriteItems.isEmpty {
+                // Empty state
+                VStack(alignment: .center, spacing: 16) {
+                    Spacer()
+                        .frame(height: 80)
+                    
+                    Image(systemName: "heart.slash")
+                        .font(.system(size: 60))
+                        .foregroundColor(.secondary.opacity(0.5))
+                    
+                    Text("No Favorite Files")
+                        .font(.title3)
+                        .bold()
+                        .foregroundColor(.primary)
+                    
+                    Text("Add individual files to your favorites from archive detail views")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    
+                    Spacer()
                 }
-                .padding(.horizontal, 10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List{
+                    ForEach(iaPlayer.favoriteItems, id: \.self) { archiveFile in
+
+                        EntityFileView(archiveFile,
+                                       showImage: true,
+                                       backgroundColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyRedAlpha : nil,
+                                       textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
+                                       fileViewMode: .playlist,
+                                       ellipsisAction: self.menuActions(archiveFile: archiveFile))
+                        .onTapGesture {
+                            guard let playlist = iaPlayer.favoritesPlaylist else { return }
+                            iaPlayer.playFileFromPlaylist(archiveFile, playlist: playlist)
+                        }
+                    }
+                    .onDelete(perform: self.remove)
+                    .onMove(perform: self.move)
+                }
+                .listStyle(PlainListStyle())
             }
-            .onDelete(perform: self.remove)
-            .onMove(perform: self.move)
         }
         .toolbar {
-            EditButton()
-                .tint(.fairyRed)
+            if !iaPlayer.favoriteItems.isEmpty {
+                EditButton()
+                    .tint(.fairyRed)
+            }
         }
-        .listStyle(PlainListStyle())
         .tint(.fairyRed)
         .safeAreaInset(edge: .bottom) {
             Spacer()
                 .frame(height: iaPlayer.playerHeight)
         }
-
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
                 .tint(Color.fairyRed)
