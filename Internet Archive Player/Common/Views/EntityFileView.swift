@@ -136,7 +136,7 @@ struct EntityFileView: View {
                         }
                         
                         // Share
-                        if let shareURL = viewModel.generateShareURL(for: archiveFile) {
+                        if let shareURL = archiveFile.shareURL {
                             ShareLink(item: shareURL) {
                                 HStack {
                                     Image(systemName: "square.and.arrow.up")
@@ -198,7 +198,7 @@ struct EntityFileView: View {
             guard file.id == archiveFile.id else { return }
             viewModel.showDownloadButton = !file.isLocalFile()
         }
-        .onAppear() {
+        .task {
             viewModel.showDownloadButton = !archiveFile.isLocalFile()
             viewModel.fetchDownloadUrl(for: archiveFile)
         }
@@ -221,7 +221,6 @@ extension EntityFileView {
         @Published var errorMessage: String?
 
         @Published var showDownloadButton = true
-
 
         func fetchDownloadUrl(for file: ArchiveFileEntity) {
             do {
@@ -247,56 +246,6 @@ extension EntityFileView {
                     self.downloadUrl = nil
                 }
             }
-        }
-        
-        // MARK: - Share URL Function
-        func generateShareURL(for entity: ArchiveFileEntity) -> URL? {
-            var components = URLComponents()
-            components.scheme = "iaplayer"
-            components.host = "add"
-            
-            var queryItems: [URLQueryItem] = []
-            
-            // Add all available fields as query parameters
-            if let identifier = entity.identifier {
-                queryItems.append(URLQueryItem(name: "identifier", value: identifier))
-            }
-            if let name = entity.name {
-                queryItems.append(URLQueryItem(name: "name", value: name))
-            }
-            if let title = entity.title {
-                queryItems.append(URLQueryItem(name: "title", value: title))
-            }
-            if let artist = entity.artist {
-                queryItems.append(URLQueryItem(name: "artist", value: artist))
-            }
-            if let creator = entity.creator {
-                queryItems.append(URLQueryItem(name: "creator", value: creator))
-            }
-            if let archiveTitle = entity.archiveTitle {
-                queryItems.append(URLQueryItem(name: "archiveTitle", value: archiveTitle))
-            }
-            if let track = entity.track {
-                queryItems.append(URLQueryItem(name: "track", value: track))
-            }
-            if let size = entity.size {
-                queryItems.append(URLQueryItem(name: "size", value: size))
-            }
-            if let format = entity.format {
-                queryItems.append(URLQueryItem(name: "format", value: format))
-            }
-            if let length = entity.length {
-                queryItems.append(URLQueryItem(name: "length", value: length))
-            }
-            
-            // Add source
-            queryItems.append(URLQueryItem(name: "source", value: "shared"))
-            
-            components.queryItems = queryItems
-            
-            print("📤 Generated share URL: \(components.url?.absoluteString ?? "nil")")
-            
-            return components.url
         }
     }
 }

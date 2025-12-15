@@ -111,6 +111,54 @@ extension ArchiveFileEntity {
         return !isAudio
     }
 
+    /// Generates a shareable URL for this archive file using the app's custom URL scheme
+    public var shareURL: URL? {
+        var components = URLComponents()
+        components.scheme = "iaplayer"
+        components.host = "add"
+        
+        var queryItems: [URLQueryItem] = []
+        
+        // Add all available fields as query parameters
+        if let identifier = identifier {
+            queryItems.append(URLQueryItem(name: "identifier", value: identifier))
+        }
+        if let name = name {
+            queryItems.append(URLQueryItem(name: "name", value: name))
+        }
+        if let title = title {
+            queryItems.append(URLQueryItem(name: "title", value: title))
+        }
+        if let artist = artist {
+            queryItems.append(URLQueryItem(name: "artist", value: artist))
+        }
+        if let creator = creator {
+            queryItems.append(URLQueryItem(name: "creator", value: creator))
+        }
+        if let archiveTitle = archiveTitle {
+            queryItems.append(URLQueryItem(name: "archiveTitle", value: archiveTitle))
+        }
+        if let track = track {
+            queryItems.append(URLQueryItem(name: "track", value: track))
+        }
+        if let size = size {
+            queryItems.append(URLQueryItem(name: "size", value: size))
+        }
+        if let format = format {
+            queryItems.append(URLQueryItem(name: "format", value: format))
+        }
+        if let length = length {
+            queryItems.append(URLQueryItem(name: "length", value: length))
+        }
+        
+        // Add source
+        queryItems.append(URLQueryItem(name: "source", value: "shared"))
+        
+        components.queryItems = queryItems
+        
+        return components.url
+    }
+
 }
 
 extension ArchiveFileEntity {
