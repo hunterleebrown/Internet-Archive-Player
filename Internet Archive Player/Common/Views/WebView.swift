@@ -33,6 +33,16 @@ struct WebView: UIViewRepresentable {
                 }
             }
         }
+        
+        // Prevent navigation when links are tapped
+        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            // Allow the initial load, but prevent link clicks
+            if navigationAction.navigationType == .linkActivated {
+                decisionHandler(.cancel)
+            } else {
+                decisionHandler(.allow)
+            }
+        }
     }
 
     func makeCoordinator() -> Coordinator {

@@ -12,62 +12,84 @@ import iaAPI
 struct FavoriteArchiveItemView<Item: SearchItemDisplayable>: View {
     var item: Item
     var textColor: Color = .droopy
+    
+    // Fixed card dimensions for uniform grid
+    private let imageHeight: CGFloat = 140
+    private let contentHeight: CGFloat = 110
+    
     var body: some View {
-        HStack(alignment:.top, spacing: 5.0) {
-
+        VStack(alignment: .leading, spacing: 0) {
+            // Image at top - larger and more prominent
             AsyncImage(url: item.displayIconUrl) { image in
                 image
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 88, height: 88)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: imageHeight)
                     .clipped()
             } placeholder: {
-                Color(.black)
-                    .frame(width: 88, height: 88)
+                Color(.systemGray5)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: imageHeight)
             }
+            .frame(maxWidth: .infinity)
+            .frame(height: imageHeight) // Fixed height to prevent layout shifts
             .background(Color.black)
-            .cornerRadius(5)
-
-            Image(systemName: item.mediatypeDisplay == .audio ||  item.mediatypeDisplay == .etree ? "hifispeaker" : item.mediatypeDisplay == .movies ? "video" : "questionmark")
-                .frame(width: 22.0, height: 22.0, alignment: .center)
-                .tint(.black)
-
-            VStack(alignment:.leading, spacing: 2.0) {
-                Text(item.archiveTitle ?? "")
-                    .bold()
-                    .font(.caption)
-//                    .foregroundColor(textColor)
+            
+            // Content section with gradient overlay style
+            VStack(alignment: .leading, spacing: 6) {
+                // Title
+                Text(item.archiveTitle ?? "Untitled")
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .multilineTextAlignment(.leading)
-
-                if let publisher = item.publisherDisplay, !publisher.isEmpty {
-                    HStack(alignment: .top, spacing: 5.0) {
-                        Text("Publisher: ")
-                            .font(.caption2)
-//                            .foregroundColor(textColor)
-                            .bold()
-                        Text(publisher.joined(separator: ", "))
-                            .font(.caption2)
-//                            .foregroundColor(textColor)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                    }
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                
+                // Creator/Artist
+                if let creators = item.creatorDisplay, !creators.isEmpty {
+                    Text(getCreators())
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(1)
                 }
-
-                if !(item.creatorDisplay?.isEmpty ?? false) {
-                    HStack(alignment: .top, spacing: 5.0) {
-                        Text(getCreators())
+                
+                Spacer(minLength: 0)
+                
+                // Media type badge and heart icon
+                HStack(spacing: 6) {
+                    HStack(spacing: 4) {
+                        Image(systemName: item.mediatypeDisplay == .audio || item.mediatypeDisplay == .etree ? "hifispeaker" : item.mediatypeDisplay == .movies ? "video" : "questionmark")
                             .font(.caption2)
-//                            .foregroundColor(textColor)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
+                        Text(item.mediatypeDisplay == .audio || item.mediatypeDisplay == .etree ? "Audio" : item.mediatypeDisplay == .movies ? "Video" : "Unknown")
+                            .font(.caption2)
+                            .bold()
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+
+                    Spacer()
+                    
+                    Image(systemName: "heart.fill")
+                        .font(.callout)
+                        .foregroundColor(.fairyRed)
                 }
             }
-            .frame(maxWidth: .infinity,
-                   alignment: .leading)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: contentHeight) // Fixed content height
+            .background(Color(UIColor.systemBackground))
         }
-        .frame(maxWidth: .infinity, minHeight: 88)
+        .frame(height: imageHeight + contentHeight) // Total fixed height
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.fairyRed.opacity(0.2), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 
     private func getCreators() -> String {

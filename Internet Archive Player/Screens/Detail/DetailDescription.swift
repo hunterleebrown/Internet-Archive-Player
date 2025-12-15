@@ -13,6 +13,7 @@ struct DetailDescription: View {
 
     @ScaledMetric(relativeTo: .body) var fontSize: CGFloat = 16 // Automatically scales with Dynamic Type
     @State private var webViewHeight: CGFloat = 100
+    @Environment(\.dismiss) private var dismiss
 
     var doc: ArchiveMetaData
 
@@ -28,113 +29,211 @@ struct DetailDescription: View {
             }
         }()
 
-        ScrollView() {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .top) {
-                    AsyncImage(
-                        url: doc.iconUrl,
-                        content: { image in
-                            image.resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(maxWidth: 66,
-                                       maxHeight: 66)
-                                .background(Color.black)
+        VStack(spacing: 0) {
+            // Header
+            HStack(alignment: .top) {
+                Text(doc.archiveTitle ?? "Archive Details")
+                    .font(.title2)
+                    .foregroundColor(.fairyRed)
+                    .bold()
+                    .multilineTextAlignment(.leading)
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        dismiss()
+                    }
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.fairyRed)
+                        .font(.title3)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 8)
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Icon and basic info
+                    HStack(alignment: .top, spacing: 12) {
+                        AsyncImage(
+                            url: doc.iconUrl,
+                            content: { image in
+                                image.resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: 66, maxHeight: 66)
+                                    .background(Color.black)
+                            },
+                            placeholder: {
+                                Color(.black)
+                                    .frame(maxWidth: 66, maxHeight: 66)
+                            })
+                        .cornerRadius(5)
+                        .frame(width: 66, height: 66)
 
-                        },
-                        placeholder: {
-                            Color(.black)
-                                .frame(maxWidth: 66,
-                                       maxHeight: 66)
-                        })
-                    .cornerRadius(5)
-                    .frame(width: 66, height: 66, alignment: .leading)
-
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(doc.archiveTitle ?? "")
-                            .font(.headline)
-                            .foregroundColor(.black)
-                            .bold()
-                            .multilineTextAlignment(.leading)
-                            .frame(alignment: .leading)
-
-                        if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
-                            Text(artist)
-                                .foregroundColor(.black)
-                                .font(.subheadline)
-                                .multilineTextAlignment(.leading)
-                        }
-
-                        if let identifier = doc.identifier {
-                            HStack(alignment: .top, spacing: 5) {
-                                Text("Identifier:")
+                        VStack(alignment: .leading, spacing: 6) {
+                            if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
+                                Text(artist)
                                     .foregroundColor(.black)
-                                    .font(.caption)
+                                    .font(.subheadline)
                                     .bold()
-                                Text(identifier)
-                                    .foregroundColor(.black)
-                                    .font(.caption)
-                            }
-                        }
-
-                        if let publisher = doc.publisher, !publisher.isEmpty {
-                            HStack(alignment: .top, spacing: 5) {
-                                Text("Publisher:")
-                                    .foregroundColor(.black)
-                                    .font(.caption)
-                                    .bold()
-                                Text(publisher.joined(separator: ", "))
-                                    .foregroundColor(.black)
-                                    .font(.caption)
                                     .multilineTextAlignment(.leading)
                             }
-                        }
 
-                        HStack(alignment: .top, spacing: 5) {
-                            Text("Collection:")
-                                .foregroundColor(.black)
-                                .font(.caption)
-                                .bold()
-                            Text(doc.collection.joined(separator: ", "))
-                                .foregroundColor(.black)
+                            Text("Collection: \(doc.collection.joined(separator: ", "))")
+                                .foregroundColor(.secondary)
                                 .font(.caption)
                                 .multilineTextAlignment(.leading)
                         }
-#if !os(tvOS)
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    // Metadata section
+                    VStack(alignment: .leading, spacing: 12) {
                         if let identifier = doc.identifier {
-                            Link("View on archive.org", destination: URL(string: "https://archive.org/details/\(identifier)")!)
-                                .foregroundColor(.fairyRed)
-                                .font(.subheadline)
+                            MetadataRow(label: "Identifier", value: identifier)
+                        }
+                        
+                        if let publisher = doc.publisher, !publisher.isEmpty {
+                            MetadataRow(label: "Publisher", value: publisher.joined(separator: ", "))
+                        }
+
+                        if let uploader = doc.uploader {
+                            MetadataRow(label: "Uploader", value: uploader)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(UIColor.systemGray6))
+                    )
+                    .padding(.horizontal, 20)
+
+#if !os(tvOS)
+                    // View on archive.org button
+                    if let identifier = doc.identifier {
+                        Link(destination: URL(string: "https://archive.org/details/\(identifier)")!) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "arrow.up.forward.square")
+                                    .font(.subheadline)
+                                Text("View on archive.org")
+                                    .font(.subheadline)
+                                    .bold()
+                            }
+                            .foregroundColor(.fairyRed)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .frame(height: 44)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(Color.fairyRed, lineWidth: 1)
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                    }
+#endif
+                    
+                    // Description section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Description")
+                            .font(.headline)
+                            .foregroundColor(.fairyRed)
+                            .padding(.horizontal, 20)
+                        
+#if !os(tvOS)
+                        WebView(htmlString: doc.description.joined(separator: ""),
+                                bodyFontSize: fontSize,
+                                bodyFontFamily: fontFamily,
+                                bodyFontWeight: fontWeight,
+                                contentHeight: $webViewHeight
+                        )
+                        .frame(height: webViewHeight)
+                        .padding(.horizontal, 20)
+#else
+                        if let att = doc.description.joined(separator: "").html2AttributedString {
+                            Text(AttributedString(att))
+                                .padding(.horizontal, 20)
                         }
 #endif
                     }
+                    .padding(.bottom, 20)
                 }
-
-#if !os(tvOS)
-                WebView(htmlString: doc.description.joined(separator: ""),
-                        bodyFontSize: fontSize,
-                        bodyFontFamily: fontFamily,
-                        bodyFontWeight: fontWeight,
-                        contentHeight: $webViewHeight
-                )
-                .frame(height: webViewHeight)
-                .padding()
-#else
-
-                if let att = doc.description.joined(separator: "").html2AttributedString {
-                    Text(AttributedString(att))
-                    //                        .textSelection(.enabled)
-                        .background(Color.white)
-                        .padding(10)
-                }
-#endif
-
+                .padding(.top, 8)
             }
-            .background(Color.white)
-            .foregroundColor(.black)
-            .frame(maxWidth:.infinity)
-            .padding(5)
         }
-        .background(Color.white)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(UIColor.systemBackground))
+    }
+}
 
+// Helper view for consistent metadata rows
+private struct MetadataRow: View {
+    let label: String
+    let value: String
+    
+    @State private var showCopiedFeedback = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
+                Text(label)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .bold()
+                
+                Image(systemName: "doc.on.doc")
+                    .font(.caption2)
+                    .foregroundColor(.secondary.opacity(0.6))
+            }
+            
+            Text(value)
+                .font(.body)
+                .foregroundColor(.primary)
+                .textSelection(.enabled)
+        }
+        .contentShape(Rectangle())
+        .onLongPressGesture {
+            // Copy to clipboard
+            UIPasteboard.general.string = value
+            
+            // Haptic feedback
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            // Show feedback
+            withAnimation {
+                showCopiedFeedback = true
+            }
+            
+            // Hide feedback after delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation {
+                    showCopiedFeedback = false
+                }
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if showCopiedFeedback {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption2)
+                    Text("Copied")
+                        .font(.caption2)
+                        .bold()
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(Color.fairyRed)
+                )
+                .transition(.scale.combined(with: .opacity))
+                .offset(x: 8, y: -8)
+            }
+        }
     }
 }

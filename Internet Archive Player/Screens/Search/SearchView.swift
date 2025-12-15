@@ -26,83 +26,122 @@ struct SearchView: View {
     }
 
     var body: some View {
-        VStack {
-//            HStack {
-//                Image(systemName: "magnifyingglass")
-//                    .foregroundColor(.gray)
-//                TextField("Search the Internet Archive", text: $viewModel.searchText)
-//                    .textFieldStyle(RoundedBorderTextFieldStyle())
-//                    .autocapitalization(.none) // Optional: For case-insensitive searches
-//                    .disableAutocorrection(true) // Optional: Disable autocorrection if unnecessary
-//                    .onSubmit {
-//                        viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
-//                    }
-//            }
-//            .padding(.horizontal)
-
-            VStack(alignment: .leading, spacing: 5) {
-
+        VStack(spacing: 0) {
+            // Media Type Picker - Cleaner header style
+            VStack(spacing: 0) {
                 Picker("What media type?", selection: $viewModel.mediaType) {
-                    Image(systemName: "hifispeaker").tag(0)
-                    Image(systemName: "video").tag(1)
+                    Label("Audio", systemImage: "hifispeaker")
+                        .tag(0)
+                    Label("Video", systemImage: "video")
+                        .tag(1)
                 }
-                .foregroundColor(.fairyRed)
                 .pickerStyle(.segmented)
                 .padding(.horizontal, 20)
+                .padding(.top, 12)
                 .onChange(of: viewModel.mediaType) {
                     viewModel.search(query: viewModel.searchText, loadMore: false)
                 }
-
-                HStack(alignment: .center , spacing:5) {
-
-
+                
+                // Collection Filter - Card style
+                HStack(spacing: 12) {
                     Button {
                         showCollections = true
                     } label: {
-                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                        HStack(spacing: 8) {
+                            Image(systemName: "line.3.horizontal.decrease.circle")
+                                .font(.body)
+                            Text("Filter")
+                                .font(.subheadline)
+                                .bold()
+                        }
+                        .foregroundColor(.fairyRed)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .stroke(Color.fairyRed, lineWidth: 1)
+                        )
                     }
-                    .buttonStyle(IAButton())
-
-                    Text("Collection: ")
-                        .font(.caption)
-
-                    collectionLabel(filter: searchFilter)
-
+                    
+                    // Collection display
+                    HStack(spacing: 8) {
+                        if let imageUrl = searchFilter.iconUrl {
+                            AsyncImage(
+                                url: imageUrl,
+                                content: { image in
+                                    image.resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 24, height: 24)
+                                        .background(Color.black)
+                                },
+                                placeholder: {
+                                    Color(.black)
+                                        .frame(width: 24, height: 24)
+                                })
+                            .cornerRadius(4)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Collection")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text(searchFilter.name)
+                                .font(.caption)
+                                .bold()
+                                .foregroundColor(.primary)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(UIColor.systemGray6))
+                    )
                 }
                 .padding(.horizontal, 20)
-
-                Divider()
-
-                List{
-                    ForEach(viewModel.items, id: \.self) { doc in
-                        NavigationLink(destination: Detail(doc.identifier!)) {
-                            SearchItemView(item: doc)
-                                .onAppear {
-                                    if doc == viewModel.items.last {
-                                        viewModel.search(query: viewModel.searchText, loadMore: true)
-                                    }
-                                }
-                        }
-                        .listRowInsets(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5))
-                        .listRowBackground(Color.clear)
-                    }
-                }
-                .padding()
-                .listStyle(PlainListStyle())
-                .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search The Internet Archive")
-                .onSubmit(of: .search, {
-                    viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
-                })
-                .zIndex(viewModel.noDataFound ? 2 : 1)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
             }
-            .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
-            .sheet(isPresented: $showCollections) {
-                let type = self.viewModel.mediaTypes[self.viewModel.mediaType]
-                if let topCollectionType = ArchiveTopCollectionType(rawValue: type.rawValue) {
-                    let filterViewModel = SearchFiltersViewModel(collectionType: topCollectionType)
-                    SearchFilters(searchFiltersViewModel: filterViewModel, delegate: self)
+            .background(Color(UIColor.systemBackground))
+            
+            Divider()
+
+            List {
+                ForEach(viewModel.items, id: \.self) { doc in
+                    ZStack {
+                        NavigationLink(destination: Detail(doc.identifier!)) {
+                            EmptyView()
+                        }
+                        .opacity(0)
+
+                        SearchItemView(item: doc)
+                            .padding(.horizontal, 10)
+                            .onAppear {
+                                if doc == viewModel.items.last {
+                                    viewModel.search(query: viewModel.searchText, loadMore: true)
+                                }
+                            }
+                    }
+                    .listRowInsets(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
+                    .listRowBackground(Color.clear)
                 }
+            }
+            .listStyle(PlainListStyle())
+            .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search The Internet Archive")
+            .onSubmit(of: .search, {
+                viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
+            })
+            .zIndex(viewModel.noDataFound ? 2 : 1)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
+        .sheet(isPresented: $showCollections) {
+            let type = self.viewModel.mediaTypes[self.viewModel.mediaType]
+            if let topCollectionType = ArchiveTopCollectionType(rawValue: type.rawValue) {
+                let filterViewModel = SearchFiltersViewModel(collectionType: topCollectionType)
+                SearchFilters(searchFiltersViewModel: filterViewModel, delegate: self)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -113,34 +152,6 @@ struct SearchView: View {
         .tint(.fairyRed)
     }
 
-    @ViewBuilder
-    func collectionLabel(filter: SearchFilter) -> some View {
-        HStack(spacing: 5) {
-            if let imageUrl = filter.iconUrl {
-                AsyncImage(
-                    url: imageUrl,
-                    content: { image in
-                        image.resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: 20,
-                                   maxHeight: 20)
-                            .background(Color.black)
-                    },
-                    placeholder: {
-                        Color(.black)
-                            .frame(maxWidth: 20,
-                                   maxHeight: 20)
-                    })
-                .cornerRadius(5)
-                .frame(width: 20, height: 20)
-            }
-
-            Text(filter.name)
-                .font(.caption)
-
-            Spacer()
-        }
-    }
 }
 
 struct SearchView_Previews: PreviewProvider {
