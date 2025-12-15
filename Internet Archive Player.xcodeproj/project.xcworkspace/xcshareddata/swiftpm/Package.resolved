@@ -1,14 +1,15 @@
 {
+  "originHash" : "9571e29fcb5dad5bd9fc631952ba1bc25dd11f9679483989ac971fe1eae11af3",
   "pins" : [
     {
       "identity" : "iaapi",
       "kind" : "remoteSourceControl",
       "location" : "git@github.com:hunterleebrown/iaAPI.git",
       "state" : {
-        "revision" : "59592f5b82be711ca7d6a4ccc140664ef6a0e60d",
-        "version" : "2.5.2"
+        "revision" : "963a1666c39a5a3443b8dbf8a80e9b388f8c947d",
+        "version" : "2.6.0"
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import AVKit
 import Combine
+import iaAPI
 
 struct Home: View {
     @StateObject var iaPlayer = Player()
@@ -29,7 +30,7 @@ struct Home: View {
 
     @State var showingNewPlaylist = false
 
-    var viewModel: Home.ViewModel = Home.ViewModel()
+    @StateObject var viewModel: Home.ViewModel = Home.ViewModel()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -239,6 +240,12 @@ struct Home: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+        .onOpenURL { url in
+            print("📂 onOpenURL called with: \(url)")
+            print("📂 URL scheme: \(url.scheme ?? "none")")
+            print("📂 URL path: \(url.path)")
+            viewModel.handleIncomingURL(url, player: iaPlayer)
+        }
         .alert("There is no network connection", isPresented: $showNetworkAlert) {
             Button("OK") {
                 showNetworkAlert = false
@@ -268,8 +275,82 @@ struct Home: View {
 }
 
 extension Home {
-    class ViewModel {
+    @MainActor
+    class ViewModel: ObservableObject {
         var archiveFileEntity: ArchiveFileEntity?
+        
+        func handleIncomingURL(_ url: URL, player: Player) {
+            print("📂 Received URL: \(url)")
+            print("  scheme: \(url.scheme ?? "none")")
+            print("  host: \(url.host ?? "none")")
+            
+            // Handle custom URL scheme (e.g., iaplayer://add?identifier=...)
+            if url.scheme == "iaplayer" {
+                handleCustomURLScheme(url, player: player)
+                return
+            }
+        }
+        
+        private func handleCustomURLScheme(_ url: URL, player: Player) {
+            guard url.host == "add" else {
+                print("⚠️ Unknown URL host: \(url.host ?? "none")")
+                return
+            }
+            
+            // Parse query parameters
+            guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                  let queryItems = components.queryItems else {
+                print("⚠️ No query parameters")
+                return
+            }
+            
+            // Convert query items to dictionary
+            var params: [String: String] = [:]
+            for item in queryItems {
+                params[item.name] = item.value
+            }
+            
+            print("📋 URL Parameters:")
+            for (key, value) in params {
+                print("  \(key): \(value)")
+            }
+            
+            // Create ArchiveFile from parameters
+            guard let identifier = params["identifier"] else {
+                print("⚠️ Missing required parameter: identifier")
+                return
+            }
+            
+            // Build the ArchiveFile
+            let archiveFile = ArchiveFile(
+                identifier: identifier,
+                artist: params["artist"],
+                creator: params["creator"]?.components(separatedBy: ","),
+                archiveTitle: params["archiveTitle"],
+                name: params["name"],
+                title: params["title"],
+                track: params["track"],
+                size: params["size"],
+                format: params["format"].flatMap { ArchiveFileFormat(rawValue: $0) },
+                length: params["length"],
+                source: params["source"] ?? "shared"
+            )
+            
+            print("✅ Created ArchiveFile from URL:")
+            print("  identifier: \(archiveFile.identifier ?? "nil")")
+            print("  title: \(archiveFile.title ?? "nil")")
+            
+            // Add to player (same logic as file import)
+            do {
+                try player.checkDupes(archiveFile: archiveFile, list: player.items, error: .alreadyOnPlaylist)
+            } catch PlayerError.alreadyOnPlaylist {
+                print("⚠️ Already on playlist")
+                return
+            } catch {}
+            
+            player.playFile(archiveFile)
+            print("✅ Added to Now Playing")
+        }
     }
 }
 
