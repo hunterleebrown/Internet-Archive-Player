@@ -42,6 +42,7 @@ struct ListsView: View {
                 }) {
                     Image(systemName: "plus")
                         .foregroundColor(.fairyRed)
+                    Text("Create Playlist")
                 }
             }
             .safeAreaInset(edge: .bottom) {

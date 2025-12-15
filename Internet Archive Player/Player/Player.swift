@@ -296,8 +296,13 @@ class Player: NSObject, ObservableObject {
 
     private func removePlayListEntities(list: PlaylistEntity?, at offsets: IndexSet) {
         guard let playlist = list else { return }
+        guard let playlistFiles = playlist.files?.array as? [ArchiveFileEntity] else { return }
+        
         for index in offsets {
-            let archiveFileEntity = playlist.name == Self.mainListName ? items[index] : favoriteItems[index]
+            // Get the file directly from the playlist's files array
+            guard playlistFiles.indices.contains(index) else { continue }
+            let archiveFileEntity = playlistFiles[index]
+            
             if let playingFile = self.playingFile, playingFile == archiveFileEntity{
                 self.stopPlaying()
                 self.playingFile = nil

@@ -24,6 +24,7 @@ enum PlayerButtonType: String {
     case hidePlay = "rectangle.expand.vertical"
     case ear = "ear"
     case x = "xmark.circle"
+    case history = "clock.arrow.circlepath"
 }
 
 struct PlayerButton: View {

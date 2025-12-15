@@ -40,18 +40,16 @@
 		5A9DCF932AA6647600F6EFDB /* OtherPlaylist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DCF922AA6647600F6EFDB /* OtherPlaylist.swift */; };
 		5A9DCF952AA6796E00F6EFDB /* SingleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9DCF942AA6796E00F6EFDB /* SingleListView.swift */; };
 		5AA391A52A4F4C8A00C65A48 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA391A42A4F4C8A00C65A48 /* Home.swift */; };
+		5AA73BF02EEF51730047B904 /* HistoryDrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */; };
 		5ABF75692AAFC4D8001B158B /* ci_post_xcodebuild.sh in Resources */ = {isa = PBXBuildFile; fileRef = 5ABF75682AAFC4D7001B158B /* ci_post_xcodebuild.sh */; };
 		5AC10D5B281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5AC10D59281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld */; };
 		5AC10D5D281C98B200119C4E /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC10D5C281C98B200119C4E /* Persistence.swift */; };
 		5AC5B2B2281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5B2B1281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift */; };
 		5AC5B2B4281CA4B000CDE937 /* EntityFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5B2B3281CA4B000CDE937 /* EntityFileView.swift */; };
 		5AC5DBA4281F7C36004D64DB /* PlaylistEntity+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */; };
-		5AC8A6B62EEB6FC200D962B9 /* OPTIONAL_IDENTIFIER_FIX.md in Resources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B52EEB6FC200D962B9 /* OPTIONAL_IDENTIFIER_FIX.md */; };
 		5AC8A6B92EEB737200D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B02EEB675E00D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift */; };
 		5AC8A6BA2EEB737200D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B02EEB675E00D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift */; };
 		5AC8A6BB2EEB737A00D962B9 /* FavoriteArchivesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B12EEB67F100D962B9 /* FavoriteArchivesView.swift */; };
-		5AC8A6BD2EEB738D00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B32EEB681F00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift */; };
-		5AC8A6BE2EEB738D00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B32EEB681F00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift */; };
 		5AC8A6BF2EEB739B00D962B9 /* ArchiveMetaDataEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B72EEB712C00D962B9 /* ArchiveMetaDataEntity+CoreDataClass.swift */; };
 		5AC8A6C02EEB739B00D962B9 /* ArchiveMetaDataEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B72EEB712C00D962B9 /* ArchiveMetaDataEntity+CoreDataClass.swift */; };
 		5AC8A6C12EEB73A400D962B9 /* ArchiveMetaDataEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8A6B82EEB713300D962B9 /* ArchiveMetaDataEntity+CoreDataProperties.swift */; };
@@ -134,6 +132,7 @@
 		5A9DCF922AA6647600F6EFDB /* OtherPlaylist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherPlaylist.swift; sourceTree = "<group>"; };
 		5A9DCF942AA6796E00F6EFDB /* SingleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleListView.swift; sourceTree = "<group>"; };
 		5AA391A42A4F4C8A00C65A48 /* Home.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Home.swift; sourceTree = "<group>"; };
+		5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryDrawerView.swift; sourceTree = "<group>"; };
 		5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Internet-Archive-Player-Info.plist"; sourceTree = SOURCE_ROOT; };
 		5AAF2F952AB4F37C00886641 /* ci_post_clone.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_clone.sh; sourceTree = "<group>"; };
 		5ABF75682AAFC4D7001B158B /* ci_post_xcodebuild.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ci_post_xcodebuild.sh; sourceTree = "<group>"; };
@@ -146,9 +145,7 @@
 		5AC8A6B02EEB675E00D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveMetaData+ArchiveMetaDataEntity.swift"; sourceTree = "<group>"; };
 		5AC8A6B12EEB67F100D962B9 /* FavoriteArchivesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteArchivesView.swift; sourceTree = "<group>"; };
 		5AC8A6B22EEB681300D962B9 /* FAVORITE_ARCHIVES_IMPLEMENTATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FAVORITE_ARCHIVES_IMPLEMENTATION.md; sourceTree = "<group>"; };
-		5AC8A6B32EEB681F00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift"; sourceTree = "<group>"; };
 		5AC8A6B42EEB684300D962B9 /* ARCHITECTURE_DIAGRAM.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ARCHITECTURE_DIAGRAM.md; sourceTree = "<group>"; };
-		5AC8A6B52EEB6FC200D962B9 /* OPTIONAL_IDENTIFIER_FIX.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = OPTIONAL_IDENTIFIER_FIX.md; sourceTree = "<group>"; };
 		5AC8A6B72EEB712C00D962B9 /* ArchiveMetaDataEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveMetaDataEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
 		5AC8A6B82EEB713300D962B9 /* ArchiveMetaDataEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveMetaDataEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		5AD216F12AA5770300325087 /* ListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListsView.swift; sourceTree = "<group>"; };
@@ -326,7 +323,6 @@
 				5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */,
 				5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */,
 				5AC8A6B02EEB675E00D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift */,
-				5AC8A6B32EEB681F00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift */,
 				5AC8A6B72EEB712C00D962B9 /* ArchiveMetaDataEntity+CoreDataClass.swift */,
 				5AC8A6B82EEB713300D962B9 /* ArchiveMetaDataEntity+CoreDataProperties.swift */,
 			);
@@ -442,7 +438,6 @@
 				5A4F2D582A50781D00DCDF95 /* UIImageView+Extension.swift */,
 				5A4F2D5A2A53227C00DCDF95 /* AttString+Extension.swift */,
 				5AFD76072AAD35FD00987D4E /* ViewExtensions.swift */,
-				5AC8A6B52EEB6FC200D962B9 /* OPTIONAL_IDENTIFIER_FIX.md */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -473,6 +468,7 @@
 				5AD6BC53279CCED100495070 /* PlayerButton.swift */,
 				5AD6BC55279CDE2100495070 /* AirPlayButton.swift */,
 				5A4151B927B0FEAA007A3623 /* Player.swift */,
+				5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */,
 			);
 			path = Player;
 			sourceTree = "<group>";
@@ -678,7 +674,6 @@
 				5ABF75692AAFC4D8001B158B /* ci_post_xcodebuild.sh in Resources */,
 				5ADED040279B56F000FB2E6D /* Preview Assets.xcassets in Resources */,
 				5ADED03D279B56F000FB2E6D /* Assets.xcassets in Resources */,
-				5AC8A6B62EEB6FC200D962B9 /* OPTIONAL_IDENTIFIER_FIX.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -706,7 +701,6 @@
 				5A3AAA8C2AEE0AF3004A15BC /* ArchiveFile+Extensions.swift in Sources */,
 				5A3AAA8E2AEE18C0004A15BC /* DetailDescription.swift in Sources */,
 				5A3AAA872AEE0922004A15BC /* IAMediaUtils.swift in Sources */,
-				5AC8A6BE2EEB738D00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift in Sources */,
 				5A3AAA762AEDEAC6004A15BC /* Persistence.swift in Sources */,
 				5A3AAA802AEDFC47004A15BC /* TVSearchView.swift in Sources */,
 				5A3AAA862AEDFFB0004A15BC /* TVDetail.swift in Sources */,
@@ -738,6 +732,7 @@
 				5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */,
 				5A012CAE282B54C800785420 /* Downloader.swift in Sources */,
 				5AE69CD22A846DBE0062CC5D /* DetailDescription.swift in Sources */,
+				5AA73BF02EEF51730047B904 /* HistoryDrawerView.swift in Sources */,
 				5AC8A6BB2EEB737A00D962B9 /* FavoriteArchivesView.swift in Sources */,
 				CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */,
 				5A4F2D5B2A53227C00DCDF95 /* AttString+Extension.swift in Sources */,
@@ -747,7 +742,6 @@
 				5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */,
 				5A33A43F2A59CC520010C6FA /* DetailViewModel.swift in Sources */,
 				5A35A6D92ABBC34000A127D6 /* ViewBuilders.swift in Sources */,
-				5AC8A6BD2EEB738D00D962B9 /* ArchiveMetaDataEntity+CoreDataProperties_REFERENCE.swift in Sources */,
 				5AC10D5B281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld in Sources */,
 				5A576F822D0E432D0065647C /* ReflectiveGradientView.swift in Sources */,
 				5AC10D5D281C98B200119C4E /* Persistence.swift in Sources */,

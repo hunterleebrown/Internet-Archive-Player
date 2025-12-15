@@ -17,6 +17,7 @@ struct PlayerControls: View {
 
     static var showPlayingDetails = PassthroughSubject<ArchiveFileEntity, Never>()
     static var showVideo = PassthroughSubject<Bool, Never>()
+    static var toggleHistory = PassthroughSubject<Void, Never>()
 
     var foregroundColor: Color = .fairyCream
     var backgroundColor: Color = .fairyRed.opacity(0.8)
@@ -70,6 +71,11 @@ struct PlayerControls: View {
                     Spacer()
 
                     HStack(alignment: .center, spacing: 15) {
+
+                        PlayerButton(.history, CGSize(width: 20, height: 20)) {
+                            PlayerControls.toggleHistory.send()
+                        }
+
                         if viewModel.isPlayingVideo {
                             PlayerButton(.video, CGSize(width: 20, height: 20)) {
                                 showVideoPlayer = true
@@ -187,8 +193,10 @@ extension PlayerControls {
         @Published var progress: Double = 0.0
         @Published var duration: Double = 0.0
 
+        weak var iaPlayer: Player?
 
         func setSubscribers(_ iaPlayer: Player) {
+            self.iaPlayer = iaPlayer
             iaPlayer.playingPublisher
                 .removeDuplicates()
                 .sink { isPlaying in
@@ -255,7 +263,6 @@ extension PlayerControls {
             }
             return 0
         }
-
     }
 }
 

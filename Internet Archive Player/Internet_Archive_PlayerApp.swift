@@ -11,6 +11,7 @@ import SwiftUI
 struct Internet_Archive_PlayerApp: App {
     @Environment(\.scenePhase) var scenePhase
     let persistenceController = PersistenceController.shared
+    
     var body: some Scene {
         WindowGroup {
             Home()

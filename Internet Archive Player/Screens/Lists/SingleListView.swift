@@ -107,9 +107,20 @@ extension SingleListView {
         }
         
         public func removeFiles(at offsets: IndexSet, from playlist: PlaylistEntity, player: Player) {
-            // Use the Player's method which handles cleanup properly
-            // This will trigger a Core Data change, which we'll pick up in onChange
+            // Capture the entities to remove before modifying the array
+            let entitiesToRemove = offsets.map { files[$0] }
+            
+            // Update the UI immediately by removing from the local array
+            files.remove(atOffsets: offsets)
+            
+            // Then use the Player's method which handles Core Data cleanup properly
+            // We pass the offsets which the Player will use on the actual playlist
             player.removeListItem(list: playlist, at: offsets)
+            
+            // Ensure the view model stays in sync after Core Data changes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                self?.loadFiles(from: playlist)
+            }
         }
         
         public func moveFiles(fromOffsets source: IndexSet, toOffset destination: Int, in playlist: PlaylistEntity) {

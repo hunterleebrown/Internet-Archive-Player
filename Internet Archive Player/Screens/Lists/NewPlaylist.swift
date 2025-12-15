@@ -18,32 +18,44 @@ struct NewPlaylist: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
-            VStack {
-                HStack(alignment: .center) {
-
-                    Image(systemName: "music.note.list")
-                        .font(.headline)
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Create a new list")
+                    .font(.title)
+                    .foregroundColor(.fairyRed)
+                    .bold()
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        isPresented = false
+                    }
+                }) {
+                    Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.fairyRed)
-
-                    Text("Create a new list")
-                        .font(.headline)
-                        .foregroundColor(.fairyRed)
-
-                    Spacer()
+                        .font(.title3)
                 }
-                .frame(alignment: .leading)
-
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 8)
+            
+            // Content
+            VStack(spacing: 16) {
                 TextField("New list name", text: $name)
-                    .padding(5) // Adds padding inside the TextField
+                    .padding(12)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(UIColor.systemGray6)) // Fill with a light gray background
+                            .fill(Color(UIColor.systemGray6))
                     )
                     .onSubmit {
-                        viewModel.createPlaylist(name: name)
-                        isPresented = false
-                        dismiss()
+                        if !name.isEmpty {
+                            viewModel.createPlaylist(name: name)
+                            isPresented = false
+                            dismiss()
+                        }
                     }
 
                 Button("Create") {
@@ -52,12 +64,13 @@ struct NewPlaylist: View {
                     dismiss()
                 }
                 .buttonStyle(IAButton())
-                .padding()
-                Spacer()
-
+                .disabled(name.isEmpty)
             }
-            .padding()
+            .padding(20)
+            
+            Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
