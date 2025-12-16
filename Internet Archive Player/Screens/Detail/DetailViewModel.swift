@@ -27,7 +27,6 @@ final class DetailViewModel: ObservableObject {
     @Published var isFavoriteArchive: Bool = false
     @Published var createdPlaylist: PlaylistEntity?
 
-//    @Published var pressedStates: [Int: Bool] = [:]
     @Published var pressedStates: [ArchiveFile.ID: Bool] = [:]
 
     // Cached sorted audio files
