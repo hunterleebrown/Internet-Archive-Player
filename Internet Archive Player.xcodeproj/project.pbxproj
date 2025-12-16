@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5A012CAE282B54C800785420 /* Downloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A012CAD282B54C800785420 /* Downloader.swift */; };
+		5A0E15182EF1EB4D000A80D2 /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0E15172EF1EB4D000A80D2 /* CachedAsyncImage.swift */; };
 		5A1CB7132EEFDED900B8D664 /* FavoriteArchiveItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1CB7122EEFDED900B8D664 /* FavoriteArchiveItemView.swift */; };
 		5A2FACD327A10FB200D02945 /* SearchItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2FACD227A10FB200D02945 /* SearchItemView.swift */; };
 		5A305F522807BF5E00735FAA /* iaAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 5A305F512807BF5E00735FAA /* iaAPI */; };
@@ -63,7 +64,7 @@
 		5AD6BC52279CCB7000495070 /* PlayerControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC51279CCB7000495070 /* PlayerControls.swift */; };
 		5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC53279CCED100495070 /* PlayerButton.swift */; };
 		5AD6BC56279CDE2100495070 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC55279CDE2100495070 /* AirPlayButton.swift */; };
-		5AD6BC58279CF31400495070 /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC57279CF31400495070 /* Playlist.swift */; };
+		5AD6BC58279CF31400495070 /* NowPlaying.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD6BC57279CF31400495070 /* NowPlaying.swift */; };
 		5ADA9D832CE9802D00A18ED6 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADA9D822CE9802300A18ED6 /* WebView.swift */; };
 		5ADB8AD02AEF23DC0034B93B /* ArchiveMetaData+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */; };
 		5ADED039279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */; };
@@ -105,6 +106,7 @@
 
 /* Begin PBXFileReference section */
 		5A012CAD282B54C800785420 /* Downloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloader.swift; sourceTree = "<group>"; };
+		5A0E15172EF1EB4D000A80D2 /* CachedAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedAsyncImage.swift; sourceTree = "<group>"; };
 		5A1CB7122EEFDED900B8D664 /* FavoriteArchiveItemView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FavoriteArchiveItemView.swift; path = "Internet Archive Player/Screens/Saved Archives/FavoriteArchiveItemView.swift"; sourceTree = SOURCE_ROOT; };
 		5A2FACD227A10FB200D02945 /* SearchItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchItemView.swift; sourceTree = "<group>"; };
 		5A33A43E2A59CC520010C6FA /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
@@ -160,7 +162,7 @@
 		5AD6BC51279CCB7000495070 /* PlayerControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerControls.swift; sourceTree = "<group>"; };
 		5AD6BC53279CCED100495070 /* PlayerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerButton.swift; sourceTree = "<group>"; };
 		5AD6BC55279CDE2100495070 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
-		5AD6BC57279CF31400495070 /* Playlist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
+		5AD6BC57279CF31400495070 /* NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlaying.swift; sourceTree = "<group>"; };
 		5ADA9D822CE9802300A18ED6 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		5ADED035279B56EE00FB2E6D /* ia-player.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ia-player.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ADED038279B56EE00FB2E6D /* Internet_Archive_PlayerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Internet_Archive_PlayerApp.swift; sourceTree = "<group>"; };
@@ -310,6 +312,7 @@
 			children = (
 				5AC8A6B12EEB67F100D962B9 /* FavoriteArchivesView.swift */,
 				5A1CB7122EEFDED900B8D664 /* FavoriteArchiveItemView.swift */,
+				5A0E15172EF1EB4D000A80D2 /* CachedAsyncImage.swift */,
 			);
 			path = "Saved Archives";
 			sourceTree = "<group>";
@@ -493,12 +496,12 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		5AFEC5042A9986BE00E0BFD3 /* Playlist */ = {
+		5AFEC5042A9986BE00E0BFD3 /* NowPlaying */ = {
 			isa = PBXGroup;
 			children = (
-				5AD6BC57279CF31400495070 /* Playlist.swift */,
+				5AD6BC57279CF31400495070 /* NowPlaying.swift */,
 			);
-			path = Playlist;
+			path = NowPlaying;
 			sourceTree = "<group>";
 		};
 		5AFEC5052A9986D700E0BFD3 /* Screens */ = {
@@ -508,7 +511,7 @@
 				5AA391A42A4F4C8A00C65A48 /* Home.swift */,
 				5A35A6DA2ABBE88B00A127D6 /* Debug */,
 				5ADED063279B589600FB2E6D /* Favorites */,
-				5AFEC5042A9986BE00E0BFD3 /* Playlist */,
+				5AFEC5042A9986BE00E0BFD3 /* NowPlaying */,
 				CEF72C9827A24BF700B8AF15 /* Detail */,
 				5ADED062279B588E00FB2E6D /* Search */,
 				5AD216F02AA576C400325087 /* Lists */,
@@ -730,7 +733,7 @@
 			files = (
 				5AC5DBA4281F7C36004D64DB /* PlaylistEntity+Extension.swift in Sources */,
 				5A9DCF952AA6796E00F6EFDB /* SingleListView.swift in Sources */,
-				5AD6BC58279CF31400495070 /* Playlist.swift in Sources */,
+				5AD6BC58279CF31400495070 /* NowPlaying.swift in Sources */,
 				5A4F2D592A50781D00DCDF95 /* UIImageView+Extension.swift in Sources */,
 				5AC8A6C12EEB73A400D962B9 /* ArchiveMetaDataEntity+CoreDataProperties.swift in Sources */,
 				5AFEC5072A99880800E0BFD3 /* NewFavoritesView.swift in Sources */,
@@ -742,6 +745,7 @@
 				5AE69CD22A846DBE0062CC5D /* DetailDescription.swift in Sources */,
 				5AA73BF02EEF51730047B904 /* HistoryDrawerView.swift in Sources */,
 				5AC8A6BB2EEB737A00D962B9 /* FavoriteArchivesView.swift in Sources */,
+				5A0E15182EF1EB4D000A80D2 /* CachedAsyncImage.swift in Sources */,
 				CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */,
 				5A4F2D5B2A53227C00DCDF95 /* AttString+Extension.swift in Sources */,
 				5AFD76042AAD06D200987D4E /* SearchFilters.swift in Sources */,

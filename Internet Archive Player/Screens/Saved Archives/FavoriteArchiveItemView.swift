@@ -20,7 +20,7 @@ struct FavoriteArchiveItemView<Item: SearchItemDisplayable>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Image at top - larger and more prominent
-            AsyncImage(url: item.displayIconUrl) { image in
+            CachedAsyncImage(url: item.displayIconUrl) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -28,9 +28,13 @@ struct FavoriteArchiveItemView<Item: SearchItemDisplayable>: View {
                     .frame(height: imageHeight)
                     .clipped()
             } placeholder: {
-                Color(.systemGray5)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: imageHeight)
+                ZStack {
+                    Color(.systemGray5)
+                    ProgressView()
+                        .tint(.fairyRed)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: imageHeight)
             }
             .frame(maxWidth: .infinity)
             .frame(height: imageHeight) // Fixed height to prevent layout shifts

@@ -112,8 +112,11 @@ struct FavoriteArchivesView: View {
                     }
                 }
             }
-            .onAppear {
+            .task {
                 iaPlayer.refreshFavoriteArchives()
+                #if DEBUG
+                viewModel.validateImageUrls(in: iaPlayer.favoriteArchives)
+                #endif
             }
         }
     }
@@ -184,6 +187,21 @@ extension FavoriteArchivesView {
             }
             
             return false
+        }
+        
+        /// Debug helper to check for invalid URLs in favorites
+        func validateImageUrls(in favorites: [ArchiveMetaDataEntity]) {
+            #if DEBUG
+            for archive in favorites {
+                if let urlString = archive.iconUrlString {
+                    if URL(string: urlString) == nil {
+                        print("⚠️ Invalid URL for archive '\(archive.displayTitle)': \(urlString)")
+                    }
+                } else {
+                    print("⚠️ Missing URL for archive '\(archive.displayTitle)'")
+                }
+            }
+            #endif
         }
     }
 }

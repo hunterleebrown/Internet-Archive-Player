@@ -169,24 +169,28 @@ class Downloader: NSObject {
             let itemDirs = try FileManager.default.contentsOfDirectory(atPath: archivePath.path)
             for dir in itemDirs {
                 guard dir != ".DS_Store" else { continue }
-                var directory: ObjCBool = ObjCBool(true)
                 let directoryPath = archivePath.appendingPathComponent(dir)
+                
+                // Check if this is actually a directory
+                var isDirectory: ObjCBool = false
+                guard FileManager.default.fileExists(atPath: directoryPath.path, isDirectory: &isDirectory),
+                      isDirectory.boolValue else {
+                    // Skip if path doesn't exist or is not a directory
+                    continue
+                }
 
 //                print("---------> dir path: \(directoryPath)")
 
-                if FileManager.default.fileExists(atPath: directoryPath.path, isDirectory: &directory) {
-
-                    let files = try FileManager.default.contentsOfDirectory(atPath: directoryPath.path)
-                    for file in files {
-                        guard file != ".DS_Store" else { continue }
-                        let filePath = directoryPath.appendingPathComponent(file)
-                        let attributes = try FileManager.default.attributesOfItem(atPath: filePath.path)
+                let files = try FileManager.default.contentsOfDirectory(atPath: directoryPath.path)
+                for file in files {
+                    guard file != ".DS_Store" else { continue }
+                    let filePath = directoryPath.appendingPathComponent(file)
+                    let attributes = try FileManager.default.attributesOfItem(atPath: filePath.path)
 //                        print("\(file) attributes: \(attributes[FileAttributeKey.size]!)")
 //                        totalFiles = totalFiles + 1
-                        if let fileSize = attributes[FileAttributeKey.size] as? Int {
+                    if let fileSize = attributes[FileAttributeKey.size] as? Int {
 //                            totalDownloadSize = totalDownloadSize + fileSize
-                            dFiles.append(DownloadReport.DownloadedFile(name: file, size: fileSize, directoryPath: dir))
-                        }
+                        dFiles.append(DownloadReport.DownloadedFile(name: file, size: fileSize, directoryPath: dir))
                     }
                 }
             }
