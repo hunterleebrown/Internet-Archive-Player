@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "git@github.com:hunterleebrown/iaAPI.git",
       "state" : {
-        "revision" : "602e6e4408029b5b2fe5a943592cf6c69d0256da",
-        "version" : "2.6.1"
+        "revision" : "7a5f0b7630eeb09b0e19c5d22bd1b852ee925570",
+        "version" : "2.6.2"
       }
     }
   ],
