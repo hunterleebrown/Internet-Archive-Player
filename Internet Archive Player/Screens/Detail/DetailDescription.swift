@@ -112,7 +112,6 @@ struct DetailDescription: View {
                     )
                     .padding(.horizontal, 20)
 
-#if !os(tvOS)
                     // View on archive.org button
                     if let identifier = doc.identifier {
                         Link(destination: URL(string: "https://archive.org/details/\(identifier)")!) {
@@ -134,7 +133,6 @@ struct DetailDescription: View {
                         }
                         .padding(.horizontal, 20)
                     }
-#endif
                     
                     // Description section
                     VStack(alignment: .leading, spacing: 8) {
@@ -143,7 +141,6 @@ struct DetailDescription: View {
                             .foregroundColor(.fairyRed)
                             .padding(.horizontal, 20)
                         
-#if !os(tvOS)
                         WebView(htmlString: doc.description.joined(separator: ""),
                                 bodyFontSize: fontSize,
                                 bodyFontFamily: fontFamily,
@@ -152,12 +149,6 @@ struct DetailDescription: View {
                         )
                         .frame(height: webViewHeight)
                         .padding(.horizontal, 20)
-#else
-                        if let att = doc.description.joined(separator: "").html2AttributedString {
-                            Text(AttributedString(att))
-                                .padding(.horizontal, 20)
-                        }
-#endif
                     }
                     .padding(.bottom, 20)
                 }

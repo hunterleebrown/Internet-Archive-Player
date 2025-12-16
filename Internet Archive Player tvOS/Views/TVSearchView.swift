@@ -14,17 +14,15 @@ struct TVSearchView: View {
     @State private var searchText = ""
     @StateObject var viewModel = TVSearchView.ViewModel()
 
+    // Adaptive columns that adjust based on available space
     let columns = [
-        GridItem(.fixed(400)),
-        GridItem(.fixed(400)),
-        GridItem(.fixed(400)),
-        GridItem(.fixed(400))
+        GridItem(.adaptive(minimum: 300, maximum: 400), spacing: 10)
     ]
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 20) {
+                LazyVGrid(columns: columns, spacing: 10) {
                     ForEach(viewModel.items, id: \.self) { doc in
                         NavigationLink(destination: TVDetail(doc: doc)) {
                             VStack(spacing: 0) {
@@ -40,28 +38,32 @@ struct TVSearchView: View {
                                 .padding(10)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(Color.black.opacity(0.55))
-                                .cornerRadius(10)
                             }
-                            .frame(width: 300, height: 250, alignment: .bottomLeading)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                            .aspectRatio(1.2, contentMode: .fit)
                             .background(
                                 AsyncImage(url: doc.iconUrl, transaction: Transaction(animation: .spring())) { phase in
                                     switch phase {
                                     case .empty:
-                                        Color.clear
+                                        Color.gray.opacity(0.3)
                                     case .success(let image):
                                         image
                                             .resizable()
-                                            .scaledToFill()
+                                            .aspectRatio(contentMode: .fill)
                                     case .failure(_):
-                                        EmptyView()
+                                        Color.gray.opacity(0.3)
                                     @unknown default:
-                                        EmptyView()
+                                        Color.gray.opacity(0.3)
                                     }
                                 }
                             )
+                            .clipped()
+                            .cornerRadius(10)
                         }
                     }
                 }
+                .padding(.horizontal, 40)
+                .padding(.vertical, 20)
             }
             .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
             .onChange(of: viewModel.searchText) {
