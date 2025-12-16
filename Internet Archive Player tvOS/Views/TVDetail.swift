@@ -157,19 +157,19 @@ struct TVDetail: View {
                 Spacer()
             }
             .background(
-                LinearGradient(
-                    gradient: Gradient(
-                        stops: [
-                            .init(color: .fairyRed, location: 0),
-                            .init(color: .fairyRed.opacity(0.75), location: 0.33),
-                            .init(color: .fairyRed.opacity(0.5), location: 0.66),
-                            .init(color: .fairyRed.opacity(0.25), location: 1),
-                        ]
-                    ),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .edgesIgnoringSafeArea(.all)
+//                LinearGradient(
+//                    gradient: Gradient(
+//                        stops: [
+//                            .init(color: .fairyRed, location: 0),
+//                            .init(color: .fairyRed.opacity(0.75), location: 0.33),
+//                            .init(color: .fairyRed.opacity(0.5), location: 0.66),
+//                            .init(color: .fairyRed.opacity(0.25), location: 1),
+//                        ]
+//                    ),
+//                    startPoint: .top,
+//                    endPoint: .bottom
+//                )
+//                .edgesIgnoringSafeArea(.all)
 
             )
             .frame(alignment: .topLeading)

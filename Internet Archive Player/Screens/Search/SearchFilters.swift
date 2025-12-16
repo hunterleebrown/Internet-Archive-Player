@@ -171,47 +171,32 @@ struct SearchFilters_Previews: PreviewProvider {
     }
 }
 
+@MainActor
 class SearchFiltersViewModel: ObservableObject {
     @Published var collectionSelection: SearchFilter = SearchFilter(name: "All", identifier: "")
 
-    let service: PlayerArchiveService
     let collectionType : ArchiveTopCollectionType
     @Published var items: [SearchFilter] = []
+    
+    private let cache = CollectionFilterCache.shared
 
     init(collectionType: ArchiveTopCollectionType) {
         self.collectionType = collectionType
-        self.service = PlayerArchiveService()
     }
 
     func search() {
-        Task { @MainActor in
-            do {
-
-                let data = try await self.service.getCollections(from: self.collectionType)
-
-                self.items = data.response.docs.map({ doc in
-                    SearchFilter(name: doc.archiveTitle ?? "title", identifier: doc.identifier ?? "zero", iconUrl: doc.iconUrl)
-                })
-
-
-                let image = Image(systemName: self.collectionType == .movies ? "video" : "hifispeaker")
-
-
-                let all = SearchFilter(name: "All \(self.collectionType.rawValue.capitalized)", identifier: "", image: image)
-                self.items.insert(all, at: 0)
-
-                if self.items.count == 0 {
-                    throw ArchiveServiceError.nodata
-                }
-
-            } catch _ as ArchiveServiceError {
-//                withAnimation(.easeIn(duration: 0.33)) {
-//                    self.archiveError = error.description
-//                    self.noDataFound = true
-//                    self.isSearching = false
-//                    self.searchStarted = false
-//                }
+        Task {
+            // Use cached data instead of making a new network request
+            self.items = await cache.getFilters(for: self.collectionType)
+            
+            if self.items.isEmpty {
+                print("No filters available for \(self.collectionType.rawValue)")
             }
         }
+    }
+    
+    /// Look up a filter by identifier from the cache
+    func filter(for identifier: String) -> SearchFilter? {
+        return cache.filter(for: identifier)
     }
 }
