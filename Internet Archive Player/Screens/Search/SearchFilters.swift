@@ -27,69 +27,122 @@ struct SearchFilters: View {
 
     @State private var searchFilter: SearchFilter?
     @StateObject var searchFiltersViewModel: SearchFiltersViewModel
+    @Environment(\.dismiss) private var dismiss
     var delegate: SearchView?
 
     var body: some View {
-        VStack(alignment: .center, spacing:10){
+        VStack(spacing: 0) {
+            // Header
             HStack {
-                Image(systemName: "line.3.horizontal.decrease.circle")
+                Text("Filter by Collection")
+                    .font(.title2)
                     .foregroundColor(.fairyRed)
-                    .font(.headline)
-                Text("Filter by collection")
-                    .font(.headline)
-                    .foregroundColor(Color.fairyRed)
-            }
-            List(searchFiltersViewModel.items, id: \.self, selection: $searchFilter ) { filter in
-
-                HStack(alignment:.top, spacing: 5.0) {
-
-                    if let image = filter.image {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 44, height: 48)
-                            .padding(.horizontal, 5)
-                    } else if let uiImage = filter.uiImage {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .cornerRadius(5)
-                            .frame(width: 44, height: 48)
-                            .padding(.horizontal, 5)
-
-                    } else if filter.iconUrl != nil {
-                        AsyncImage(
-                            url: filter.iconUrl,
-                            content: { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: 44,
-                                           maxHeight: 44)
-                                    .background(Color.black)
-                            },
-                            placeholder: {
-                                Color(.black)
-                                    .frame(maxWidth: 44,
-                                           maxHeight: 44)
-                            })
-                        .cornerRadius(5)
-                        .frame(width: 44, height: 48)
-                        .padding(.horizontal, 5)
+                    .bold()
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        dismiss()
                     }
-
-                    Text(filter.name)
-                        .font(.subheadline)
-                        .foregroundColor(delegate?.collectionName == filter.name ? Color.fairyCream : Color("playerBackgroundText"))
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .padding(.leading, 5)
-
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.fairyRed)
+                        .font(.title3)
                 }
-                .listRowInsets(EdgeInsets(top: 1, leading: 5, bottom: 1, trailing: 5))
-                .background(delegate?.collectionName == filter.name ? Color.fairyRed : Color("playerBackgrouond"))
-                .cornerRadius(10)
             }
-            .listStyle(PlainListStyle())
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 8)
+            
+            // Collection type indicator
+            HStack(spacing: 6) {
+                Image(systemName: searchFiltersViewModel.collectionType == .movies ? "video" : "hifispeaker")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(searchFiltersViewModel.collectionType.rawValue.capitalized)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
+            
+            Divider()
+            
+            // List of collections
+            List(searchFiltersViewModel.items, id: \.self, selection: $searchFilter) { filter in
+                HStack(spacing: 10) {
+                    // Collection icon
+                    Group {
+                        if let image = filter.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 40, height: 40)
+                        } else if let uiImage = filter.uiImage {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 40, height: 40)
+                        } else if filter.iconUrl != nil {
+                            AsyncImage(
+                                url: filter.iconUrl,
+                                content: { image in
+                                    image.resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 40, height: 40)
+                                        .background(Color.black)
+                                },
+                                placeholder: {
+                                    Color(.systemGray5)
+                                        .frame(width: 40, height: 40)
+                                })
+                            .cornerRadius(5)
+                        }
+                    }
+                    .frame(width: 40, height: 40)
+                    
+                    // Collection name and identifier
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(filter.name)
+                            .font(.subheadline)
+                            .foregroundColor(isSelected(filter) ? .white : .primary)
+                            .lineLimit(2)
+                        
+                        if !filter.identifier.isEmpty {
+                            Text(filter.identifier)
+                                .font(.caption2)
+                                .foregroundColor(isSelected(filter) ? .white.opacity(0.8) : .secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Checkmark for selected
+                    if isSelected(filter) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.white)
+                            .font(.callout)
+                    }
+                }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(isSelected(filter) ? Color.fairyRed : Color(UIColor.systemGray6))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(isSelected(filter) ? Color.fairyRed.opacity(0.3) : Color.clear, lineWidth: 2)
+                )
+                .listRowInsets(EdgeInsets(top: 3, leading: 16, bottom: 3, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+            }
+            .listStyle(.plain)
         }
-        .offset(y:10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(UIColor.systemBackground))
         .onChange(of: searchFilter) { oldValue, newValue in
             if let val = newValue {
                 searchFiltersViewModel.collectionSelection = val
@@ -99,13 +152,16 @@ struct SearchFilters: View {
                     del.collectionIdentifier = val.identifier
                     del.showCollections = false
                     del.viewModel.search(query: del.viewModel.searchText, collection: searchFiltersViewModel.collectionSelection.identifier.isEmpty ? nil : searchFiltersViewModel.collectionSelection.identifier, loadMore: false)
-
                 }
             }
         }
         .onAppear() {
             searchFiltersViewModel.search()
         }
+    }
+    
+    private func isSelected(_ filter: SearchFilter) -> Bool {
+        delegate?.collectionName == filter.name
     }
 }
 

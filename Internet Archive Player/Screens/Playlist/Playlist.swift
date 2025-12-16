@@ -45,13 +45,11 @@ struct Playlist: View {
                                textColor: archiveFile.url?.absoluteURL == viewModel.playingFile?.url?.absoluteURL ? .fairyCream : .primary,
                                fileViewMode: .playlist,
                                ellipsisAction: self.menuItems(archiveFileEntity: archiveFile))
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .onTapGesture {
                     if let playlist = iaPlayer.mainPlaylist {
                         iaPlayer.playFileFromPlaylist(archiveFile, playlist: playlist)
                     }
                 }
-                .padding(.horizontal, 5)
             }
             .onDelete(perform: self.remove)
             .onMove(perform: self.move)

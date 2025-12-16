@@ -16,7 +16,7 @@ public protocol FileViewDownloadDelegate {
 
 struct EntityFileView: View {
 
-    @Environment(\.colorScheme) var colorScheme // Access the color scheme
+    @Environment(\.colorScheme) var colorScheme
 
     @StateObject var viewModel: EntityFileView.ViewModel = EntityFileView.ViewModel()
 
@@ -43,157 +43,56 @@ struct EntityFileView: View {
     }
     
     var body: some View {
-        
-        HStack() {
-            if (showImage) {
-                AsyncImage(
-                    url: archiveFile.iconUrl,
-                    content: { image in
-                        image.resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: 44,
-                                   maxHeight: 44)
-                            .background(Color.black)
-
-                    },
-                    placeholder: {
-                        Color(.black)
-                            .frame(maxWidth: 44,
-                                   maxHeight: 44)
-                    })
-                    .cornerRadius(5)
-                    .padding(5)
+        HStack(alignment: .top, spacing: 12) {
+            // Thumbnail with fixed frame to prevent layout shifts
+            if showImage {
+                thumbnailView
             }
-
-            Spacer()
-            VStack(alignment: .leading, spacing: 0) {
+            
+            // Main content
+            VStack(alignment: .leading, spacing: 4) {
+                // Title
                 Text(archiveFile.displayTitle)
-                    .bold()
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(textColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .multilineTextAlignment(.leading)
-
-                if fileViewMode == .playlist {
-                    Text(archiveFile.archiveTitle ?? "")
-                        .font(.caption2)
-                        .foregroundColor(textColor)
+                
+                // Archive title (in playlist mode)
+                if fileViewMode == .playlist, let archiveTitle = archiveFile.archiveTitle {
+                    Text(archiveTitle)
+                        .font(.caption)
+                        .foregroundColor(textColor.opacity(0.8))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .multilineTextAlignment(.leading)
                 }
-
-                HStack(alignment: .center, spacing: 5) {
-
-                    Image(systemName: archiveFile.isVideo ? "video" : "hifispeaker")
-                        .tint(.black)
-                        .font(.caption2)
-
-                    Text("· \(archiveFile.calculatedSize ?? "\"\"") mb")
-                        .font(.caption2)
-                        .foregroundColor(textColor)
-                        .bold()
-                    Text("· \(archiveFile.displayLength ?? "")")
-                        .font(.caption2)
-                        .foregroundColor(textColor)
-                        .bold()
-                    Image(systemName: viewModel.showDownloadButton ? "cloud" : "iphone")
-                        .font(.caption2)
-                    Text(viewModel.showDownloadButton ? "online" : "downloaded")
-                        .font(.caption2)
-                        .foregroundColor(textColor)
-                }
-
+                
+                // Metadata row
+                metadataView
+                
+                // Download progress
                 if viewModel.downloadProgress > 0 &&
                     viewModel.downloadProgress < 1 &&
                     !archiveFile.isLocalFile() {
-                    ProgressView("Downloading", value: viewModel.downloadProgress, total:1)
+                    ProgressView("Downloading", value: viewModel.downloadProgress, total: 1)
                         .tint(textColor)
                         .font(.caption2)
                         .foregroundColor(textColor)
                 }
             }
-            .padding(5.0)
-            Spacer()
-            HStack() {
-
-                    Menu {
-
-                        ForEach(self.ellipsisAction, id: \.self) { menuItem in
-                            Button(action: {
-                                menuItem.action()
-                            }){
-                                HStack {
-                                    if let imageName = menuItem.imageName {
-                                        Image(systemName: imageName)
-                                            .aspectRatio(contentMode: .fill)
-                                            .foregroundColor(textColor)
-                                    }
-                                    Text(menuItem.name)
-                                }
-                            }
-                            .frame(width: 44, height: 44)
-
-                        }
-                        
-                        // Share
-                        if let shareURL = archiveFile.shareURL {
-                            ShareLink(item: shareURL) {
-                                HStack {
-                                    Image(systemName: "square.and.arrow.up")
-                                        .aspectRatio(contentMode: .fill)
-                                        .foregroundColor(textColor)
-                                    Text("Share")
-                                }
-                            }
-                            .frame(width: 44, height: 44)
-                        }
-
-                        if (viewModel.showDownloadButton && archiveFile.format == "VBR MP3") {
-                            Button(action: {
-                                archiveFile.download(delegate: viewModel)
-                            }) {
-                                Image(systemName: "icloud.and.arrow.down")
-                                    .aspectRatio(contentMode: .fill)
-                                    .foregroundColor(textColor)
-                                Text("Download")
-                            }
-                            .frame(width: 44, height: 44)
-                        } else {
-                            Button(action: {
-                                do {
-                                    try Downloader.removeDownload(file: archiveFile)
-                                } catch let error {
-                                    print("Remove download error: \(error)")
-                                }
-                            }) {
-                                Image(systemName: "folder.badge.minus")
-                                    .aspectRatio(contentMode: .fill)
-                                    .foregroundColor(textColor)
-                                Text("Remove download")
-                            }
-                            .frame(width: 44, height: 44)
-                        }
-
-
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .foregroundColor(textColor)
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 44, height: 44)
-                    }
-                    .highPriorityGesture(TapGesture())
-            }
-            .padding(5.0)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Menu button
+            menuButton
         }
-        .listRowSeparator(.visible) // Hides the separator for this row
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
         .background(
-            RoundedRectangle(
-                cornerRadius: 5,
-                style: .continuous
-            )
-            .fill(backgroundColor ?? (colorScheme == .dark ? Color.droopy : Color.white))
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(backgroundColor ?? (colorScheme == .dark ? Color.droopy : Color.white))
         )
-        .padding(10)
+        .listRowSeparator(.visible)
+        .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
         .onReceive(Downloader.downloadedSubject) { file in
             guard file.id == archiveFile.id else { return }
             viewModel.showDownloadButton = !file.isLocalFile()
@@ -201,6 +100,115 @@ struct EntityFileView: View {
         .task {
             viewModel.showDownloadButton = !archiveFile.isLocalFile()
             viewModel.fetchDownloadUrl(for: archiveFile)
+        }
+    }
+    
+    // MARK: - Subviews
+    
+    private var thumbnailView: some View {
+        AsyncImage(url: archiveFile.iconUrl) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 56, height: 56)
+                .clipped()
+        } placeholder: {
+            Color.black
+                .frame(width: 56, height: 56)
+                .overlay(
+                    Image(systemName: archiveFile.isVideo ? "video.fill" : "music.note")
+                        .foregroundColor(textColor.opacity(0.5))
+                        .font(.title3)
+                )
+        }
+        .frame(width: 56, height: 56)
+        .background(Color.black)
+        .cornerRadius(6)
+    }
+    
+    private var metadataView: some View {
+        HStack(alignment: .center, spacing: 4) {
+            // Media type icon
+            Image(systemName: archiveFile.isVideo ? "video" : "hifispeaker")
+                .font(.caption2)
+                .foregroundColor(textColor.opacity(0.8))
+            
+            // File size
+            if let size = archiveFile.calculatedSize {
+                Text("·")
+                    .font(.caption2)
+                    .foregroundColor(textColor.opacity(0.6))
+                Text(size + " MB")
+                    .font(.caption2)
+                    .foregroundColor(textColor.opacity(0.8))
+            }
+            
+            // Duration
+            if let duration = archiveFile.displayLength {
+                Text("·")
+                    .font(.caption2)
+                    .foregroundColor(textColor.opacity(0.6))
+                Text(duration)
+                    .font(.caption2)
+                    .foregroundColor(textColor.opacity(0.8))
+            }
+            
+            // Download status
+            Text("·")
+                .font(.caption2)
+                .foregroundColor(textColor.opacity(0.6))
+            Image(systemName: viewModel.showDownloadButton ? "icloud" : "arrow.down.circle.fill")
+                .font(.caption2)
+                .foregroundColor(textColor.opacity(0.8))
+            Text(viewModel.showDownloadButton ? "online" : "downloaded")
+                .font(.caption2)
+                .foregroundColor(textColor.opacity(0.8))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private var menuButton: some View {
+        Menu {
+            // Custom menu items
+            ForEach(ellipsisAction, id: \.self) { menuItem in
+                Button(action: menuItem.action) {
+                    Label(menuItem.name, systemImage: menuItem.imageName ?? "")
+                }
+            }
+            
+            // Share
+            if let shareURL = archiveFile.shareURL {
+                ShareLink(item: shareURL) {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
+            }
+            
+            Divider()
+            
+            // Download/Remove
+            if viewModel.showDownloadButton && archiveFile.format == "VBR MP3" {
+                Button(action: {
+                    archiveFile.download(delegate: viewModel)
+                }) {
+                    Label("Download", systemImage: "icloud.and.arrow.down")
+                }
+            } else if !viewModel.showDownloadButton {
+                Button(role: .destructive, action: {
+                    do {
+                        try Downloader.removeDownload(file: archiveFile)
+                    } catch {
+                        print("Remove download error: \(error)")
+                    }
+                }) {
+                    Label("Remove Download", systemImage: "trash")
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .foregroundColor(textColor)
+                .font(.title3)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
         }
     }
 }

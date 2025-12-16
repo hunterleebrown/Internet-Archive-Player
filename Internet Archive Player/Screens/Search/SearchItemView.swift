@@ -13,65 +13,70 @@ struct SearchItemView<Item: SearchItemDisplayable>: View {
     var item: Item
     var textColor: Color = .droopy
     var body: some View {
-        HStack(alignment:.top, spacing: 5.0) {
+        HStack(alignment: .top, spacing: 12) {
+            // Image with fixed aspect ratio
+            AsyncImage(url: item.displayIconUrl) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 80, height: 80)
+                    .clipped()
+            } placeholder: {
+                Color(.systemGray5)
+                    .frame(width: 80, height: 80)
+            }
+            .frame(width: 80, height: 80) // Fixed frame to prevent layout shifts
+            .background(Color.black)
+            .cornerRadius(8)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                // Title with media type icon
+                HStack(spacing: 6) {
+                    Text(item.archiveTitle ?? "Untitled")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(3)
+                    
+                    Image(systemName: item.mediatypeDisplay == .audio || item.mediatypeDisplay == .etree ? "hifispeaker" : item.mediatypeDisplay == .movies ? "video" : "questionmark")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
 
-            AsyncImage(
-                url: item.displayIconUrl,
-                content: { image in
-                    image.resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: 44,
-                               maxHeight: 44)
-                        .background(Color.black)
+                // Creator/Artist
+                if let creators = item.creatorDisplay, !creators.isEmpty {
+                    Text(getCreators())
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                }
 
-                },
-                placeholder: {
-                    Color(.black)
-                        .frame(maxWidth: 44,
-                               maxHeight: 44)
-                })
-            .cornerRadius(5)
-            .frame(width: 44, height: 44, alignment: .leading)
-
-            Image(systemName: item.mediatypeDisplay == .audio ||  item.mediatypeDisplay == .etree ? "hifispeaker" : item.mediatypeDisplay == .movies ? "video" : "questionmark")
-                .frame(width: 22.0, height: 22.0, alignment: .center)
-                .tint(.black)
-
-            VStack(alignment:.leading, spacing: 2.0) {
-                Text(item.archiveTitle ?? "")
-                    .bold()
-                    .font(.caption)
-//                    .foregroundColor(textColor)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .multilineTextAlignment(.leading)
-
+                // Publisher (only if exists)
                 if let publisher = item.publisherDisplay, !publisher.isEmpty {
-                    HStack(alignment: .top, spacing: 5.0) {
-                        Text("Publisher: ")
+                    HStack(alignment: .top, spacing: 4) {
+                        Text("Publisher:")
                             .font(.caption2)
-//                            .foregroundColor(textColor)
+                            .foregroundColor(.secondary)
                             .bold()
                         Text(publisher.joined(separator: ", "))
                             .font(.caption2)
-//                            .foregroundColor(textColor)
+                            .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
-                    }
-                }
-
-                if !(item.creatorDisplay?.isEmpty ?? false) {
-                    HStack(alignment: .top, spacing: 5.0) {
-                        Text(getCreators())
-                            .font(.caption2)
-//                            .foregroundColor(textColor)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
+                            .lineLimit(1)
                     }
                 }
             }
-            .frame(maxWidth: .infinity,
-                   alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(UIColor.systemGray6).opacity(0.5))
+        )
         .frame(maxWidth: .infinity)
     }
 

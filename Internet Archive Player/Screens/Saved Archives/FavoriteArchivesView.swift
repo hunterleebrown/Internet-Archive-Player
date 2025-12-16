@@ -11,51 +11,102 @@ import iaAPI
 struct FavoriteArchivesView: View {
     @EnvironmentObject var iaPlayer: Player
     @Environment(\.dismiss) var dismiss
+    @State private var isEditing = false
+    
+    // Two-column grid layout
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
     
     var body: some View {
         NavigationStack {
-            List {
+            ScrollView {
                 if iaPlayer.favoriteArchives.isEmpty {
-                    VStack(alignment: .center, spacing: 10) {
+                    VStack(alignment: .center, spacing: 16) {
+                        Spacer()
+                            .frame(height: 60)
+                        
                         Image(systemName: "heart.slash")
-                            .font(.largeTitle)
-                            .foregroundColor(.gray)
+                            .font(.system(size: 60))
+                            .foregroundColor(.secondary.opacity(0.5))
+                        
                         Text("No Bookmarked Archives")
-                            .font(.headline)
-                            .foregroundColor(.gray)
+                            .font(.title3)
+                            .bold()
+                            .foregroundColor(.primary)
+                        
                         Text("Add archives to your bookmarks by tapping the heart icon from the detail view")
-                            .font(.caption)
-                            .foregroundColor(.gray)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 40)
                 } else {
-                    ForEach(iaPlayer.favoriteArchives, id: \.identifier) { archive in
-                        NavigationLink(value: archive) {
-                            FavoriteArchiveItemView(item: archive)
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(iaPlayer.favoriteArchives, id: \.identifier) { archive in
+                            ZStack(alignment: .topTrailing) {
+                                // Main card with navigation
+                                NavigationLink(value: archive) {
+                                    FavoriteArchiveItemView(item: archive)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                .disabled(isEditing)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        deleteArchive(archive)
+                                    } label: {
+                                        Label("Remove Bookmark", systemImage: "heart.slash.fill")
+                                    }
+                                }
+                                
+                                // Delete button in edit mode
+                                if isEditing {
+                                    Button {
+                                        withAnimation {
+                                            deleteArchive(archive)
+                                        }
+                                    } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.title2)
+                                            .foregroundColor(.white)
+                                            .background(
+                                                Circle()
+                                                    .fill(Color.red)
+                                                    .frame(width: 24, height: 24)
+                                            )
+                                    }
+                                    .offset(x: 8, y: -8)
+                                    .transition(.scale.combined(with: .opacity))
+                                }
+                            }
                         }
-                        .listRowInsets(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5))
-                        .listRowBackground(Color.clear)
                     }
-                    .onDelete(perform: deleteArchives)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 16)
                 }
             }
             .safeAreaInset(edge: .bottom) {
                 Spacer()
                     .frame(height: iaPlayer.playerHeight)
             }
-            .padding()
-            .listStyle(PlainListStyle())
+            .background(Color(UIColor.systemBackground))
             .navigationTitle("Bookmarks")
             .navigationDestination(for: ArchiveMetaDataEntity.self) { archive in
                 Detail(archive.identifier ?? "")
             }
             .toolbar {
-
                 if !iaPlayer.favoriteArchives.isEmpty {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        EditButton()
+                        Button(isEditing ? "Done" : "Edit") {
+                            withAnimation {
+                                isEditing.toggle()
+                            }
+                        }
+                        .tint(.fairyRed)
                     }
                 }
             }
@@ -65,12 +116,9 @@ struct FavoriteArchivesView: View {
         }
     }
     
-    private func deleteArchives(at offsets: IndexSet) {
-        for index in offsets {
-            let archive = iaPlayer.favoriteArchives[index]
-            if let identifier = archive.identifier {
-                iaPlayer.removeFavoriteArchive(identifier: identifier)
-            }
+    private func deleteArchive(_ archive: ArchiveMetaDataEntity) {
+        if let identifier = archive.identifier {
+            iaPlayer.removeFavoriteArchive(identifier: identifier)
         }
     }
 }

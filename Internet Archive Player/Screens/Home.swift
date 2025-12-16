@@ -21,7 +21,7 @@ struct Home: View {
     @State var showHistory: Bool = false
     @State var maxControlHeight: Bool = true
     @State var otherPlaylistPresented: Bool = false
-    @State var selectedTab: Int = 2  // Default to Now Playing tab (index 3)
+    @State var selectedTab: Int = 1
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var controlHeightPass = PassthroughSubject<Bool, Never>()
@@ -56,7 +56,7 @@ struct Home: View {
             }
 
             TabView(selection: $selectedTab) {
-                // Search Tab
+                // Search Tab - First for discovery
                 NavigationStack {
                     SearchView()
                 }
@@ -65,25 +65,7 @@ struct Home: View {
                 }
                 .tag(0)
 
-//                // Favorites Tab
-//                NavigationStack {
-//                    NewFavoritesView()
-//                }
-//                .tabItem {
-//                    Label("Favorites", systemImage: "heart")
-//                }
-//                .tag(1)
-
-                // Favorite Archives Tab
-                NavigationStack {
-                    FavoriteArchivesView()
-                }
-                .tabItem {
-                    Label("Bookmarks", systemImage: "books.vertical")
-                }
-                .tag(1)
-
-                // Now Playing Tab (Center - Most Prominent)
+                // Now Playing Tab - Where the action happens
                 NavigationStack {
                     VStack(spacing:0) {
                         topView()
@@ -114,7 +96,16 @@ struct Home: View {
                     .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
                 }
                 .tabItem {
-                    Label("Now Playing", systemImage: "music.note.square.stack.fill")
+                    Label("Now Playing", systemImage: "play.circle.fill")
+                }
+                .tag(1)
+
+                // Bookmarks Tab - Saved favorites
+                NavigationStack {
+                    FavoriteArchivesView()
+                }
+                .tabItem {
+                    Label("Bookmarks", systemImage: "books.vertical")
                 }
                 .tag(2)
 
@@ -256,17 +247,63 @@ struct Home: View {
 
     @ViewBuilder func topView() -> some View {
         if iaPlayer.mainPlaylist?.files?.count == 0 {
-            VStack(alignment: .leading, spacing: 0) {
-                // Your combined Text view using string interpolation
-                Text("Use the search icon \(Image(systemName: "magnifyingglass")) to find and add files to your library.")
+            VStack(alignment: .center, spacing: 16) {
+                Spacer()
+                    .frame(height: 80)
+                
+                Image(systemName: "music.note.list")
+                    .font(.system(size: 60))
+                    .foregroundColor(.secondary.opacity(0.5))
+                
+                Text("Nothing Playing")
+                    .font(.title3)
+                    .bold()
+                    .foregroundColor(.primary)
+                
+                Text("Your Now Playing queue is empty. Search for music and videos from the Internet Archive to start playing, or browse your saved playlists.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                
+                // Action buttons
+                HStack(spacing: 12) {
+                    Button(action: {
+                        selectedTab = 0  // Switch to Search tab
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "magnifyingglass")
+                            Text("Search")
+                        }
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(Color.fairyRed)
+                        .cornerRadius(10)
+                    }
+                    
+                    // Navigate to playlists - using the same navigation as toolbar
+                    NavigationLink(destination: ListsView()) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "music.note.list")
+                            Text("Playlists")
+                        }
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.fairyRed)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(Color.fairyRed.opacity(0.15))
+                        .cornerRadius(10)
+                    }
+                }
+                .padding(.top, 8)
+                
+                Spacer()
             }
-            .padding(10)
-            .background(Color.fairyRed)
-            .cornerRadius(10)
-            .foregroundColor(.fairyCream)
-            .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-
         } else {
             Playlist()
         }

@@ -22,14 +22,34 @@ struct ListsView: View {
                 NavigationLink {
                     NewFavoritesView()
                 }   label: {
-                    Text("Favorites")
+                    HStack(spacing: 12) {
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.fairyRed)
+                            .font(.body)
+                        Text("Favorites")
+                            .foregroundColor(.fairyRed)
+                            .fontWeight(.semibold)
+                    }
                 }
 
                 ForEach(viewModel.lists, id: \.self) { list in
                     NavigationLink {
                         SingleListView(playlistEntity: list)
                     }   label: {
-                        Text(list.name ?? "list name")
+                        HStack(spacing: 12) {
+                            if list.name == "Now Playing" {
+                                Image(systemName: "play.circle.fill")
+                                    .foregroundColor(.fairyRed)
+                                    .font(.body)
+                            } else {
+                                Image(systemName: "music.note.list")
+                                    .foregroundColor(.secondary)
+                                    .font(.body)
+                            }
+                            Text(list.name ?? "Untitled Playlist")
+                                .foregroundColor(list.name == "Now Playing" ? .fairyRed : .primary)
+                                .fontWeight(list.name == "Now Playing" ? .semibold : .regular)
+                        }
                     }
                 }
                 .onDelete(perform: viewModel.remove)
