@@ -33,7 +33,7 @@ struct Detail: View {
 
     @State var backgroundURL: URL?
     static var backgroundPass = PassthroughSubject<URL, Never>()
-    
+
     @State private var showFullscreenImage = false
 
     var detailCornerRadius: CGFloat = 5.0
@@ -46,7 +46,7 @@ struct Detail: View {
     var body: some View {
         ZStack {
             if isLoading {
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.5)
                         .tint(.fairyRed)
@@ -112,296 +112,310 @@ struct Detail: View {
                 .frame(height: iaPlayer.playerHeight)
         })
     }
-    
+
     private var mainContentView: some View {
         ZStack {
             ObservableScrollView(scrollOffset: $scrollOffset) {
-                Spacer().frame(height: 300)
-                VStack(alignment: .leading, spacing:5) {
-                    HStack(alignment: .top, spacing: 8) {
-                        if backgroundURL != nil {
-                            Button {
-                                showFullscreenImage = true
-                            } label: {
-                                Image(systemName: "photo")
-                                    .font(.title3)
-                                    .foregroundColor(.black)
-                                    .padding(8)
-                                    .background(Color.white.opacity(0.3))
-                                    .clipShape(Circle())
-                            }
-                        }
-                        
-                        Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
-                            .font(.headline)
-                            .bold()
-                            .foregroundColor(Color(.black))
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        
-                        if backgroundURL != nil {
-                            Spacer()
-                                .frame(width: 40)
-                        }
-                    }
-                    .padding(.top, 10)
-                    .padding(.horizontal, 10)
+                LazyVStack {
 
-                if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
-                        Text(artist)
-                            .font(.caption)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 10)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                    Spacer().frame(height: 300)
 
-                }
-
-                VStack(alignment: .center) {
-                    HStack(spacing: 10) {
-
-                        if (self.viewModel.archiveDoc?.description) != nil {
-                            Button {
-                                descriptionExpanded = true
-                            } label: {
-                                VStack(spacing: 4) {
-                                    Image(systemName: "info.circle")
-                                        .font(.title2)
-                                        .frame(height: 28)
-                                        .tint(.black)
-                                    Text("Description")
-                                        .font(.caption2)
+                    VStack(alignment: .leading, spacing:5) {
+                        HStack(alignment: .top, spacing: 8) {
+                            if backgroundURL != nil {
+                                Button {
+                                    showFullscreenImage = true
+                                } label: {
+                                    Image(systemName: "photo")
+                                        .font(.title3)
                                         .foregroundColor(.black)
+                                        .padding(8)
+                                        .background(Color.white.opacity(0.3))
+                                        .clipShape(Circle())
                                 }
                             }
-                            .frame(minWidth: 100)
 
-                            Divider()
-                                .frame(height: 44)
-                        }
-                        
-                        Button {
-                            if viewModel.toggleFavoriteArchive(identifier: identifier) != nil {
-                                favoriteArchivesErrorAlertShowing = true
-                            }
-                        } label: {
-                            VStack(spacing: 4) {
-                                Image(systemName: viewModel.isFavoriteArchive ? "heart.fill" : "heart")
-                                    .font(.title2)
-                                    .frame(height: 28)
-                                    .tint(.black)
-                                Text("Bookmark")
-                                    .font(.caption2)
-                                    .foregroundColor(.black)
-                            }
-                        }
-                        .frame(minWidth: 100)
+                            Text(self.viewModel.archiveDoc?.archiveTitle ?? "")
+                                .font(.headline)
+                                .bold()
+                                .foregroundColor(Color(.black))
+                                .multilineTextAlignment(.center)
+                                .frame(maxWidth: .infinity, alignment: .center)
 
-
-                        Divider()
-                            .frame(height: 44)
-                        
-                        ShareLink(item: URL(string: "https://archive.org/details/\(identifier)")!) {
-                            VStack(spacing: 4) {
-                                Image(systemName: "square.and.arrow.up.circle")
-                                    .font(.title2)
-                                    .frame(height: 28)
-                                    .tint(.black)
-                                Text("Share")
-                                    .font(.caption2)
-                                    .foregroundColor(.black)
-                            }
-                        }
-                        .frame(minWidth: 100)
-
-
-                    }
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.white.opacity(0.3))
-                    .cornerRadius(detailCornerRadius)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: detailCornerRadius)
-                            .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
-                    )
-
-                    Spacer()
-                        .frame(height:10)
-
-                }
-                .padding(.horizontal, 10)
-
-            }
-            .background(
-                Color.white.opacity(0.5)
-//                Color(avgColor(viewModel) ?? .white).opacity(0.5)
-            )
-//            .cornerRadius(detailCornerRadius)
-            .frame(maxWidth: .infinity, alignment: .leading)
-//            .padding()
-
-
-
-            VStack(alignment: .center, spacing: 5.0) {
-
-                if self.viewModel.audioFiles.isEmpty &&
-                    self.viewModel.movieFiles.isEmpty {
-                    VStack(alignment: .center) {
-                        Text("No playable file for app")
-                            .font(.body)
-                            .padding(.top, 5)
-                            .padding(.horizontal, 5)
-                        Link("View on archive.org", destination: URL(string: "https://archive.org/details/\(identifier)")!)
-                            .foregroundColor(.fairyRed)
-                            .padding(.bottom, 5)
-                            .padding(.horizontal, 5)
-                    }
-                    .background(
-                        Color.white.opacity(0.5)
-                    )
-                    .cornerRadius(detailCornerRadius)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding()
-
-                }
-
-                VStack(alignment: .leading) {
-
-                    if self.viewModel.audioFiles.count > 0 {
-                        VStack(alignment: .center, spacing: 8) {
-                            HStack {
-                                Text("Audio")
-                                    .font(.subheadline)
-                                    .bold()
-                                    .foregroundColor(.black)
-
+                            if backgroundURL != nil {
                                 Spacer()
+                                    .frame(width: 40)
+                            }
+                        }
+                        .padding(.top, 10)
+                        .padding(.horizontal, 10)
+
+                        if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
+                            Text(artist)
+                                .font(.caption)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 10)
+                                .frame(maxWidth: .infinity, alignment: .center)
+
+                        }
+
+                        VStack(alignment: .center) {
+                            HStack(spacing: 10) {
+
+                                if (self.viewModel.archiveDoc?.description) != nil {
+                                    Button {
+                                        descriptionExpanded = true
+                                    } label: {
+                                        VStack(spacing: 4) {
+                                            Image(systemName: "info.circle")
+                                                .font(.title2)
+                                                .frame(height: 28)
+                                                .tint(.black)
+                                            Text("Description")
+                                                .font(.caption2)
+                                                .foregroundColor(.black)
+                                        }
+                                    }
+                                    .frame(minWidth: 100)
+
+                                    Divider()
+                                        .frame(height: 44)
+                                }
 
                                 Button {
-                                    viewModel.playAllAudio()
+                                    if viewModel.toggleFavoriteArchive(identifier: identifier) != nil {
+                                        favoriteArchivesErrorAlertShowing = true
+                                    }
                                 } label: {
                                     VStack(spacing: 4) {
-                                        Image(systemName: "play.circle")
-                                            .resizable()
+                                        Image(systemName: viewModel.isFavoriteArchive ? "heart.fill" : "heart")
                                             .font(.title2)
-                                            .frame(width:44, height: 44)
-                                        Text("Play all")
+                                            .frame(height: 28)
+                                            .tint(.black)
+                                        Text("Bookmark")
                                             .font(.caption2)
                                             .foregroundColor(.black)
                                     }
-                                    .frame(width: 80)
-                                    .padding(.vertical, 12)
                                 }
+                                .frame(minWidth: 100)
 
-                                Spacer()
 
-                                Menu {
-                                    Button(action: {
-                                        viewModel.playlistArchiveFiles = viewModel.audioFiles + viewModel.movieFiles
-                                        otherPlaylistPresented = true
-                                    }){
-                                        HStack {
-                                            Image(systemName: PlayerButtonType.list.rawValue)
-                                            Text("Add all to a playlist ...")
-                                        }
+                                Divider()
+                                    .frame(height: 44)
+
+                                ShareLink(item: URL(string: "https://archive.org/details/\(identifier)")!) {
+                                    VStack(spacing: 4) {
+                                        Image(systemName: "square.and.arrow.up.circle")
+                                            .font(.title2)
+                                            .frame(height: 28)
+                                            .tint(.black)
+                                        Text("Share")
+                                            .font(.caption2)
+                                            .foregroundColor(.black)
                                     }
-                                    .frame(width: 44, height: 44)
-                                } label: {
-                                    HStack(spacing: 1.0) {
-                                        Image(systemName: "plus")
-                                        Image(systemName: PlayerButtonType.list.rawValue)
-                                    }
-                                    .padding(5)
                                 }
-                                .highPriorityGesture(TapGesture())
+                                .frame(minWidth: 100)
 
 
                             }
-                            .tint(Color.black)
-
-                            Text("Select a track to start playing, or use Play all to queue everything.")
-                                .font(.caption)
-                                .multilineTextAlignment(.center)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.horizontal, 8)
-                                .padding(.bottom, 8)
-                        }
-                        .padding(8)
-                        .background(
-                            RoundedRectangle(
-                                cornerRadius: detailCornerRadius,
-                                style: .continuous
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.white.opacity(0.3))
+                            .cornerRadius(detailCornerRadius)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: detailCornerRadius)
+                                    .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
                             )
-                            .fill(Color.white.opacity(0.5))
-                        )
 
+                            Spacer()
+                                .frame(height:10)
 
-                        ForEach(Array(self.viewModel.sortedAudioFilesCache.enumerated()), id: \.element.name) { index, file in
-                            HStack(alignment: .center, spacing: 5) {
-                                
-                                Image(systemName: PlayerButtonType.ear.rawValue)
-                                    .frame(width: 33, height: 33)
-                                    .background(viewModel.pressedStates[index] == true ? Color.fairyCreamAlpha : Color.fairyRedAlpha)
-                                    .cornerRadius(10)
-                                    .foregroundColor(viewModel.pressedStates[index] == true ? Color.fairyRedAlpha : Color.fairyCreamAlpha)
-                                    .onTouchDownUp { pressed in
-                                        viewModel.pressedStates[index] = pressed
-                                        if pressed {
-                                            viewModel.previewAudio(file: file)
-                                        } else {
-                                            viewModel.stopPreview()
-                                        }
-                                    }
-
-                                self.createFileView(file)
-                                    .padding(.leading, 5.0)
-                                    .padding(.trailing, 5.0)
-                                    .onTapGesture {
-                                        do  {
-                                            try iaPlayer.checkDupes(archiveFile: file, list: iaPlayer.items, error: .alreadyOnPlaylist)
-                                        } catch PlayerError.alreadyOnPlaylist {
-                                            self.playlistErrorAlertShowing = true
-                                            return
-                                        } catch {}
-                                        iaPlayer.playFile(file)
-
-                                    }
-                            }
                         }
+                        .padding(.horizontal, 10)
+
                     }
+                    .background(
+                        Color.white.opacity(0.5)
+                        //                Color(avgColor(viewModel) ?? .white).opacity(0.5)
+                    )
+                    //            .cornerRadius(detailCornerRadius)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    //            .padding()
 
-                    if self.viewModel.movieFiles.count > 0 {
-                        Text("Movies")
-                            .font(.subheadline)
-                            .bold()
-                            .foregroundColor(.black)
-                            .padding(5)
-                            .background(
-                                RoundedRectangle(
-                                    cornerRadius: detailCornerRadius,
-                                    style: .continuous
-                                )
-                                .fill(Color.white.opacity(0.5))
-                            )
 
-                        ForEach(self.viewModel.movieFiles, id: \.self) { file in
-                            self.createFileView(file)
-                                .padding(.leading, 5.0)
-                                .padding(.trailing, 5.0)
-                                .onTapGesture {
-                                    do  {
-                                        try iaPlayer.checkDupes(archiveFile: file, list: iaPlayer.items, error: PlayerError.alreadyOnPlaylist)
-                                    } catch PlayerError.alreadyOnPlaylist {
-                                        self.playlistErrorAlertShowing = true
-                                        return
-                                    } catch {}
-                                    iaPlayer.playFile(file)
-                                }
+
+                    VStack(alignment: .center, spacing: 5.0) {
+
+                        if self.viewModel.audioFiles.isEmpty &&
+                            self.viewModel.movieFiles.isEmpty {
+                            VStack(alignment: .center, spacing: 12) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.secondary.opacity(0.5))
+
+                                Text("No Playable Files")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+
+                                Text("This archive doesn't contain audio or video files compatible with the app")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 20)
+
+                                Link("View on archive.org", destination: URL(string: "https://archive.org/details/\(identifier)")!)
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.fairyRed)
+                                    .padding(.top, 4)
+                            }
+                            .padding(.vertical, 20)
+                            .padding(.horizontal, 16)
+                            .background(Color.white.opacity(0.5))
+                            .cornerRadius(detailCornerRadius)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding()
+
                         }
+
+                        VStack(alignment: .leading) {
+
+                            if self.viewModel.audioFiles.count > 0 {
+                                VStack(alignment: .center, spacing: 8) {
+                                    HStack {
+                                        Text("Audio")
+                                            .font(.subheadline)
+                                            .bold()
+                                            .foregroundColor(.black)
+
+                                        Spacer()
+
+                                        Button {
+                                            viewModel.playAllAudio()
+                                        } label: {
+                                            VStack(spacing: 4) {
+                                                Image(systemName: "play.circle")
+                                                    .resizable()
+                                                    .font(.title2)
+                                                    .frame(width:44, height: 44)
+                                                Text("Play All")
+                                                    .font(.caption2)
+                                                    .foregroundColor(.black)
+                                            }
+                                            .frame(width: 80)
+                                            .padding(.vertical, 12)
+                                        }
+
+                                        Spacer()
+
+                                        Menu {
+
+                                            Button(action: {
+                                                viewModel.playlistArchiveFiles = viewModel.audioFiles + viewModel.movieFiles
+                                                otherPlaylistPresented = true
+                                            }){
+                                                Label("Add All to Playlist...", systemImage: PlayerButtonType.list.rawValue)
+                                            }
+                                            .frame(width: 44, height: 44)
+
+
+                                        } label: {
+                                            HStack(spacing: 1.0) {
+                                                Image(systemName: "plus")
+                                                Image(systemName: PlayerButtonType.list.rawValue)
+                                            }
+                                            .padding(5)
+                                        }
+                                        .highPriorityGesture(TapGesture())
+
+
+                                    }
+                                    .tint(Color.black)
+
+                                    Text("Tap a track to play it, or use Play All to queue everything.")
+                                        .font(.caption)
+                                        .multilineTextAlignment(.center)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .padding(.horizontal, 8)
+                                        .padding(.bottom, 8)
+                                }
+                                .padding(8)
+                                .background(
+                                    RoundedRectangle(
+                                        cornerRadius: detailCornerRadius,
+                                        style: .continuous
+                                    )
+                                    .fill(Color.white.opacity(0.5))
+                                )
+
+
+                                ForEach(Array(viewModel.sortedAudioFilesCache.enumerated()), id: \.element.id) { i, file in
+                                    HStack(alignment: .center, spacing: 5) {
+
+                                        Image(systemName: PlayerButtonType.ear.rawValue)
+                                            .frame(width: 33, height: 33)
+                                            .background(viewModel.pressedStates[file.id] == true ? Color.fairyCreamAlpha : Color.fairyRedAlpha)
+                                            .cornerRadius(10)
+                                            .foregroundColor(viewModel.pressedStates[file.id] == true ? Color.fairyRedAlpha : Color.fairyCreamAlpha)
+                                            .onTouchDownUp { pressed in
+                                                viewModel.pressedStates[file.id] = pressed
+                                                if pressed {
+                                                    viewModel.previewAudio(file: file)
+                                                } else {
+                                                    viewModel.stopPreview()
+                                                }
+                                            }
+
+                                        self.createFileView(file)
+                                            .padding(.horizontal, 5)
+                                            .onTapGesture {
+                                                do  {
+                                                    try iaPlayer.checkDupes(archiveFile: file, list: iaPlayer.items, error: .alreadyOnPlaylist)
+                                                } catch PlayerError.alreadyOnPlaylist {
+                                                    self.playlistErrorAlertShowing = true
+                                                    return
+                                                } catch {}
+                                                iaPlayer.playFile(file)
+                                            }
+                                    }
+                                }
+                            }
+
+                            if self.viewModel.movieFiles.count > 0 {
+                                Text("Movies")
+                                    .font(.subheadline)
+                                    .bold()
+                                    .foregroundColor(.black)
+                                    .padding(5)
+                                    .background(
+                                        RoundedRectangle(
+                                            cornerRadius: detailCornerRadius,
+                                            style: .continuous
+                                        )
+                                        .fill(Color.white.opacity(0.5))
+                                    )
+
+                                ForEach(self.viewModel.movieFiles, id: \.self) { file in
+                                    self.createFileView(file)
+                                        .padding(.leading, 5.0)
+                                        .padding(.trailing, 5.0)
+                                        .onTapGesture {
+                                            do  {
+                                                try iaPlayer.checkDupes(archiveFile: file, list: iaPlayer.items, error: PlayerError.alreadyOnPlaylist)
+                                            } catch PlayerError.alreadyOnPlaylist {
+                                                self.playlistErrorAlertShowing = true
+                                                return
+                                            } catch {}
+                                            iaPlayer.playFile(file)
+                                        }
+                                }
+                            }
+                        }
+                        .padding(10)
                     }
                 }
-                .padding(10)
-            }
             }
             .onChange(of: scrollOffset) { scrollOfset, newScrollOffset in
                 let offset = newScrollOffset + (self.hideNavigationBar ? 50 : 0) // note 1
@@ -420,54 +434,54 @@ struct Detail: View {
             }
             .background(
 
-            VStack(spacing: 0) {
-                if let img = self.backgroundURL,
-                   let color = viewModel.averageColor {
+                VStack(spacing: 0) {
+                    if let img = self.backgroundURL,
+                       let color = viewModel.averageColor {
 
-                    ZStack(alignment: .top) {
+                        ZStack(alignment: .top) {
 
-                        Color(color)
+                            Color(color)
 
-                        AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
-                            switch phase {
-                            case .empty:
-                                Color.clear
+                            AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
+                                switch phase {
+                                case .empty:
+                                    Color.clear
 
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                                    .transition(.opacity)
-                                    .blur(radius: backgroundBlur)
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                        .transition(.opacity)
+                                        .blur(radius: backgroundBlur)
 
-                            case .failure(_):
-                                EmptyView()
+                                case .failure(_):
+                                    EmptyView()
 
-                            @unknown default:
-                                EmptyView()
+                                @unknown default:
+                                    EmptyView()
+                                }
                             }
+                            .frame(height: 400)
+                            .clipped()
                         }
-                        .frame(height: 400)
-                        .clipped()
-                    }
 
 
-                    if let gradient = viewModel.gradient {
-                        LinearGradient(
-                            gradient: gradient,
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .ignoresSafeArea() // Makes the gradient cover the entire screen
-                    } else {
-                        Color(color)
+                        if let gradient = viewModel.gradient {
+                            LinearGradient(
+                                gradient: gradient,
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            .ignoresSafeArea() // Makes the gradient cover the entire screen
+                        } else {
+                            Color(color)
+                        }
+
                     }
 
                 }
-
-            }
-        )
-        .listStyle(.plain)
+            )
+            .listStyle(.plain)
         }
     }
 
@@ -482,7 +496,7 @@ struct Detail: View {
     private func menuActions(archiveFile: ArchiveFile) -> [MenuAction] {
         var actions = [MenuAction]()
 
-        let playlist = MenuAction(name: "Add file to Now Playing", action:  {
+        let playlist = MenuAction(name: "Add to Now Playing", action:  {
             do  {
                 try iaPlayer.appendPlaylistItem(archiveFile)
             } catch PlayerError.alreadyOnPlaylist {
@@ -492,7 +506,7 @@ struct Detail: View {
             }
         }, imageName: "list.bullet.rectangle.portrait")
 
-        let favorites = MenuAction(name: "Add file to Favorites", action:  {
+        let favorites = MenuAction(name: "Add to Favorites", action:  {
             do  {
                 try iaPlayer.appendFavoriteItem(file: archiveFile)
             } catch PlayerError.alreadyOnFavorites {
@@ -503,7 +517,7 @@ struct Detail: View {
         }, imageName: "heart")
 
 
-        let otherPlaylist = MenuAction(name: "Add to a playlist ...", action:  {
+        let otherPlaylist = MenuAction(name: "Add to Playlist...", action:  {
             viewModel.playlistArchiveFiles = [archiveFile]
             otherPlaylistPresented = true
         }, imageName: "music.note.list")
@@ -528,11 +542,11 @@ struct FullscreenImageViewer: View {
     let imageURL: URL
     @Binding var isPresented: Bool
     @State private var showControls = true
-    
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            
+
             AsyncImage(url: imageURL) { phase in
                 switch phase {
                 case .empty:
@@ -559,7 +573,7 @@ struct FullscreenImageViewer: View {
                     showControls.toggle()
                 }
             }
-            
+
             if showControls {
                 VStack {
                     HStack {

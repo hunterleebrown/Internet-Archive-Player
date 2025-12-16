@@ -21,7 +21,7 @@ struct Home: View {
     @State var showHistory: Bool = false
     @State var maxControlHeight: Bool = true
     @State var otherPlaylistPresented: Bool = false
-    @State var selectedTab: Int = 0  // Default to Search tab for better first-run experience
+    @State var selectedTab: Int = 1
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var controlHeightPass = PassthroughSubject<Bool, Never>()
