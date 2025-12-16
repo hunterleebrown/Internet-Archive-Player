@@ -6,18 +6,11 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct HistoryDrawerView: View {
     @Binding var isPresented: Bool
-    
-    // Mock data for now - will be replaced with actual Core Data later
-    let mockHistoryItems: [MockHistoryItem] = [
-        MockHistoryItem(title: "Grateful Dead - 1977-05-08 - Barton Hall", artist: "Grateful Dead", identifier: "gd77-05-08"),
-        MockHistoryItem(title: "Dark Star", artist: "Grateful Dead", identifier: "gd77-05-08"),
-        MockHistoryItem(title: "Estimated Prophet", artist: "Grateful Dead", identifier: "gd77-05-08"),
-        MockHistoryItem(title: "Live at the Fillmore", artist: "Miles Davis", identifier: "miles-fillmore"),
-        MockHistoryItem(title: "So What", artist: "Miles Davis", identifier: "miles-fillmore"),
-    ]
+    @StateObject private var viewModel = ViewModel()
     
     var body: some View {
         VStack(spacing: 0) {
@@ -47,12 +40,12 @@ struct HistoryDrawerView: View {
             // History items list
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(mockHistoryItems) { item in
+                    ForEach(viewModel.historyItems, id: \.stableID) { item in
                         HistoryItemRow(item: item)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                         
-                        if item.id != mockHistoryItems.last?.id {
+                        if item.stableID != viewModel.historyItems.last?.stableID {
                             Divider()
                                 .background(Color.fairyCream.opacity(0.3))
                                 .padding(.leading, 76)
@@ -64,16 +57,19 @@ struct HistoryDrawerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.fairyRed.opacity(0.95))
+        .onAppear {
+            viewModel.fetchHistory()
+        }
     }
 }
 
 struct HistoryItemRow: View {
-    let item: MockHistoryItem
+    let item: HistoryArchiveFileEntity
     
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             // Thumbnail
-            AsyncImage(
+            CachedAsyncImage(
                 url: item.iconUrl,
                 content: { image in
                     image.resizable()
@@ -94,18 +90,33 @@ struct HistoryItemRow: View {
             )
             .frame(width: 50, height: 50)
             
-            // Title and artist
+            // Title, artist, and metadata
             VStack(alignment: .leading, spacing: 4) {
-                Text(item.title)
+                Text(item.displayTitle)
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.fairyCream)
                     .lineLimit(2)
                 
-                Text(item.artist)
+                Text(item.displayArtist)
                     .font(.caption)
                     .foregroundColor(.fairyCream.opacity(0.8))
                     .lineLimit(1)
+                
+                // Metadata: played date and play count
+                HStack(spacing: 8) {
+                    Text(formattedPlayedAt)
+                        .font(.caption2)
+                        .foregroundColor(.fairyCream.opacity(0.6))
+                    
+                    Text("•")
+                        .font(.caption2)
+                        .foregroundColor(.fairyCream.opacity(0.6))
+                    
+                    Text("Played \(item.playCount) time\(item.playCount == 1 ? "" : "s")")
+                        .font(.caption2)
+                        .foregroundColor(.fairyCream.opacity(0.6))
+                }
             }
             
             Spacer()
@@ -124,18 +135,46 @@ struct HistoryItemRow: View {
             // TODO: Navigate to detail or play item
         }
     }
+    
+    private var formattedPlayedAt: String {
+        guard let playedAt = item.playedAt else { return "Unknown" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd/yy HH:mm:ss"
+        return formatter.string(from: playedAt)
+    }
 }
 
-// Mock history item for preview purposes
-struct MockHistoryItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let artist: String
-    let identifier: String
-    
-    var iconUrl: URL? {
-        let itemImageUrl = "https://archive.org/services/img/\(identifier)"
-        return URL(string: itemImageUrl)
+// MARK: - ViewModel
+extension HistoryDrawerView {
+    @MainActor
+    class ViewModel: ObservableObject {
+        @Published var historyItems: [HistoryArchiveFileEntity] = []
+        
+        private let context = PersistenceController.shared.container.viewContext
+        
+        func fetchHistory() {
+            let fetchRequest = HistoryArchiveFileEntity.historyFetchRequest
+            
+            do {
+                historyItems = try context.fetch(fetchRequest)
+            } catch {
+                print("Error fetching history: \(error.localizedDescription)")
+                historyItems = []
+            }
+        }
+        
+        func clearHistory() {
+            for item in historyItems {
+                context.delete(item)
+            }
+            
+            do {
+                try context.save()
+                historyItems = []
+            } catch {
+                print("Error clearing history: \(error.localizedDescription)")
+            }
+        }
     }
 }
 
@@ -147,6 +186,7 @@ struct HistoryDrawerView_Previews: PreviewProvider {
             VStack {
                 Spacer()
                 HistoryDrawerView(isPresented: .constant(true))
+                    .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
             }
         }
     }
