@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  NowPlaying.swift
 //  Internet Archive Player
 //
 //  Created by Hunter Lee Brown on 1/22/22.
@@ -12,9 +12,9 @@ import AVFoundation
 import AVKit
 import Combine
 
-struct Playlist: View {
+struct NowPlaying: View {
     @EnvironmentObject var iaPlayer: Player
-    @StateObject var viewModel = Playlist.ViewModel()
+    @StateObject var viewModel = NowPlaying.ViewModel()
     @State private var seek = 1.0
     @State private var showingAlert = false
     @State var favoritesErrorAlertShowing: Bool = false
@@ -121,7 +121,7 @@ struct Playlist: View {
     }
 }
 
-extension Playlist {
+extension NowPlaying {
     final class ViewModel: ObservableObject {
         @Published var playingFile: ArchiveFileEntity? = nil
 
@@ -140,7 +140,7 @@ extension Playlist {
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
-        Playlist().environmentObject(Player())
+        NowPlaying().environmentObject(Player())
     }
 }
 

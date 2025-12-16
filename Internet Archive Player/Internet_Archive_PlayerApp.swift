@@ -13,6 +13,11 @@ struct Internet_Archive_PlayerApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject private var filterCache = CollectionFilterCache.shared
     
+    init() {
+        // Configure image cache on app startup
+        ImageCacheManager.shared.configureCache()
+    }
+    
     var body: some Scene {
         WindowGroup {
             Home()

@@ -48,7 +48,7 @@ extension ArchiveMetaData: SearchItemDisplayable {
 extension ArchiveMetaDataEntity: SearchItemDisplayable {
     var displayIconUrl: URL? {
         guard let iconUrlString else { return nil }
-        return URL(string: iconUrlString)!
+        return URL(string: iconUrlString)
     }
     
     var publisherDisplay: [String]? {

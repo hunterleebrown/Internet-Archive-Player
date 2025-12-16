@@ -192,3 +192,31 @@ extension NSManagedObject {
         }
     }
 }
+
+
+extension PersistenceController {
+    /// Check if a file exists in any playlist other than the one being excluded
+    func fileExistsInOtherPlaylists(_ file: ArchiveFileEntity, excluding playlist: PlaylistEntity) -> Bool {
+        let allPlaylists = PlaylistEntity.getAllPlaylists()
+
+        for otherPlaylist in allPlaylists where otherPlaylist != playlist {
+            if let playlistFiles = otherPlaylist.files?.array as? [ArchiveFileEntity],
+               playlistFiles.contains(file) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /// Clean up ArchiveFileEntity objects that are no longer in any playlist
+    func cleanupOrphanedFiles(from files: [ArchiveFileEntity]) {
+        for file in files {
+            if !isOnPlaylist(entity: file) {
+                print("🧹 Cleaning up orphaned ArchiveFileEntity: \(file.name ?? "unknown")")
+                delete(file, false)
+            }
+        }
+        save()
+    }
+}

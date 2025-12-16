@@ -303,10 +303,8 @@ class Player: NSObject, ObservableObject {
             guard playlistFiles.indices.contains(index) else { continue }
             let archiveFileEntity = playlistFiles[index]
             
-            if let playingFile = self.playingFile, playingFile == archiveFileEntity{
-                self.stopPlaying()
-                self.playingFile = nil
-            }
+            unsetPlayingFile(entity: archiveFileEntity)
+
             playlist.removeFromFiles(archiveFileEntity)
             PersistenceController.shared.save()
 
@@ -314,6 +312,13 @@ class Player: NSObject, ObservableObject {
                 self.deleteLocalFile(item: archiveFileEntity)
                 PersistenceController.shared.delete(archiveFileEntity, false)
             }
+        }
+    }
+
+    public func unsetPlayingFile(entity: ArchiveFileEntity) {
+        if let playingFile = self.playingFile, playingFile == entity{
+            self.stopPlaying()
+            self.playingFile = nil
         }
     }
 

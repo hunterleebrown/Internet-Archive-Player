@@ -66,12 +66,12 @@ struct DebugView: View {
             }
             .listStyle(PlainListStyle())
         }
-        .onAppear(perform: {
-            viewModel.startDownloadReport()
-            viewModel.fetchLocalFiles()
-        })
         .navigationTitle("Debug")
         .padding()
+        .task{
+            viewModel.startDownloadReport()
+            viewModel.fetchLocalFiles()
+        }
     }
 
 }

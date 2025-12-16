@@ -52,7 +52,9 @@ struct ListsView: View {
                         }
                     }
                 }
-                .onDelete(perform: viewModel.remove)
+                .onDelete { offsets in
+                    viewModel.remove(at: offsets, player: iaPlayer)
+                }
             }
             .listStyle(PlainListStyle())
             .navigationTitle("Playlists")
@@ -75,6 +77,7 @@ struct ListsView: View {
 
 extension ListsView {
 
+    @MainActor
     final class ViewModel: NSObject, ObservableObject {
         @Published var lists: [PlaylistEntity] = [PlaylistEntity]()
         private let listsFetchController: NSFetchedResultsController<PlaylistEntity>
@@ -92,10 +95,8 @@ extension ListsView {
             do {
                 try listsFetchController.performFetch()
                 if let playlists = listsFetchController.fetchedObjects {
-                    DispatchQueue.main.async {
-                        if playlists.count > 0 {
-                            self.lists = playlists.filter{!$0.permanent}
-                        }
+                    if playlists.count > 0 {
+                        self.lists = playlists.filter{!$0.permanent}
                     }
                 }
             } catch {
@@ -104,25 +105,70 @@ extension ListsView {
         }
 
 
-        func remove(at offsets: IndexSet) {
-            for index in offsets {
-                let list = lists[index]
-
-                guard let files = list.files?.array as? [ArchiveFileEntity] else {
-                    return
-                }
-
-                files.forEach { item in
-                    if item.isLocalFile(), let workingUrl = item.workingUrl {
+        func remove(at offsets: IndexSet, player: Player) {
+            Task { @MainActor in
+                for index in offsets {
+                    let list = lists[index]
+                    
+                    // Step 1: Get all files from the playlist
+                    guard let files = list.files?.array as? [ArchiveFileEntity] else {
+                        // If no files, just delete the playlist
+                        PersistenceController.shared.delete(list)
+                        continue
+                    }
+                    
+                    // Step 2: Delete all local files that are only in this playlist
+                    var deletionErrors: [String] = []
+                    
+                    for item in files {
+                        // Unset the playing file if this item is currently playing
+                        player.unsetPlayingFile(entity: item)
+                        
+                        // Only attempt to delete if it's a local file
+                        guard item.isLocalFile() else { continue }
+                        
+                        // Check if this file exists in other playlists
+                        // Only delete the physical file if this is the only playlist using it
+                        let isInOtherPlaylists = PersistenceController.shared.fileExistsInOtherPlaylists(item, excluding: list)
+                        
+                        if isInOtherPlaylists {
+                            print("ℹ️ Skipping deletion of \(item.name ?? "unknown") - exists in other playlists")
+                            continue
+                        }
+                        
+                        // Verify the file actually exists before attempting deletion
+                        guard let workingUrl = item.workingUrl,
+                              FileManager.default.fileExists(atPath: workingUrl.path) else {
+                            print("⚠️ Local file doesn't exist at expected path for: \(item.name ?? "unknown")")
+                            continue
+                        }
+                        
+                        // Attempt to delete the file
                         do {
                             try Downloader.removeFile(at: workingUrl)
-                        } catch let error {
-                            print(error.localizedDescription)
+                            print("✅ Successfully deleted local file: \(workingUrl.lastPathComponent)")
+                        } catch {
+                            let errorMessage = "Failed to delete \(item.name ?? "unknown"): \(error.localizedDescription)"
+                            deletionErrors.append(errorMessage)
+                            print("❌ \(errorMessage)")
                         }
                     }
+                    
+                    // Step 3: Delete the playlist from Core Data
+                    // This happens regardless of whether file deletion succeeded
+                    // (to avoid orphaned playlists in the database)
+                    PersistenceController.shared.delete(list)
+                    
+                    // Step 4: Clean up orphaned ArchiveFileEntity objects
+                    // (if your Core Data relationship is set to Nullify)
+                    PersistenceController.shared.cleanupOrphanedFiles(from: files)
+                    
+                    // Step 5: Log any errors that occurred
+                    if !deletionErrors.isEmpty {
+                        print("⚠️ Playlist deleted but some files could not be removed:")
+                        deletionErrors.forEach { print("  - \($0)") }
+                    }
                 }
-
-                PersistenceController.shared.delete(list)
             }
         }
     }
@@ -130,12 +176,14 @@ extension ListsView {
 }
 
 extension ListsView.ViewModel: NSFetchedResultsControllerDelegate {
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    nonisolated func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         guard let playlists = controller.fetchedObjects as? [PlaylistEntity]
         else { return }
-        DispatchQueue.main.async {
-            if playlists.count > 0 {
-                self.lists = playlists.filter{!$0.permanent}
+        
+        if playlists.count > 0 {
+            let filteredPlaylists = playlists.filter{!$0.permanent}
+            Task { @MainActor in
+                self.lists = filteredPlaylists
             }
         }
     }

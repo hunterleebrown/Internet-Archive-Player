@@ -305,7 +305,7 @@ struct Home: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         } else {
-            Playlist()
+            NowPlaying()
         }
     }
 
