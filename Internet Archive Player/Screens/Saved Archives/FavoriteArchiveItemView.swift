@@ -15,7 +15,7 @@ struct FavoriteArchiveItemView<Item: SearchItemDisplayable>: View {
     
     // Fixed card dimensions for uniform grid
     private let imageHeight: CGFloat = 140
-    private let contentHeight: CGFloat = 110
+    private let contentHeight: CGFloat = 90
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -72,10 +72,6 @@ struct FavoriteArchiveItemView<Item: SearchItemDisplayable>: View {
                     .padding(.vertical, 4)
 
                     Spacer()
-                    
-                    Image(systemName: "heart.fill")
-                        .font(.callout)
-                        .foregroundColor(.fairyRed)
                 }
             }
             .padding(12)

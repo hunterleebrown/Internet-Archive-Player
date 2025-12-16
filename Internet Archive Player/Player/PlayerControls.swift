@@ -104,14 +104,14 @@ struct PlayerControls: View {
                 Text(viewModel.minimumValue)
                     .foregroundColor(foregroundColor)
                     .font(.caption)
-                    .frame(width: 44.0)
+                    .frame(minWidth: 44.0)
 
                 Spacer()
 
                 Text(viewModel.remainingValue)
                     .foregroundColor(foregroundColor)
                     .font(.caption)
-                    .frame(width: 44.0)
+                    .frame(minWidth: 44.0)
             }
 
             HStack(alignment: .center, spacing: 10.0) {

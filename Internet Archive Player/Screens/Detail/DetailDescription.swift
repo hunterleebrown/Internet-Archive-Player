@@ -53,6 +53,7 @@ struct DetailDescription: View {
             .padding(.horizontal, 20)
             .padding(.top, 20)
             .padding(.bottom, 8)
+            .background(Color.white)
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
@@ -76,7 +77,7 @@ struct DetailDescription: View {
                         VStack(alignment: .leading, spacing: 6) {
                             if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
                                 Text(artist)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
                                     .font(.subheadline)
                                     .bold()
                                     .multilineTextAlignment(.leading)
@@ -92,8 +93,8 @@ struct DetailDescription: View {
                         }
                         
                         // Collections with icons
-                        if !doc.collection.isEmpty {
-                            CollectionsMetadataRow(collectionIdentifiers: doc.collection)
+                        if !doc.collectionArchives.isEmpty {
+                            CollectionsMetadataRow(collectionArchives: doc.collectionArchives)
                         }
                         
                         if let publisher = doc.publisher, !publisher.isEmpty {
@@ -108,7 +109,7 @@ struct DetailDescription: View {
                     .padding(.vertical, 12)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(UIColor.systemGray6))
+                            .fill(Color(red: 0.95, green: 0.95, blue: 0.97))
                     )
                     .padding(.horizontal, 20)
 
@@ -156,7 +157,8 @@ struct DetailDescription: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(UIColor.systemBackground))
+        .background(Color.white)
+        .colorScheme(.light) // Force light mode
     }
 }
 
@@ -182,7 +184,7 @@ private struct MetadataRow: View {
             
             Text(value)
                 .font(.body)
-                .foregroundColor(.primary)
+                .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
                 .textSelection(.enabled)
         }
         .contentShape(Rectangle())
@@ -230,15 +232,7 @@ private struct MetadataRow: View {
 }
 // Helper view for displaying collections with icons
 private struct CollectionsMetadataRow: View {
-    let collectionIdentifiers: [String]
-    @State private var collections: [CollectionInfo] = []
-    
-    struct CollectionInfo: Identifiable {
-        let id: String
-        let name: String
-        let iconUrl: URL?
-        let image: Image?
-    }
+    let collectionArchives: [Archive]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -247,84 +241,42 @@ private struct CollectionsMetadataRow: View {
                 .foregroundColor(.secondary)
                 .bold()
             
-            if collections.isEmpty {
-                // Fallback if cache isn't ready
-                Text(collectionIdentifiers.joined(separator: ", "))
+            if collectionArchives.isEmpty {
+                Text("No collections")
                     .font(.body)
-                    .foregroundColor(.primary)
+                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
             } else {
-                FlowLayout(spacing: 8) {
-                    ForEach(collections) { collection in
-                        HStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(collectionArchives) { archive in
+                        HStack(alignment: .top, spacing: 6) {
                             // Collection icon
-                            Group {
-                                if let image = collection.image {
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 20, height: 20)
-                                } else if let iconUrl = collection.iconUrl {
-                                    AsyncImage(url: iconUrl) { image in
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                    } placeholder: {
-                                        Image(systemName: "folder")
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .frame(width: 20, height: 20)
-                                    .cornerRadius(3)
-                                } else {
-                                    Image(systemName: "folder")
-                                        .foregroundColor(.secondary)
-                                        .frame(width: 20, height: 20)
-                                }
+                            AsyncImage(url: archive.metadata?.iconUrl) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } placeholder: {
+                                Image(systemName: "folder")
+                                    .foregroundColor(.secondary)
                             }
+                            .frame(width: 20, height: 20)
+                            .cornerRadius(3)
                             
-                            Text(collection.name)
+                            Text(archive.metadata?.archiveTitle ?? archive.metadata?.identifier ?? "Unknown")
                                 .font(.subheadline)
-                                .foregroundColor(.primary)
+                                .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
+                                .lineLimit(nil)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 6)
                         .background(
                             RoundedRectangle(cornerRadius: 6)
-                                .fill(Color(UIColor.systemBackground))
+                                .fill(Color.white)
                         )
                     }
                 }
             }
         }
-        .task {
-            // Look up collection details from cache
-            await loadCollections()
-        }
-    }
-    
-    private func loadCollections() async {
-        let cache = CollectionFilterCache.shared
-        var collectionInfos: [CollectionInfo] = []
-        
-        for identifier in collectionIdentifiers {
-            if let filter = cache.filter(for: identifier) {
-                collectionInfos.append(CollectionInfo(
-                    id: identifier,
-                    name: filter.name,
-                    iconUrl: filter.iconUrl,
-                    image: filter.image
-                ))
-            } else {
-                // Fallback to identifier if not found in cache
-                collectionInfos.append(CollectionInfo(
-                    id: identifier,
-                    name: identifier,
-                    iconUrl: nil,
-                    image: nil
-                ))
-            }
-        }
-        
-        collections = collectionInfos
     }
 }
 

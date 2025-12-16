@@ -11,6 +11,7 @@ import iaAPI
 struct FavoriteArchivesView: View {
     @EnvironmentObject var iaPlayer: Player
     @Environment(\.dismiss) var dismiss
+    @StateObject private var viewModel = ViewModel()
     @State private var isEditing = false
     
     // Two-column grid layout
@@ -22,21 +23,21 @@ struct FavoriteArchivesView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                if iaPlayer.favoriteArchives.isEmpty {
+                if viewModel.filteredFavorites(from: iaPlayer.favoriteArchives).isEmpty {
                     VStack(alignment: .center, spacing: 16) {
                         Spacer()
                             .frame(height: 60)
                         
-                        Image(systemName: "heart.slash")
+                        Image(systemName: viewModel.searchText.isEmpty ? "heart.slash" : "magnifyingglass")
                             .font(.system(size: 60))
                             .foregroundColor(.secondary.opacity(0.5))
                         
-                        Text("No Bookmarked Archives")
+                        Text(viewModel.searchText.isEmpty ? "No Bookmarked Archives" : "No Results")
                             .font(.title3)
                             .bold()
                             .foregroundColor(.primary)
                         
-                        Text("Add archives to your bookmarks by tapping the heart icon from the detail view")
+                        Text(viewModel.searchText.isEmpty ? "Add archives to your bookmarks by tapping the heart icon from the detail view" : "No bookmarks match '\(viewModel.searchText)'")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -46,7 +47,7 @@ struct FavoriteArchivesView: View {
                     .padding(.top, 40)
                 } else {
                     LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(iaPlayer.favoriteArchives, id: \.identifier) { archive in
+                        ForEach(viewModel.filteredFavorites(from: iaPlayer.favoriteArchives), id: \.identifier) { archive in
                             ZStack(alignment: .topTrailing) {
                                 // Main card with navigation
                                 NavigationLink(value: archive) {
@@ -98,6 +99,7 @@ struct FavoriteArchivesView: View {
             .navigationDestination(for: ArchiveMetaDataEntity.self) { archive in
                 Detail(archive.identifier ?? "")
             }
+            .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Filter bookmarks")
             .toolbar {
                 if !iaPlayer.favoriteArchives.isEmpty {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -127,5 +129,61 @@ struct FavoriteArchivesView_Previews: PreviewProvider {
     static var previews: some View {
         FavoriteArchivesView()
             .environmentObject(Player())
+    }
+}
+
+// MARK: - ViewModel Extension
+extension FavoriteArchivesView {
+    @MainActor
+    class ViewModel: ObservableObject {
+        @Published var searchText: String = ""
+        
+        /// Filters the favorites based on the current search text
+        /// - Parameter favorites: The array of favorite archives to filter
+        /// - Returns: Filtered array of archives matching the search criteria
+        func filteredFavorites(from favorites: [ArchiveMetaDataEntity]) -> [ArchiveMetaDataEntity] {
+            guard !searchText.isEmpty else {
+                return favorites
+            }
+            
+            let searchLower = searchText.lowercased()
+            
+            return favorites.filter { archive in
+                matchesSearch(archive, searchTerm: searchLower)
+            }
+        }
+        
+        /// Checks if an archive matches the search term
+        /// - Parameters:
+        ///   - archive: The archive to check
+        ///   - searchTerm: The lowercased search term
+        /// - Returns: True if the archive matches the search term
+        private func matchesSearch(_ archive: ArchiveMetaDataEntity, searchTerm: String) -> Bool {
+            // Search in title
+            if let title = archive.archiveTitle?.lowercased(), 
+               title.contains(searchTerm) {
+                return true
+            }
+
+            // Search in creator
+            if let creator = archive.creator?.lowercased(), 
+               creator.contains(searchTerm) {
+                return true
+            }
+            
+            // Search in description
+            if let description = archive.desc?.lowercased(), 
+               description.contains(searchTerm) {
+                return true
+            }
+            
+            // Search in publisher
+            if let publisher = archive.publisher?.lowercased(), 
+               publisher.contains(searchTerm) {
+                return true
+            }
+            
+            return false
+        }
     }
 }
