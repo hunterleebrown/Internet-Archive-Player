@@ -11,6 +11,8 @@ import CoreData
 struct HistoryDrawerView: View {
     @Binding var isPresented: Bool
     @StateObject private var viewModel = ViewModel()
+    @EnvironmentObject var iaPlayer: Player
+    @State private var showClearAlert = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -22,6 +24,18 @@ struct HistoryDrawerView: View {
                     .bold()
                 
                 Spacer()
+                
+                // Clear history button
+                if !viewModel.historyItems.isEmpty {
+                    Button(action: {
+                        showClearAlert = true
+                    }) {
+                        Text("Clear")
+                            .font(.subheadline)
+                            .foregroundColor(.fairyCream)
+                    }
+                    .padding(.trailing, 12)
+                }
                 
                 Button(action: {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -38,25 +52,58 @@ struct HistoryDrawerView: View {
             .padding(.bottom, 8)
             
             // History items list
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(viewModel.historyItems, id: \.stableID) { item in
-                        HistoryItemRow(item: item)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                        
-                        if item.stableID != viewModel.historyItems.last?.stableID {
-                            Divider()
-                                .background(Color.fairyCream.opacity(0.3))
-                                .padding(.leading, 76)
+            if viewModel.historyItems.isEmpty {
+                // Empty state
+                VStack(spacing: 16) {
+                    Spacer()
+                    
+                    Image(systemName: "clock")
+                        .font(.system(size: 60))
+                        .foregroundColor(.fairyCream.opacity(0.5))
+                    
+                    Text("No History Yet")
+                        .font(.title3)
+                        .bold()
+                        .foregroundColor(.fairyCream)
+                    
+                    Text("Files you play will appear here")
+                        .font(.subheadline)
+                        .foregroundColor(.fairyCream.opacity(0.8))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(viewModel.historyItems, id: \.stableID) { item in
+                            HistoryItemRow(item: item)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                            
+                            if item.stableID != viewModel.historyItems.last?.stableID {
+                                Divider()
+                                    .background(Color.fairyCream.opacity(0.3))
+                                    .padding(.leading, 76)
+                            }
                         }
                     }
+                    .padding(.vertical, 8)
                 }
-                .padding(.vertical, 8)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.fairyRed.opacity(0.95))
+        .alert("Clear History", isPresented: $showClearAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear", role: .destructive) {
+                viewModel.clearHistory(player: iaPlayer)
+            }
+        } message: {
+            Text("Are you sure you want to clear all play history? This cannot be undone.")
+        }
         .onAppear {
             viewModel.fetchHistory()
         }
@@ -163,7 +210,17 @@ extension HistoryDrawerView {
             }
         }
         
-        func clearHistory() {
+        func clearHistory(player: Player) {
+            // Stop playing if the currently playing file is in history
+            // Find if any history item matches the currently playing file
+            if let matchingItem = historyItems.first(where: { item in
+                guard let playingFile = player.playingFile else { return false }
+                return item.onlineUrl?.absoluteString == playingFile.onlineUrl?.absoluteString
+            }) {
+                player.unsetPlayingFile(entity: matchingItem)
+            }
+            
+            // Delete all history items
             for item in historyItems {
                 context.delete(item)
             }

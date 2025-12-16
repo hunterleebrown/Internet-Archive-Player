@@ -315,8 +315,9 @@ class Player: NSObject, ObservableObject {
         }
     }
 
-    public func unsetPlayingFile(entity: ArchiveFileEntity) {
-        if let playingFile = self.playingFile, playingFile == entity{
+    public func unsetPlayingFile<T: ArchiveFileDisplayable>(entity: T) {
+        if let playingFile = self.playingFile,
+           playingFile.onlineUrl?.absoluteString == entity.onlineUrl?.absoluteString {
             self.stopPlaying()
             self.playingFile = nil
         }
