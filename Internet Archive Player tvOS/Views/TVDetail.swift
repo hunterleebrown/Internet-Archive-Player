@@ -144,7 +144,8 @@ struct TVDetail: View {
                                     NavigationLink {
                                         AudioPlayerView(
                                             audioFile: file,
-                                            artworkURL: imageUrl
+                                            artworkURL: imageUrl,
+                                            playlist: self.viewModel.audioFiles
                                         )
                                     } label: {
                                         FileRow(file: file)
@@ -587,12 +588,45 @@ struct VideoPlayerWithPlaceholder: View {
 struct AudioPlayerView: View {
     let audioFile: ArchiveFile
     let artworkURL: URL?
+    let playlist: [ArchiveFile]? // Optional playlist
     
     @State private var player: AVPlayer?
     @State private var isPlaying = false
     @State private var currentTime: TimeInterval = 0
     @State private var duration: TimeInterval = 0
     @State private var timeObserverToken: Any?
+    @State private var currentTrackIndex: Int = 0
+    @State private var playlistFiles: [ArchiveFile] = []
+    @State private var seekIndicator: String? = nil // For showing +15s/-15s feedback
+    
+    // Seek interval in seconds (configurable)
+    private let seekInterval: Double = 15
+    
+    // Convenience initializer for single file playback
+    init(audioFile: ArchiveFile, artworkURL: URL?) {
+        self.audioFile = audioFile
+        self.artworkURL = artworkURL
+        self.playlist = nil
+    }
+    
+    // Full initializer with playlist support
+    init(audioFile: ArchiveFile, artworkURL: URL?, playlist: [ArchiveFile]?) {
+        self.audioFile = audioFile
+        self.artworkURL = artworkURL
+        self.playlist = playlist
+    }
+    
+    var currentTrack: ArchiveFile {
+        playlistFiles.isEmpty ? audioFile : playlistFiles[currentTrackIndex]
+    }
+    
+    var canGoNext: Bool {
+        currentTrackIndex < playlistFiles.count - 1
+    }
+    
+    var canGoPrevious: Bool {
+        currentTrackIndex > 0
+    }
     
     var body: some View {
         ZStack {
@@ -604,55 +638,78 @@ struct AudioPlayerView: View {
             )
             .ignoresSafeArea()
             
-            VStack(spacing: 40) {
+            VStack(spacing: 50) {
                 Spacer()
                 
-                // Album artwork
-                if let imageURL = artworkURL {
-                    AsyncImage(url: imageURL) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 600, height: 600)
-                            .cornerRadius(20)
-                            .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
-                    } placeholder: {
+                // Album artwork with seek indicator overlay
+                ZStack {
+                    if let imageURL = artworkURL {
+                        AsyncImage(url: imageURL) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 600, height: 600)
+                                .cornerRadius(20)
+                                .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
+                        } placeholder: {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 600, height: 600)
+                                .overlay(
+                                    ProgressView()
+                                        .tint(.white)
+                                )
+                        }
+                    } else {
                         RoundedRectangle(cornerRadius: 20)
                             .fill(Color.gray.opacity(0.3))
                             .frame(width: 600, height: 600)
                             .overlay(
-                                ProgressView()
-                                    .tint(.white)
+                                Image(systemName: "music.note")
+                                    .font(.system(size: 120))
+                                    .foregroundColor(.white.opacity(0.5))
                             )
                     }
-                } else {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 600, height: 600)
-                        .overlay(
-                            Image(systemName: "music.note")
-                                .font(.system(size: 120))
-                                .foregroundColor(.white.opacity(0.5))
-                        )
+                    
+                    // Seek indicator overlay
+                    if let indicator = seekIndicator {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.black.opacity(0.75))
+                                .frame(width: 200, height: 100)
+                            
+                            Text(indicator)
+                                .font(.system(size: 40, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                        .transition(.scale.combined(with: .opacity))
+                    }
                 }
+                .frame(width: 600, height: 600)
                 
                 // Track info
                 VStack(spacing: 12) {
-                    Text(audioFile.displayTitle)
+                    Text(currentTrack.displayTitle)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
                     
-                    if let artist = audioFile.artist ?? audioFile.creator?.joined(separator: ", ") {
+                    if let artist = currentTrack.artist ?? currentTrack.creator?.joined(separator: ", ") {
                         Text(artist)
                             .font(.title3)
                             .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
                     }
+                    
+                    // Show track position if in playlist mode
+                    if !playlistFiles.isEmpty {
+                        Text("Track \(currentTrackIndex + 1) of \(playlistFiles.count)")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.6))
+                    }
                 }
-                .padding(.horizontal, 60)
                 
                 // Time progress bar
                 VStack(spacing: 8) {
@@ -675,18 +732,59 @@ struct AudioPlayerView: View {
                     .frame(width: 800)
                 }
                 
-                // Play/Pause button
-                Button(action: togglePlayPause) {
-                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                        .font(.system(size: 80))
-                        .foregroundColor(.white)
+                // Playback controls
+                HStack(spacing: 80) {
+                    // Skip to previous track
+                    Button(action: playPrevious) {
+                        Image(systemName: "backward.end.fill")
+                            .font(.system(size: 44))
+                    }
+                    .disabled(!canGoPrevious)
+                    
+                    // Seek backward 15 seconds
+                    Button(action: seekBackward) {
+                        Image(systemName: "gobackward.\(Int(seekInterval))")
+                            .font(.system(size: 44))
+                    }
+                    
+                    // Play/Pause button
+                    Button(action: togglePlayPause) {
+                        Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                            .font(.system(size: 44))
+                    }
+                    
+                    // Seek forward 15 seconds
+                    Button(action: seekForward) {
+                        Image(systemName: "goforward.\(Int(seekInterval))")
+                            .font(.system(size: 44))
+                    }
+                    
+                    // Skip to next track
+                    Button(action: playNext) {
+                        Image(systemName: "forward.end.fill")
+                            .font(.system(size: 44))
+                    }
+                    .disabled(!canGoNext)
                 }
-                .buttonStyle(.plain)
+                .padding(.bottom, 40)
                 
                 Spacer()
             }
+            .padding(.horizontal, 90)
+            .padding(.top, 60)
         }
         .onAppear {
+            // Initialize playlist
+            if let playlist = playlist {
+                playlistFiles = playlist
+                // Find the starting index
+                if let index = playlist.firstIndex(where: { $0.name == audioFile.name }) {
+                    currentTrackIndex = index
+                }
+            } else {
+                playlistFiles = [audioFile]
+                currentTrackIndex = 0
+            }
             setupPlayer()
         }
         .onDisappear {
@@ -694,8 +792,79 @@ struct AudioPlayerView: View {
         }
     }
     
+    private func playNext() {
+        guard canGoNext else { return }
+        currentTrackIndex += 1
+        loadAndPlayCurrentTrack()
+    }
+    
+    private func playPrevious() {
+        guard canGoPrevious else { return }
+        currentTrackIndex -= 1
+        loadAndPlayCurrentTrack()
+    }
+    
+    private func seekForward() {
+        guard let player = player else { return }
+        let currentTime = player.currentTime()
+        let seekTime = CMTimeAdd(currentTime, CMTime(seconds: seekInterval, preferredTimescale: 1))
+        
+        // Make sure we don't seek past the end
+        if let duration = player.currentItem?.duration, seekTime < duration {
+            player.seek(to: seekTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        } else if let duration = player.currentItem?.duration {
+            // If we'd go past the end, just go to the end
+            player.seek(to: duration, toleranceBefore: .zero, toleranceAfter: .zero)
+        }
+        
+        // Show visual feedback
+        showSeekIndicator("+\(Int(seekInterval))s")
+    }
+    
+    private func seekBackward() {
+        guard let player = player else { return }
+        let currentTime = player.currentTime()
+        let seekTime = CMTimeSubtract(currentTime, CMTime(seconds: seekInterval, preferredTimescale: 1))
+        
+        // Make sure we don't seek before the beginning
+        if seekTime > .zero {
+            player.seek(to: seekTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        } else {
+            // If we'd go before the start, just go to the beginning
+            player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+        }
+        
+        // Show visual feedback
+        showSeekIndicator("-\(Int(seekInterval))s")
+    }
+    
+    private func showSeekIndicator(_ text: String) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            seekIndicator = text
+        }
+        
+        // Hide after 1 second
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation(.easeOut(duration: 0.2)) {
+                seekIndicator = nil
+            }
+        }
+    }
+    
+    private func loadAndPlayCurrentTrack() {
+        // Clean up current player
+        cleanupPlayer()
+        
+        // Reset state
+        currentTime = 0
+        duration = 0
+        
+        // Setup new player for current track
+        setupPlayer()
+    }
+    
     private func setupPlayer() {
-        guard let url = audioFile.url else { return }
+        guard let url = currentTrack.url else { return }
         
         let playerItem = AVPlayerItem(url: url)
         let newPlayer = AVPlayer(playerItem: playerItem)
@@ -708,6 +877,17 @@ struct AudioPlayerView: View {
                     if !durationSeconds.isNaN && durationSeconds.isFinite {
                         duration = durationSeconds
                     }
+                }
+            }
+            .store(in: &cancellables)
+        
+        // Observe when track finishes to auto-advance
+        NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime, object: playerItem)
+            .sink { _ in
+                if canGoNext {
+                    playNext()
+                } else {
+                    isPlaying = false
                 }
             }
             .store(in: &cancellables)
