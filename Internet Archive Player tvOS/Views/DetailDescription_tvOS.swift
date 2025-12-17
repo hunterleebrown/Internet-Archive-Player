@@ -119,20 +119,18 @@ struct DetailDescription: View {
                         Text("Description")
                             .font(.system(size: 24, weight: .semibold))
                         
-                        // Wrap description in a focusable container for tvOS scrolling
-                        Group {
-                            if let att = doc.description.joined(separator: "").html2AttributedString {
-                                Text(AttributedString(scaledAttributedStringForTVOS(att)))
-                                    .font(.body)
-                            } else {
-                                Text(doc.description.joined(separator: "\n"))
-                                    .font(.body)
-                            }
+                        if let att = doc.description.joined(separator: "").html2AttributedString {
+                            Text(AttributedString(scaledAttributedStringForTVOS(att)))
+                                .font(.body)
+                        } else {
+                            Text(doc.description.joined(separator: "\n"))
+                                .font(.body)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .focusable() // Makes the text focusable so users can scroll through it
                     }
                 }
+                
+                // Add a spacer at the bottom to ensure last content is visible
+                Spacer(minLength: 100)
             }
             .padding(60)
         }

@@ -11,7 +11,6 @@ import iaAPI
 import Combine
 
 struct TVSearchView: View {
-    @State private var searchText = ""
     @StateObject var viewModel = TVSearchView.ViewModel()
 
     // Adaptive columns that adjust based on available space
@@ -112,7 +111,10 @@ extension TVSearchView {
         }
 
         func search(query: String, collection:String? = nil, loadMore: Bool) {
-            guard !query.isEmpty, query.count > 2 else { 
+            // Trim whitespace and check validity
+            let trimmedQuery = query.trimmingCharacters(in: .whitespaces)
+            
+            guard !trimmedQuery.isEmpty, trimmedQuery.count > 2 else { 
                 self.items.removeAll()
                 return 
             }
@@ -136,8 +138,8 @@ extension TVSearchView {
 
 //                    let format: ArchiveFileFormat? = .mp3 //self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
 //                    let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
-                    print("Searching for: \(query)")
-                    let data = try await self.service.searchAsync(query: query, mediaTypes: self.mediaTypes, rows: self.rows, page: self.page, format: nil, collection: collection)
+                    print("Searching for: '\(trimmedQuery)' (length: \(trimmedQuery.count))")
+                    let data = try await self.service.searchAsync(query: trimmedQuery, mediaTypes: self.mediaTypes, rows: self.rows, page: self.page, format: nil, collection: collection)
 
                     self.numberOfResults = data.response.numFound
                     self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
