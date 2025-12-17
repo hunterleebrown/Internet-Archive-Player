@@ -70,105 +70,114 @@ struct TVSearchView: View {
 }
 
 extension TVSearchView {
+    @MainActor
     final class ViewModel: ObservableObject {
         @Published var items: [ArchiveMetaData] = []
-        @Published var searchText: String = "" {
-            didSet {
-                withAnimation(.easeOut(duration: 0.33)) {
-                    noDataFound = false
-                }
-            }
-        }
+        @Published var searchText: String = ""
         @Published var isSearching: Bool = false
         @Published var noDataFound: Bool = false
         @Published var archiveError: String?
 
-        @Published var mediaType: Int = 0
-
-        private var bag = Set<AnyCancellable>()
-        private var searchTask: Task<Void, Never>?
-
         public let mediaTypes: [ArchiveMediaType] = [.audio, .movies]
-        private var isLoadingMore: Bool = false
+        private var searchTask: Task<Void, Never>?
         private var page: Int = 1
-        private var numberOfResults = 0
-        private var rows = 50
-        private var totalPages = 0
+        private let rows = 50
 
         let service: PlayerArchiveService
 
         init() {
             self.service = PlayerArchiveService()
-
-            $searchText
-                .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
-                .removeDuplicates()
-                .sink(receiveValue: { [weak self] value in
-                    guard let self = self else { return }
-                    self.search(query: value, collection: nil, loadMore: false)
-                })
-                .store(in: &bag)
-        }
-
-        func search(query: String, collection:String? = nil, loadMore: Bool) {
-            // Trim whitespace and check validity
-            let trimmedQuery = query.trimmingCharacters(in: .whitespaces)
             
-            guard !trimmedQuery.isEmpty, trimmedQuery.count > 2 else { 
-                self.items.removeAll()
-                return 
-            }
-            
-            // Cancel any existing search
-            searchTask?.cancel()
-            
-            self.isSearching = true
-            self.noDataFound = false
-            self.isLoadingMore = loadMore
-            self.archiveError = nil
-            
-            searchTask = Task { @MainActor in
-                do {
-
-                    if !self.isLoadingMore {
-                        self.page = 1
-                        self.totalPages = 0
-                        self.items.removeAll()
+            // Simple debounced search using Task
+            Task { @MainActor in
+                for await searchText in $searchText.values {
+                    // Cancel previous search
+                    searchTask?.cancel()
+                    
+                    let query = searchText.trimmingCharacters(in: .whitespaces)
+                    
+                    // Clear results if query is too short
+                    guard query.count > 2 else {
+                        items = []
+                        noDataFound = false
+                        archiveError = nil
+                        continue
                     }
-
-//                    let format: ArchiveFileFormat? = .mp3 //self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
-//                    let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
-                    print("Searching for: '\(trimmedQuery)' (length: \(trimmedQuery.count))")
-                    let data = try await self.service.searchAsync(query: trimmedQuery, mediaTypes: self.mediaTypes, rows: self.rows, page: self.page, format: nil, collection: collection)
-
-                    self.numberOfResults = data.response.numFound
-                    self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
-
-                    self.page += 1
-
-                    print("The Page Number is: \(self.page)")
-                    if !isLoadingMore {
-                        self.items = data.response.docs
-                    } else {
-                        self.items += data.response.docs
+                    
+                    // Debounce
+                    try? await Task.sleep(for: .milliseconds(500))
+                    
+                    // Start search
+                    searchTask = Task { @MainActor in
+                        await performSearch(query: query)
                     }
-
-                    self.isSearching = false
-
-                    if self.items.count == 0 {
-                        throw ArchiveServiceError.nodata
-                    }
-
-                } catch let error as ArchiveServiceError {
-                    withAnimation(.easeIn(duration: 0.33)) {
-                        self.archiveError = error.description
-                        self.noDataFound = true
-                        self.isSearching = false
-                    }
-                } catch {
-                    // Handle cancellation
-                    self.isSearching = false
                 }
+            }
+        }
+        
+        private func performSearch(query: String) async {
+            isSearching = true
+            noDataFound = false
+            archiveError = nil
+            page = 1
+            
+            do {
+                let data = try await service.searchAsync(
+                    query: query,
+                    mediaTypes: mediaTypes,
+                    rows: rows,
+                    page: page,
+                    format: nil,
+                    collection: nil
+                )
+                
+                // Check if task was cancelled
+                guard !Task.isCancelled else { return }
+                
+                items = data.response.docs
+                isSearching = false
+                
+                if items.isEmpty {
+                    noDataFound = true
+                    archiveError = "No results found"
+                }
+                
+            } catch let error as ArchiveServiceError {
+                guard !Task.isCancelled else { return }
+                archiveError = error.description
+                noDataFound = true
+                isSearching = false
+            } catch {
+                guard !Task.isCancelled else { return }
+                isSearching = false
+            }
+        }
+        
+        func loadMore() async {
+            guard !isSearching else { return }
+            
+            let query = searchText.trimmingCharacters(in: .whitespaces)
+            guard query.count > 2 else { return }
+            
+            isSearching = true
+            page += 1
+            
+            do {
+                let data = try await service.searchAsync(
+                    query: query,
+                    mediaTypes: mediaTypes,
+                    rows: rows,
+                    page: page,
+                    format: nil,
+                    collection: nil
+                )
+                
+                items.append(contentsOf: data.response.docs)
+                isSearching = false
+                
+            } catch {
+                isSearching = false
+                page -= 1 // Revert page on failure
             }
         }
     }
