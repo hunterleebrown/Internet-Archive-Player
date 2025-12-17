@@ -14,10 +14,9 @@ struct FavoriteArchivesView: View {
     @StateObject private var viewModel = ViewModel()
     @State private var isEditing = false
     
-    // Two-column grid layout
+    // Adaptive grid layout - items will flow based on available width
     private let columns = [
-        GridItem(.flexible(), spacing: 12),
-        GridItem(.flexible(), spacing: 12)
+        GridItem(.adaptive(minimum: 160, maximum: 200), spacing: 12)
     ]
     
     var body: some View {
@@ -57,7 +56,9 @@ struct FavoriteArchivesView: View {
                                 .disabled(isEditing)
                                 .contextMenu {
                                     Button(role: .destructive) {
-                                        deleteArchive(archive)
+                                        withAnimation {
+                                            deleteArchive(archive)
+                                        }
                                     } label: {
                                         Label("Remove Bookmark", systemImage: "heart.slash.fill")
                                     }

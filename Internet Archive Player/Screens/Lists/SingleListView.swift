@@ -17,9 +17,11 @@ struct SingleListView: View {
     @ObservedObject var playlistEntity: PlaylistEntity
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel = SingleListView.ViewModel()
+    var showToolbar: Bool = true // Control toolbar visibility
 
-    init(playlistEntity: PlaylistEntity) {
+    init(playlistEntity: PlaylistEntity, showToolbar: Bool = true) {
         _playlistEntity = ObservedObject(initialValue: playlistEntity)
+        self.showToolbar = showToolbar
     }
 
     var body: some View {
@@ -72,18 +74,18 @@ struct SingleListView: View {
             }
         }
         .toolbar {
-            if !viewModel.files.isEmpty {
+            if showToolbar && !viewModel.files.isEmpty {
                 EditButton()
                     .tint(.fairyRed)
             }
         }
-        .navigationTitle(playlistEntity.name ?? "List")
+//        .navigationTitle(playlistEntity.name ?? "List")
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) {
-            Spacer()
-                .frame(height: iaPlayer.playerHeight)
-        }
-        .onAppear {
+//        .safeAreaInset(edge: .bottom) {
+//            Spacer()
+//                .frame(height: iaPlayer.playerHeight)
+//        }
+        .task {
             viewModel.setUpSubscribers(iaPlayer)
             viewModel.loadFiles(from: playlistEntity)
             iaPlayer.sendPlayingFileForPlaylist()
@@ -113,6 +115,14 @@ struct SingleListView: View {
             Home.otherPlaylistPass.send(archiveFileEntity)
         }, imageName: "music.note.list")
         items.append(otherPlaylist)
+        
+        let delete = MenuAction(name: "Delete from playlist", action: {
+            // Find the index of this file in the current playlist
+            if let index = viewModel.files.firstIndex(of: archiveFileEntity) {
+                self.remove(at: IndexSet(integer: index))
+            }
+        }, imageName: "trash")
+        items.append(delete)
 
         return items
     }

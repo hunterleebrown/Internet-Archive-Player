@@ -29,6 +29,20 @@ final class DetailViewModel: ObservableObject {
 
     @Published var pressedStates: [ArchiveFile.ID: Bool] = [:]
 
+    // MARK: - Pagination Properties
+    private let itemsPerPage = 10
+    @Published var displayedAudioFiles: [ArchiveFile] = []
+    @Published var currentAudioPage = 0
+    @Published var isLoadingMore = false
+    
+    var hasMoreAudioFiles: Bool {
+        displayedAudioFiles.count < sortedAudioFilesCache.count
+    }
+    
+    var remainingAudioCount: Int {
+        sortedAudioFilesCache.count - displayedAudioFiles.count
+    }
+
     // Cached sorted audio files
     var sortedAudioFilesCache: [ArchiveFile] {
         audioFiles.sorted { lf, rf in
@@ -60,6 +74,9 @@ final class DetailViewModel: ObservableObject {
                 guard let track1 = $0.track, let track2 = $1.track else { return false}
                 return track1 < track2
             }
+            
+            // Initialize pagination with first page
+            loadInitialAudioFiles()
 
             let video = doc.files.filter{ $0.isVideo }
             if video.count > 0 {
@@ -81,6 +98,40 @@ final class DetailViewModel: ObservableObject {
         } catch {
             print(error)
         }
+    }
+    
+    // MARK: - Pagination Methods
+    
+    func loadInitialAudioFiles() {
+        currentAudioPage = 0
+        displayedAudioFiles = Array(sortedAudioFilesCache.prefix(itemsPerPage))
+    }
+    
+    func loadMoreAudioFiles() {
+        guard !isLoadingMore && hasMoreAudioFiles else { return }
+        
+        isLoadingMore = true
+        
+        // Simulate a small delay for smooth UX (optional)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self = self else { return }
+            
+            let startIndex = (self.currentAudioPage + 1) * self.itemsPerPage
+            let endIndex = min(startIndex + self.itemsPerPage, self.sortedAudioFilesCache.count)
+            
+            if startIndex < self.sortedAudioFilesCache.count {
+                let newFiles = Array(self.sortedAudioFilesCache[startIndex..<endIndex])
+                self.displayedAudioFiles.append(contentsOf: newFiles)
+                self.currentAudioPage += 1
+            }
+            
+            self.isLoadingMore = false
+        }
+    }
+    
+    func resetPagination() {
+        currentAudioPage = 0
+        displayedAudioFiles = []
     }
 
     private func desiredVideo(files: [ArchiveFile]) -> [ArchiveFile] {
