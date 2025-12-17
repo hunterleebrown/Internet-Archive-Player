@@ -8,6 +8,7 @@
 import SwiftUI
 import AVKit
 import Combine
+import MediaPlayer
 import iaAPI
 
 struct AudioPlayerView: View {
@@ -172,6 +173,10 @@ struct AudioPlayerView: View {
             .padding(.horizontal, 90)
             .padding(.top, 60)
         }
+        .onPlayPauseCommand {
+            print("this is magic")
+            viewModel.togglePlayPause()
+        }
         .onAppear {
             viewModel.setupPlayer()
         }
@@ -232,6 +237,14 @@ extension AudioPlayerView {
         func setupPlayer() {
             guard let url = currentTrack.url else { return }
             
+            // Configure audio session for remote control
+            do {
+                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+                try AVAudioSession.sharedInstance().setActive(true)
+            } catch {
+                print("Failed to set up audio session: \(error)")
+            }
+            
             let playerItem = AVPlayerItem(url: url)
             let newPlayer = AVPlayer(playerItem: playerItem)
             
@@ -273,6 +286,12 @@ extension AudioPlayerView {
             self.player = newPlayer
             newPlayer.play()
             isPlaying = true
+            
+            // Setup remote command center
+            setupRemoteTransportControls()
+            
+            // Update Now Playing info
+            updateNowPlayingInfo()
         }
         
         func cleanupPlayer() {
@@ -283,6 +302,19 @@ extension AudioPlayerView {
             player?.pause()
             player = nil
             cancellables.removeAll()
+            
+            // Clean up remote command center
+            let commandCenter = MPRemoteCommandCenter.shared()
+            commandCenter.playCommand.removeTarget(nil)
+            commandCenter.pauseCommand.removeTarget(nil)
+            commandCenter.togglePlayPauseCommand.removeTarget(nil)
+            commandCenter.nextTrackCommand.removeTarget(nil)
+            commandCenter.previousTrackCommand.removeTarget(nil)
+            commandCenter.skipForwardCommand.removeTarget(nil)
+            commandCenter.skipBackwardCommand.removeTarget(nil)
+            
+            // Clear Now Playing info
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         }
         
         func togglePlayPause() {
@@ -294,6 +326,9 @@ extension AudioPlayerView {
                 player.play()
             }
             isPlaying.toggle()
+            
+            // Update Now Playing info when state changes
+            updateNowPlayingInfo()
         }
         
         func playNext() {
@@ -350,6 +385,112 @@ extension AudioPlayerView {
         }
         
         // MARK: - Private Methods
+        private func setupRemoteTransportControls() {
+            let commandCenter = MPRemoteCommandCenter.shared()
+            
+
+            // Enable and configure play command
+            commandCenter.playCommand.isEnabled = true
+            commandCenter.playCommand.addTarget { [weak self] event in
+                guard let self = self else {
+                    return .commandFailed
+                }
+                
+                Task { @MainActor in
+                    self.player?.play()
+                    self.isPlaying = true
+                    self.updateNowPlayingInfo()
+                }
+                
+                return .success
+            }
+            
+            // Enable and configure pause command  
+            commandCenter.pauseCommand.isEnabled = true
+            commandCenter.pauseCommand.addTarget { [weak self] event in
+                guard let self = self else {
+                    return .commandFailed
+                }
+                
+                Task { @MainActor in
+                    self.player?.pause()
+                    self.isPlaying = false
+                    self.updateNowPlayingInfo()
+                }
+                
+                return .success
+            }
+            
+            // Enable and configure toggle play/pause command
+            commandCenter.togglePlayPauseCommand.isEnabled = true
+            commandCenter.togglePlayPauseCommand.addTarget { [weak self] event in
+                guard let self = self else {
+                    return .commandFailed
+                }
+                
+                Task { @MainActor in
+                    self.togglePlayPause()
+                }
+                
+                return .success
+            }
+            
+            // Next track command
+            commandCenter.nextTrackCommand.isEnabled = true
+            commandCenter.nextTrackCommand.addTarget { [weak self] event in
+                guard let self = self else { return .commandFailed }
+                
+                Task { @MainActor in
+                    if self.canGoNext {
+                        self.playNext()
+                    }
+                }
+                
+                return .success
+            }
+            
+            // Previous track command
+            commandCenter.previousTrackCommand.isEnabled = true
+            commandCenter.previousTrackCommand.addTarget { [weak self] event in
+                guard let self = self else { return .commandFailed }
+                
+                Task { @MainActor in
+                    if self.canGoPrevious {
+                        self.playPrevious()
+                    }
+                }
+                
+                return .success
+            }
+            
+            // Skip forward command
+            commandCenter.skipForwardCommand.isEnabled = true
+            commandCenter.skipForwardCommand.preferredIntervals = [NSNumber(value: seekInterval)]
+            commandCenter.skipForwardCommand.addTarget { [weak self] event in
+                guard let self = self else { return .commandFailed }
+                
+                Task { @MainActor in
+                    self.seekForward()
+                }
+                
+                return .success
+            }
+            
+            // Skip backward command
+            commandCenter.skipBackwardCommand.isEnabled = true
+            commandCenter.skipBackwardCommand.preferredIntervals = [NSNumber(value: seekInterval)]
+            commandCenter.skipBackwardCommand.addTarget { [weak self] event in
+                guard let self = self else { return .commandFailed }
+                
+                Task { @MainActor in
+                    self.seekBackward()
+                }
+                
+                return .success
+            }
+            
+        }
+        
         private func loadAndPlayCurrentTrack() {
             // Clean up current player
             cleanupPlayer()
@@ -374,6 +515,36 @@ extension AudioPlayerView {
                     seekIndicator = nil
                 }
             }
+        }
+        
+        private func updateNowPlayingInfo() {
+            var nowPlayingInfo = [String: Any]()
+            
+            // Set track metadata
+            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrack.displayTitle
+            
+            if let artist = currentTrack.artist ?? currentTrack.creator?.joined(separator: ", ") {
+                nowPlayingInfo[MPMediaItemPropertyArtist] = artist
+            }
+            
+            // Set playback position and duration
+            if let player = player, let currentItem = player.currentItem {
+                let currentTime = currentItem.currentTime().seconds
+                let duration = currentItem.duration.seconds
+                
+                if !currentTime.isNaN && currentTime.isFinite {
+                    nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+                }
+                
+                if !duration.isNaN && duration.isFinite {
+                    nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+                }
+            }
+            
+            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+            
+            // Set the now playing info
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
         }
     }
 }
