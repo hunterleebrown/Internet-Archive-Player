@@ -257,24 +257,7 @@ struct TVDetail: View {
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-                
-                // Blurred background image
-                if let imageUrl = imageUrl {
-                    GeometryReader { geometry in
-                        AsyncImage(url: imageUrl) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-                                .clipped()
-                                .blur(radius: 30)
-                                .opacity(0.4)
-                        } placeholder: {
-                            Color.clear
-                        }
-                    }
-                }
-                
+                                
                 // Dark overlay for text readability
                 LinearGradient(
                     colors: [Color.black.opacity(0.7), Color.black.opacity(0.5)],
