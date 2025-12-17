@@ -36,21 +36,27 @@ struct Home: View {
         ZStack(alignment: .bottom) {
 
             if iaPlayer.playingFile != nil {
-                VStack(alignment: .trailing) {
-
+                HStack {
+                    Spacer()
+                    
                     Button(action: {
                         withAnimation {
                             showControls.toggle()
+                            // Don't change height when manually toggling - keep it at 160
+                            if showControls {
+                                iaPlayer.playerHeight = 160
+                            }
                         }
                     }, label: {
                         Image(systemName: "rectangle.expand.vertical")
                             .foregroundColor(.fairyRed)
-                            .frame(maxWidth: 44, maxHeight: 44)
+                            .frame(width: 44, height: 44)
                             .background(Color.fairyCream)
                             .cornerRadius(10)
                     })
+                    .padding(.trailing, 10)
                 }
-                .padding(.trailing, 10)
+                .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.bottom, 59)
                 .zIndex(showControls ? 0 : 3)
             }
@@ -197,6 +203,7 @@ struct Home: View {
         .onReceive(Home.showControlsPass) { show in
             withAnimation {
                 showControls = show
+                iaPlayer.playerHeight = show ? 160 : 0
             }
         }
         .onReceive(Player.networkAlert, perform: { badNetwork in

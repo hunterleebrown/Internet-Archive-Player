@@ -14,10 +14,28 @@ import CoreData
 struct ListsView: View {
     @StateObject var viewModel = ListsView.ViewModel()
     @EnvironmentObject var iaPlayer: Player
+    
+    // Toggle this to test different layouts
+    private let useCarouselLayout = true
 
     var body: some View {
-        NavigationStack {
+        if useCarouselLayout {
+            PlaylistsCarouselView(viewModel: viewModel)
+                .environmentObject(iaPlayer)
+        } else {
+            PlaylistsListView(viewModel: viewModel)
+                .environmentObject(iaPlayer)
+        }
+    }
+}
 
+// MARK: - List Layout (Original)
+private struct PlaylistsListView: View {
+    @ObservedObject var viewModel: ListsView.ViewModel
+    @EnvironmentObject var iaPlayer: Player
+    
+    var body: some View {
+        NavigationStack {
             List {
                 NavigationLink {
                     NewFavoritesView()
@@ -71,6 +89,186 @@ struct ListsView: View {
                 Spacer()
                     .frame(height: iaPlayer.playerHeight)
             }
+        }
+    }
+}
+
+// MARK: - Carousel Layout (New)
+private struct PlaylistsCarouselView: View {
+    @ObservedObject var viewModel: ListsView.ViewModel
+    @EnvironmentObject var iaPlayer: Player
+    @State private var selectedPlaylistIndex = 0
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                // Page-style carousel with embedded content
+                TabView(selection: $selectedPlaylistIndex) {
+                    // Favorites card with embedded view
+                    FullPlaylistCard(
+                        title: "Favorites",
+                        icon: "heart.fill",
+                        color: .fairyRed,
+                        content: AnyView(NewFavoritesView()),
+                        showDeleteButton: false
+                    )
+                    .tag(-1)
+                    
+                    // Playlist cards with embedded SingleListView
+                    ForEach(Array(viewModel.lists.enumerated()), id: \.element) { index, list in
+                        FullPlaylistCard(
+                            title: list.name ?? "Untitled Playlist",
+                            icon: list.name == "Now Playing" ? "play.circle.fill" : "music.note.list",
+                            color: list.name == "Now Playing" ? .fairyRed : .secondary,
+                            content: AnyView(SingleListView(playlistEntity: list, showToolbar: false)),
+                            showDeleteButton: list.name != "Now Playing",
+                            onDelete: {
+                                viewModel.remove(at: IndexSet(integer: index), player: iaPlayer)
+                            },
+                            playlistEntity: list
+                        )
+                        .tag(index)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .always))
+                .indexViewStyle(.page(backgroundDisplayMode: .always))
+            }
+            .navigationTitle("Playlists")
+            .toolbar {
+                Button(action: {
+                    Home.newPlaylistPass.send(true)
+                }) {
+                    Image(systemName: "plus")
+                        .foregroundColor(.fairyRed)
+                    Text("Create Playlist")
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                Spacer()
+                    .frame(height: iaPlayer.playerHeight)
+            }
+        }
+    }
+}
+
+// MARK: - Full Playlist Card with Embedded Content
+private struct FullPlaylistCard: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let content: AnyView
+    var showDeleteButton: Bool = false
+    var onDelete: (() -> Void)? = nil
+    var playlistEntity: PlaylistEntity? = nil  // Optional: pass the playlist to get the first item's image
+    @EnvironmentObject var iaPlayer: Player
+    
+    @State private var showDeleteConfirmation = false
+    
+    // Get the first file's image URL from the playlist
+    private var firstFileImageUrl: URL? {
+        guard let playlist = playlistEntity,
+              let files = playlist.files?.array as? [ArchiveFileEntity],
+              let firstFile = files.first else {
+            return nil
+        }
+        
+        // Try to get the archive's icon URL from the identifier
+        if let identifier = firstFile.identifier {
+            // Construct the archive.org thumbnail URL
+            return URL(string: "https://archive.org/services/img/\(identifier)")
+        }
+        
+        return nil
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header with icon/image, title, and gradient background
+            HStack(alignment: .center, spacing: 12) {
+                // Show first item's image or fallback to SF Symbol icon
+                if let imageUrl = firstFileImageUrl {
+                    CachedAsyncImage(url: imageUrl) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 44, height: 44)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } placeholder: {
+                        // Fallback to icon while loading
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.white.opacity(0.2))
+                                .frame(width: 44, height: 44)
+                            
+                            ProgressView()
+                                .tint(.white)
+                        }
+                    }
+                } else {
+                    // Default SF Symbol icon
+                    Image(systemName: icon)
+                        .font(.title2)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                }
+                
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(2)
+                
+                Spacer()
+                
+                // Delete button in header
+                if showDeleteButton, let _ = onDelete {
+                    Button(action: {
+                        showDeleteConfirmation = true
+                    }) {
+                        Image(systemName: "trash")
+                            .font(.body)
+                            .foregroundColor(.white.opacity(0.9))
+                    }
+                }
+            }
+            .frame(height: 64)
+            .padding(.horizontal, 20)
+            .background(
+                LinearGradient(
+                    colors: [color, color.opacity(0.8)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
+            
+            // Embedded playlist content
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.2), radius: 15, x: 0, y: 8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .strokeBorder(color.opacity(0.3), lineWidth: 1)
+        )
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .confirmationDialog(
+            "Delete Playlist",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+            Button("Cancel", role: .cancel) {
+                // Dialog dismisses automatically
+            }
+        } message: {
+            Text("Are you sure you want to delete \"\(title)\"? This action cannot be undone.")
         }
     }
 }

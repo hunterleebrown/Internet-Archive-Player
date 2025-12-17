@@ -141,7 +141,7 @@ struct HistoryItemRow: View {
             )
             .frame(width: 50, height: 50)
             
-            // Title, artist, and metadata
+            // Title, artist, and timestamp
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.displayTitle)
                     .font(.subheadline)
@@ -154,29 +154,34 @@ struct HistoryItemRow: View {
                     .foregroundColor(.fairyCream.opacity(0.8))
                     .lineLimit(1)
                 
-                // Metadata: played date and play count
-                HStack(spacing: 8) {
-                    Text(formattedPlayedAt)
-                        .font(.caption2)
-                        .foregroundColor(.fairyCream.opacity(0.6))
-                    
-                    Text("•")
-                        .font(.caption2)
-                        .foregroundColor(.fairyCream.opacity(0.6))
-                    
-                    Text("Played \(item.playCount) time\(item.playCount == 1 ? "" : "s")")
-                        .font(.caption2)
-                        .foregroundColor(.fairyCream.opacity(0.6))
-                }
+                // Compact timestamp with styled fonts
+                Text(formattedTimestamp)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(.fairyCream.opacity(0.6))
             }
             
             Spacer()
             
-            // Play button
-            Button(action: onPlay) {
-                Image(systemName: "play.circle.fill")
-                    .font(.title2)
+            // Play count badge
+            VStack(spacing: 2) {
+                Text("\(item.playCount)")
+                    .font(.system(size: 16, weight: .bold, design: .monospaced))
                     .foregroundColor(.fairyCream)
+                    .monospacedDigit()
+                    .frame(minWidth: 30, minHeight: 34)
+                    .padding(.horizontal, 4)
+                    .background(Color.black.opacity(0.3))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .strokeBorder(Color.fairyCream.opacity(0.4), lineWidth: 1.5)
+                    )
+                    .cornerRadius(4)
+                
+                Text("plays")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.fairyCream.opacity(0.7))
+                    .textCase(.uppercase)
+                    .kerning(0.5)
             }
         }
         .contentShape(Rectangle())
@@ -185,11 +190,27 @@ struct HistoryItemRow: View {
         }
     }
     
-    private var formattedPlayedAt: String {
-        guard let playedAt = item.playedAt else { return "Unknown" }
+    // Compact single-line timestamp with bullets
+    private var formattedTimestamp: String {
+        guard let playedAt = item.playedAt else { return "----•---•--•--:--:-- --" }
+        
         let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd/yy HH:mm:ss"
-        return formatter.string(from: playedAt)
+        formatter.locale = Locale(identifier: "en_US")
+        
+        // Get individual components
+        formatter.dateFormat = "yyyy"
+        let year = formatter.string(from: playedAt)
+        
+        formatter.dateFormat = "MMM"
+        let month = formatter.string(from: playedAt)
+        
+        formatter.dateFormat = "dd"
+        let day = formatter.string(from: playedAt)
+        
+        formatter.dateFormat = "h:mm:ss a"
+        let time = formatter.string(from: playedAt)
+        
+        return "\(year)•\(month)•\(day)•\(time)"
     }
 }
 

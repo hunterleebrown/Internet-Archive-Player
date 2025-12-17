@@ -46,13 +46,33 @@ struct Detail: View {
     var body: some View {
         ZStack {
             if isLoading {
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .tint(.fairyRed)
-                    Text("Loading archive details...")
+                VStack(alignment: .center, spacing: 20) {
+                    Spacer()
+                    
+                    // Animated icon with pulsing effect
+                    ZStack {
+                        Circle()
+                            .fill(Color.fairyRed.opacity(0.1))
+                            .frame(width: 100, height: 100)
+                        
+                        Image(systemName: "archivebox")
+                            .font(.system(size: 50))
+                            .foregroundColor(.fairyRed)
+                            .symbolEffect(.pulse, options: .repeating)
+                    }
+                    
+                    Text("Loading Archive")
+                        .font(.title3)
+                        .bold()
+                        .foregroundColor(.primary)
+                    
+                    Text("Fetching details from the Internet Archive...")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    
+                    Spacer()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemBackground))
@@ -189,10 +209,20 @@ struct Detail: View {
                                     }
                                 } label: {
                                     VStack(spacing: 4) {
-                                        Image(systemName: viewModel.isFavoriteArchive ? "heart.fill" : "heart")
-                                            .font(.title2)
-                                            .frame(height: 28)
-                                            .tint(.black)
+                                        ZStack(alignment: .topTrailing) {
+                                            Image(systemName: viewModel.isFavoriteArchive ? "books.vertical.fill" : "books.vertical")
+                                                .font(.title2)
+                                                .frame(height: 28)
+                                                .tint(.black)
+                                            
+                                            // Green checkmark badge when bookmarked
+                                            if viewModel.isFavoriteArchive {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .font(.system(size: 14))
+                                                    .foregroundStyle(.white, .green)
+                                                    .offset(x: 6, y: -6)
+                                            }
+                                        }
                                         Text("Bookmark")
                                             .font(.caption2)
                                             .foregroundColor(.black)
@@ -351,7 +381,8 @@ struct Detail: View {
                                 )
 
 
-                                ForEach(Array(viewModel.sortedAudioFilesCache.enumerated()), id: \.element.id) { i, file in
+                                // Paginated audio files
+                                ForEach(Array(viewModel.displayedAudioFiles.enumerated()), id: \.element.id) { i, file in
                                     HStack(alignment: .center, spacing: 5) {
 
                                         Image(systemName: PlayerButtonType.ear.rawValue)
@@ -380,6 +411,39 @@ struct Detail: View {
                                                 iaPlayer.playFile(file)
                                             }
                                     }
+                                    .onAppear {
+                                        // Auto-load more when nearing the end
+                                        if i == viewModel.displayedAudioFiles.count - 5 {
+                                            viewModel.loadMoreAudioFiles()
+                                        }
+                                    }
+                                }
+                                
+                                // Load More button (if there are more files)
+                                if viewModel.hasMoreAudioFiles {
+                                    Button {
+                                        viewModel.loadMoreAudioFiles()
+                                    } label: {
+                                        HStack(spacing: 8) {
+                                            if viewModel.isLoadingMore {
+                                                ProgressView()
+                                                    .tint(.fairyRed)
+                                            } else {
+                                                Image(systemName: "arrow.down.circle")
+                                                    .font(.title3)
+                                            }
+                                            Text(viewModel.isLoadingMore ? "Loading..." : "Load More (\(viewModel.remainingAudioCount) remaining)")
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                        }
+                                        .foregroundColor(.fairyRed)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 12)
+                                        .background(Color.white.opacity(0.5))
+                                        .cornerRadius(detailCornerRadius)
+                                    }
+                                    .disabled(viewModel.isLoadingMore)
+                                    .padding(.vertical, 8)
                                 }
                             }
 

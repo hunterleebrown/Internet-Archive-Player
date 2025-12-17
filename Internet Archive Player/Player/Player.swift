@@ -56,7 +56,7 @@ class Player: NSObject, ObservableObject {
             self.loadNowPlayingMediaArtwork()
         }
     }
-    @Published public var playerHeight: CGFloat = 160
+    @Published public var playerHeight: CGFloat = 0
 
     var playingPlaylist: PlaylistEntity? = nil {
         didSet {
@@ -508,7 +508,7 @@ class Player: NSObject, ObservableObject {
             try audioSession.setActive(true)
         }
         catch {
-            fatalError("Failure to session: \(error)")
+            print("Failed to set audio session: \(error)")
         }
     }
 
@@ -517,6 +517,7 @@ class Player: NSObject, ObservableObject {
                 DispatchQueue.main.async {
                     self.playing  = self.avPlayer.rate > 0.0
                     self.playingSubject.send(self.avPlayer.rate > 0.0)
+                    self.setPlayingInfo(playing: self.playing)
                     self.monitorPlayback()
                 }
             }
@@ -547,6 +548,9 @@ class Player: NSObject, ObservableObject {
                 }
 
                 if(avPlayer.rate != 0.0) {
+                    // Update Now Playing info periodically during playback
+                    self.setPlayingInfo(playing: true)
+                    
                     let delay = 0.1 * Double(NSEC_PER_SEC)
                     let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
                     DispatchQueue.main.asyncAfter(deadline: time) {
@@ -572,10 +576,17 @@ class Player: NSObject, ObservableObject {
         let fileTitle = self.playingFile?.displayTitle ?? self.fileIdentifierTitle
 
         if let playItem = avPlayer.currentItem {
+            let currentTime = CMTimeGetSeconds(avPlayer.currentTime())
+            let duration = CMTimeGetSeconds(playItem.duration)
+            
             playItem.nowPlayingInfo = [
                 MPMediaItemPropertyTitle : fileTitle ?? "",
                 MPMediaItemPropertyArtist: artist ?? "",
                 MPNowPlayingInfoPropertyPlaybackQueueCount: self.items.count,
+                // Critical timing information for Apple Watch
+                MPNowPlayingInfoPropertyElapsedPlaybackTime: currentTime,
+                MPMediaItemPropertyPlaybackDuration: duration,
+                MPNowPlayingInfoPropertyPlaybackRate: playing ? 1.0 : 0.0,
             ]
             if let image = self.playingImage {
                 playItem.nowPlayingInfo?[MPMediaItemPropertyArtwork] = image
@@ -601,9 +612,6 @@ class Player: NSObject, ObservableObject {
         }
     }
 
-    var seekTimer: Timer?
-    let seekInterval: CMTime = CMTimeMakeWithSeconds(1, preferredTimescale: 600) // 1 second seek intervals
-
     private func sessionRemote(session: MPNowPlayingSession) {
 
         session.remoteCommandCenter.playCommand.addTarget { [weak self] event in
@@ -621,10 +629,35 @@ class Player: NSObject, ObservableObject {
             return .success
         }
 
-        // Set up fast-forward command
-        session.remoteCommandCenter.seekForwardCommand.addTarget(self, action: #selector(handleSeekForwardCommand))
-        // Set up rewind command
-        session.remoteCommandCenter.seekBackwardCommand.addTarget(self, action: #selector(handleSeekBackwardCommand))
+        // Skip forward command (15 seconds)
+        session.remoteCommandCenter.skipForwardCommand.isEnabled = true
+        session.remoteCommandCenter.skipForwardCommand.preferredIntervals = [NSNumber(value: 15)]
+        session.remoteCommandCenter.skipForwardCommand.addTarget { [weak self] event in
+            guard let self = self else { return .commandFailed }
+            let currentTime = self.avPlayer.currentTime()
+            let skipTime = CMTimeAdd(currentTime, CMTime(seconds: 15, preferredTimescale: 1))
+            self.avPlayer.seek(to: skipTime) { success in
+                if success {
+                    self.setPlayingInfo(playing: self.playing)
+                }
+            }
+            return .success
+        }
+        
+        // Skip backward command (15 seconds)
+        session.remoteCommandCenter.skipBackwardCommand.isEnabled = true
+        session.remoteCommandCenter.skipBackwardCommand.preferredIntervals = [NSNumber(value: 15)]
+        session.remoteCommandCenter.skipBackwardCommand.addTarget { [weak self] event in
+            guard let self = self else { return .commandFailed }
+            let currentTime = self.avPlayer.currentTime()
+            let skipTime = CMTimeSubtract(currentTime, CMTime(seconds: 15, preferredTimescale: 1))
+            self.avPlayer.seek(to: skipTime) { success in
+                if success {
+                    self.setPlayingInfo(playing: self.playing)
+                }
+            }
+            return .success
+        }
 
         session.remoteCommandCenter.changePlaybackPositionCommand.addTarget { [weak self] remoteEvent in
 
@@ -634,6 +667,7 @@ class Player: NSObject, ObservableObject {
                      guard let self = self else {return}
                      if success, let r = playerRate {
                          self.avPlayer.rate = r
+                         self.setPlayingInfo(playing: r > 0)
                      }
                  })
                  return .success
@@ -670,31 +704,22 @@ class Player: NSObject, ObservableObject {
         }
 
     }
-
-    @objc private func handleSeekForwardCommand(event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        // Toggle the timer action
-        self.seek(forward: true)
-        return .success
-    }
-
-    @objc private func handleSeekBackwardCommand(event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        // Toggle the timer action
-        self.seek(forward: false)
-        return .success
-    }
-
+    
+    // MARK: - Seeking Methods for PlayerControls
+    
+    var seekTimer: Timer?
+    let seekInterval: CMTime = CMTimeMakeWithSeconds(1, preferredTimescale: 600) // 1 second seek intervals
+    
     func seek(forward: Bool) {
         if seekTimer == nil {
             startSeeking(forward: forward)
-        } else {
-            stopSeeking()
         }
     }
-
+    
     private func startSeeking(forward: Bool) {
         // Invalidate any existing timer
         seekTimer?.invalidate()
-
+        
         // Start a timer to seek forward or backward in increments
         seekTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
             guard let self = self else { return }
@@ -703,7 +728,7 @@ class Player: NSObject, ObservableObject {
             self.avPlayer.seek(to: seekTime)
         }
     }
-
+    
     func stopSeeking() {
         // Invalidate the timer and stop seeking
         seekTimer?.invalidate()
@@ -711,7 +736,6 @@ class Player: NSObject, ObservableObject {
         // Reset playback rate to normal if necessary
         avPlayer.rate = 1.0
     }
-
 
 }
 
