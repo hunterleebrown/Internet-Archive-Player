@@ -220,6 +220,7 @@ struct Home: View {
         })
         .sheet(isPresented: $showHistory) {
             HistoryDrawerView(isPresented: $showHistory)
+                .environmentObject(iaPlayer)
         }
         .sheet(isPresented: $otherPlaylistPresented) {
             if let f = viewModel.archiveFileEntity {

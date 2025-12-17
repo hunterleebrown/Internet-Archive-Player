@@ -315,8 +315,9 @@ class Player: NSObject, ObservableObject {
         }
     }
 
-    public func unsetPlayingFile(entity: ArchiveFileEntity) {
-        if let playingFile = self.playingFile, playingFile == entity{
+    public func unsetPlayingFile<T: ArchiveFileDisplayable>(entity: T) {
+        if let playingFile = self.playingFile,
+           playingFile.onlineUrl?.absoluteString == entity.onlineUrl?.absoluteString {
             self.stopPlaying()
             self.playingFile = nil
         }
@@ -383,7 +384,52 @@ class Player: NSObject, ObservableObject {
             }
         }
 
+        // Create or update history entry
+        self.updatePlayHistory(for: archiveFileEntity)
+
         self.loadAndPlay(archiveFileEntity.workingUrl!)
+    }
+    
+    /// Creates or updates a history entry for the played file
+    private func updatePlayHistory(for archiveFileEntity: ArchiveFileEntity) {
+        let context = PersistenceController.shared.container.viewContext
+        
+        // Check if history entry already exists with matching identifier and name
+        let fetchRequest: NSFetchRequest<HistoryArchiveFileEntity> = HistoryArchiveFileEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "identifier == %@ AND name == %@", 
+                                             archiveFileEntity.identifier ?? "", 
+                                             archiveFileEntity.name ?? "")
+        fetchRequest.fetchLimit = 1
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            
+            if let existingHistory = results.first {
+                // Update existing entry
+                existingHistory.playedAt = Date()
+                existingHistory.playCount += 1
+            } else {
+                // Create new history entry
+                let historyEntity = HistoryArchiveFileEntity(context: context)
+                historyEntity.identifier = archiveFileEntity.identifier
+                historyEntity.name = archiveFileEntity.name
+                historyEntity.title = archiveFileEntity.title
+                historyEntity.artist = archiveFileEntity.artist
+                historyEntity.creator = archiveFileEntity.creator
+                historyEntity.archiveTitle = archiveFileEntity.archiveTitle
+                historyEntity.track = archiveFileEntity.track
+                historyEntity.size = archiveFileEntity.size
+                historyEntity.format = archiveFileEntity.format
+                historyEntity.length = archiveFileEntity.length
+                historyEntity.url = archiveFileEntity.onlineUrl // Use computed onlineUrl
+                historyEntity.playedAt = Date()
+                historyEntity.playCount = 1
+            }
+            
+            PersistenceController.shared.save()
+        } catch {
+            print("Error updating play history: \(error.localizedDescription)")
+        }
     }
 
 
