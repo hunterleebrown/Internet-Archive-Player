@@ -30,4 +30,21 @@ extension HistoryArchiveFileEntity {
         return request
     }
     
+    /// Creates an ArchiveFileEntity from this history item
+    func toArchiveFileEntity(context: NSManagedObjectContext) -> ArchiveFileEntity {
+        let entity = ArchiveFileEntity(context: context)
+        entity.identifier = self.identifier
+        entity.name = self.name
+        entity.title = self.title
+        entity.artist = self.artist
+        entity.creator = self.creator
+        entity.archiveTitle = self.archiveTitle
+        entity.track = self.track
+        entity.size = self.size
+        entity.format = self.format
+        entity.length = self.length
+        entity.url = self.url
+        return entity
+    }
+    
 }

@@ -79,9 +79,12 @@ struct HistoryDrawerView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(viewModel.historyItems, id: \.stableID) { item in
-                            HistoryItemRow(item: item)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
+                            HistoryItemRow(item: item) {
+                                viewModel.playHistoryItem(item, player: iaPlayer)
+                                isPresented = false
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                             
                             if item.stableID != viewModel.historyItems.last?.stableID {
                                 Divider()
@@ -104,7 +107,7 @@ struct HistoryDrawerView: View {
         } message: {
             Text("Are you sure you want to clear all play history? This cannot be undone.")
         }
-        .onAppear {
+        .task {
             viewModel.fetchHistory()
         }
     }
@@ -112,6 +115,7 @@ struct HistoryDrawerView: View {
 
 struct HistoryItemRow: View {
     let item: HistoryArchiveFileEntity
+    let onPlay: () -> Void
     
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -169,9 +173,7 @@ struct HistoryItemRow: View {
             Spacer()
             
             // Play button
-            Button(action: {
-                // TODO: Play this history item
-            }) {
+            Button(action: onPlay) {
                 Image(systemName: "play.circle.fill")
                     .font(.title2)
                     .foregroundColor(.fairyCream)
@@ -179,7 +181,7 @@ struct HistoryItemRow: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            // TODO: Navigate to detail or play item
+            onPlay()
         }
     }
     
@@ -207,6 +209,39 @@ extension HistoryDrawerView {
             } catch {
                 print("Error fetching history: \(error.localizedDescription)")
                 historyItems = []
+            }
+        }
+        
+        func playHistoryItem(_ historyItem: HistoryArchiveFileEntity, player: Player) {
+            guard let mainPlaylist = player.mainPlaylist else { return }
+            guard let playlistFiles = mainPlaylist.files?.array as? [ArchiveFileEntity] else { return }
+            
+            // Check if an ArchiveFileEntity with matching identifier/name already exists in the playlist
+            if let existingEntity = playlistFiles.first(where: { entity in
+                entity.identifier == historyItem.identifier && entity.name == historyItem.name
+            }) {
+                // Play the existing entity
+                player.playFileFromPlaylist(existingEntity, playlist: mainPlaylist)
+            } else {
+                // Create new ArchiveFileEntity from history item
+                let newEntity = historyItem.toArchiveFileEntity(context: context)
+                
+                do {
+                    // Add to playlist
+                    try player.appendPlaylistItem(archiveFileEntity: newEntity)
+                    
+                    // Retrieve the saved entity from the playlist to ensure we use the managed object
+                    if let savedEntity = playlistFiles.first(where: { entity in
+                        entity.identifier == historyItem.identifier && entity.name == historyItem.name
+                    }) {
+                        player.playFileFromPlaylist(savedEntity, playlist: mainPlaylist)
+                    } else {
+                        // Fallback: play the newly created entity
+                        player.playFileFromPlaylist(newEntity, playlist: mainPlaylist)
+                    }
+                } catch {
+                    print("Error adding history item to playlist: \(error.localizedDescription)")
+                }
             }
         }
         
