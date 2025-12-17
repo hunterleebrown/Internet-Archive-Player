@@ -78,20 +78,7 @@ struct TVDetail: View {
                             MetadataRow(label: "Publisher", value: publisher.joined(separator: ", "))
                         }
                     }
-                    
-                    // Collections display
-                    if let collectionArchives = self.viewModel.archiveDoc?.collectionArchives, !collectionArchives.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Collections")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(.white.opacity(0.9))
-                            
-                            // Flowing layout with varying sizes
-                            FlowingCollectionsView(collections: collectionArchives)
-                        }
-                        .padding(.top, 8)
-                    }
-                    
+                                        
                     // Description button
                     if (self.viewModel.archiveDoc?.description) != nil {
                         NavigationLink {
