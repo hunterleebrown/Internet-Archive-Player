@@ -66,9 +66,6 @@ struct TVSearchView: View {
                 .padding(.vertical, 20)
             }
             .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
-            .onChange(of: viewModel.searchText) {
-                viewModel.search(query: viewModel.searchText, collection: nil, loadMore: false)
-            }
         }
     }
 }
@@ -87,10 +84,10 @@ extension TVSearchView {
         @Published var noDataFound: Bool = false
         @Published var archiveError: String?
 
-        @Published var mediaType: Int = 1
+        @Published var mediaType: Int = 0
 
         private var bag = Set<AnyCancellable>()
-
+        private var searchTask: Task<Void, Never>?
 
         public let mediaTypes: [ArchiveMediaType] = [.audio, .movies]
         private var isLoadingMore: Bool = false
@@ -99,29 +96,36 @@ extension TVSearchView {
         private var rows = 50
         private var totalPages = 0
 
-        var searchStarted: Bool = false
-
         let service: PlayerArchiveService
 
         init() {
             self.service = PlayerArchiveService()
 
-            //            $searchText
-            //                .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
-            //                .sink(receiveValue: { [weak self] value in
-            //                    self?.searchText = value
-            //                })
-            //                .store(in: &bag)
+            $searchText
+                .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
+                .removeDuplicates()
+                .sink(receiveValue: { [weak self] value in
+                    guard let self = self else { return }
+                    self.search(query: value, collection: nil, loadMore: false)
+                })
+                .store(in: &bag)
         }
 
         func search(query: String, collection:String? = nil, loadMore: Bool) {
-            guard !searchText.isEmpty, searchText.count > 2, !searchStarted  else { return }
+            guard !query.isEmpty, query.count > 2 else { 
+                self.items.removeAll()
+                return 
+            }
+            
+            // Cancel any existing search
+            searchTask?.cancel()
+            
             self.isSearching = true
             self.noDataFound = false
             self.isLoadingMore = loadMore
-            self.searchStarted = true
             self.archiveError = nil
-            Task { @MainActor in
+            
+            searchTask = Task { @MainActor in
                 do {
 
                     if !self.isLoadingMore {
@@ -130,10 +134,10 @@ extension TVSearchView {
                         self.items.removeAll()
                     }
 
-                    let format: ArchiveFileFormat? = self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
-                    let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
-                    print(query)
-                    let data = try await self.service.searchAsync(query: query, mediaTypes: [searchMediaType], rows: self.rows, page: self.page, format: format, collection: collection)
+//                    let format: ArchiveFileFormat? = .mp3 //self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
+//                    let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
+                    print("Searching for: \(query)")
+                    let data = try await self.service.searchAsync(query: query, mediaTypes: self.mediaTypes, rows: self.rows, page: self.page, format: nil, collection: collection)
 
                     self.numberOfResults = data.response.numFound
                     self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
@@ -148,7 +152,6 @@ extension TVSearchView {
                     }
 
                     self.isSearching = false
-                    self.searchStarted = false
 
                     if self.items.count == 0 {
                         throw ArchiveServiceError.nodata
@@ -159,8 +162,10 @@ extension TVSearchView {
                         self.archiveError = error.description
                         self.noDataFound = true
                         self.isSearching = false
-                        self.searchStarted = false
                     }
+                } catch {
+                    // Handle cancellation
+                    self.isSearching = false
                 }
             }
         }

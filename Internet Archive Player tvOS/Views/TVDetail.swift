@@ -22,157 +22,193 @@ struct TVDetail: View {
     @State var imageUrl: URL?
 
     var body: some View {
-        NavigationView {
-            VStack(alignment: .leading, spacing:10) {
-                HStack(alignment: .center, spacing: 50) {
-
-                    VStack(alignment: .leading) {
-                        Text(doc.archiveTitle ?? "")
-                            .font(.largeTitle)
+        VStack(alignment: .leading, spacing: 0) {
+            // Hero section with artwork and title (fixed at top)
+            HStack(alignment: .top, spacing: 60) {
+                // Album artwork
+                if let imageUrl = imageUrl {
+                    AsyncImage(url: imageUrl) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 400, height: 400)
+                            .cornerRadius(20)
+                            .shadow(color: .black.opacity(0.8), radius: 30, x: 0, y: 15)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 400, height: 400)
+                            .overlay(
+                                ProgressView()
+                                    .tint(.white)
+                                    .scaleEffect(2)
+                            )
+                    }
+                } else {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 400, height: 400)
+                        .overlay(
+                            Image(systemName: "music.note")
+                                .font(.system(size: 120))
+                                .foregroundColor(.white.opacity(0.3))
+                        )
+                }
+                
+                // Title and metadata
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(doc.archiveTitle ?? "Untitled")
+                            .font(.system(size: 48, weight: .bold))
+                            .foregroundColor(.white)
                             .lineLimit(3)
-                            .multilineTextAlignment(.leading)
-                            .frame(alignment: .leading)
-
+                            .fixedSize(horizontal: false, vertical: true)
+                        
                         if let artist = self.viewModel.archiveDoc?.artist ?? self.viewModel.archiveDoc?.creator?.joined(separator: ", "), !artist.isEmpty {
                             Text(artist)
-                                .font(.caption)
-                                .lineLimit(10)
-                                .multilineTextAlignment(.leading)
-                                .frame(alignment: .leading)
+                                .font(.system(size: 24, weight: .medium))
+                                .foregroundColor(.white.opacity(0.9))
+                                .lineLimit(2)
                         }
                     }
-                    .padding(30)
-                    .shadow(radius: 10)
-//                    .background(Color.black)
-                    .cornerRadius(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-
-                HStack(alignment: .top, spacing: 100) {
-                    AsyncImage(url: imageUrl, transaction: Transaction(animation: .spring())) { phase in
-                        switch phase {
-                        case .empty:
-                            Color.clear
-
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .clipped()
-                                .cornerRadius(10)
-
-                        case .failure(_):
-                            EmptyView()
-
-                        @unknown default:
-                            EmptyView()
+                    
+                    // Additional metadata
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let publisher = doc.publisher, !publisher.isEmpty {
+                            MetadataRow(label: "Publisher", value: publisher.joined(separator: ", "))
                         }
                     }
-                    .frame(width:800, alignment: .leading)
-
-                    VStack(alignment: .leading) {
-
-                        if (self.viewModel.archiveDoc?.description) != nil {
-                            NavigationLink {
-                                if let goodDoc = viewModel.archiveDoc {
-                                    DetailDescription(doc: goodDoc)
-                                }
-                            } label: {
-                                Text("Description")
+                    
+                    // Collections display
+                    if let collectionArchives = self.viewModel.archiveDoc?.collectionArchives, !collectionArchives.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Collections")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.9))
+                            
+                            // Flowing layout with varying sizes
+                            FlowingCollectionsView(collections: collectionArchives)
+                        }
+                        .padding(.top, 8)
+                    }
+                    
+                    // Description button
+                    if (self.viewModel.archiveDoc?.description) != nil {
+                        NavigationLink {
+                            if let goodDoc = viewModel.archiveDoc {
+                                DetailDescription(doc: goodDoc)
                             }
-                        }
-
-                        Divider()
-
-                        if self.viewModel.movieFiles.count > 0 {
-                            Text("Files")
-                                .font(.subheadline)
-                                .bold()
-                                .foregroundColor(.white)
-                                .padding(5)
-
-                            List {
-                                ForEach(self.viewModel.movieFiles, id: \.self) { file in
-
-                                    NavigationLink {
-                                        let player = AVPlayer(url: file.url!)
-
-                                        VideoPlayer(player: player)
-                                            .ignoresSafeArea()
-                                            .onAppear() {
-                                                player.play()
-                                            }
-                                            .onDisappear() {
-                                                player.pause()
-                                            }
-                                    } label: {
-                                        Text(file.displayTitle)
-                                            .padding(.leading, 5.0)
-                                            .padding(.trailing, 5.0)
-                                            .frame(alignment: .leading)
-                                            .multilineTextAlignment(.leading)
-                                            .foregroundStyle(Color.fairyCream)
-
-                                    }
-                                    .listRowBackground(Color.fairyRed)
-
-                                }
+                        } label: {
+                            HStack {
+                                Image(systemName: "text.alignleft")
+                                Text("Read Description")
                             }
-                            .cornerRadius(10)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 32)
+                            .padding(.vertical, 16)
+                            .cornerRadius(12)
                         }
                     }
                 }
-                .frame(height: 500)
-
-                if let identifier = doc.identifier {
-                    HStack(alignment: .top, spacing: 5) {
-                        Text("Identifier:")
-                            .font(.caption)
-                            .bold()
-                        Text(identifier)
-                            .font(.caption)
-                    }
-                }
-
-                if let publisher = doc.publisher, !publisher.isEmpty {
-                    HStack(alignment: .top, spacing: 5) {
-                        Text("Publisher:")
-                            .font(.caption)
-                            .bold()
-                        Text(publisher.joined(separator: ", "))
-                            .font(.caption)
-                            .multilineTextAlignment(.leading)
-                    }
-                }
-
-                HStack(alignment: .top, spacing: 5) {
-                    Text("Collection:")
-                        .font(.caption)
-                        .bold()
-                    Text(doc.collection.joined(separator: ", "))
-                        .font(.caption)
-                        .multilineTextAlignment(.leading)
-                }
-
+                
                 Spacer()
             }
-            .background(
-//                LinearGradient(
-//                    gradient: Gradient(
-//                        stops: [
-//                            .init(color: .fairyRed, location: 0),
-//                            .init(color: .fairyRed.opacity(0.75), location: 0.33),
-//                            .init(color: .fairyRed.opacity(0.5), location: 0.66),
-//                            .init(color: .fairyRed.opacity(0.25), location: 1),
-//                        ]
-//                    ),
-//                    startPoint: .top,
-//                    endPoint: .bottom
-//                )
-//                .edgesIgnoringSafeArea(.all)
-
-            )
-            .frame(alignment: .topLeading)
+            .padding(.horizontal, 60)
+            .padding(.top, 60)
+            .padding(.bottom, 40)
+            
+            // Files section (scrollable lists)
+            if self.viewModel.movieFiles.count > 0 || self.viewModel.audioFiles.count > 0 {
+                HStack(alignment: .top, spacing: 40) {
+                    // Video files list (left side)
+                    if self.viewModel.movieFiles.count > 0 {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Videos")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            List {
+                                ForEach(self.viewModel.movieFiles, id: \.self) { file in
+                                    NavigationLink {
+                                        VideoPlayerWithPlaceholder(
+                                            videoURL: file.url!,
+                                            placeholderImageURL: imageUrl
+                                        )
+                                    } label: {
+                                        FileRow(file: file)
+                                    }
+                                }
+                            }
+                            .listStyle(.plain)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    
+                    // Audio files list (right side)
+                    if self.viewModel.audioFiles.count > 0 {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Audio")
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            List {
+                                ForEach(self.viewModel.audioFiles, id: \.self) { file in
+                                    NavigationLink {
+                                        AudioPlayerView(
+                                            audioFile: file,
+                                            artworkURL: imageUrl
+                                        )
+                                    } label: {
+                                        FileRow(file: file)
+                                    }
+                                }
+                            }
+                            .listStyle(.plain)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                .padding(.horizontal, 60)
+            }
+            
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background {
+            ZStack {
+                // Base gradient
+                LinearGradient(
+                    colors: [Color.black, Color.gray.opacity(0.3)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                
+                // Blurred background image
+                if let imageUrl = imageUrl {
+                    GeometryReader { geometry in
+                        AsyncImage(url: imageUrl) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+                                .clipped()
+                                .blur(radius: 30)
+                                .opacity(0.4)
+                        } placeholder: {
+                            Color.clear
+                        }
+                    }
+                }
+                
+                // Dark overlay for text readability
+                LinearGradient(
+                    colors: [Color.black.opacity(0.7), Color.black.opacity(0.5)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            .ignoresSafeArea()
         }
         .onReceive(TVDetail.backgroundPass) { url in
             withAnimation(.linear(duration: 0.3)) {
@@ -184,6 +220,183 @@ struct TVDetail: View {
                 self.viewModel.getArchiveDoc(identifier: identifier)
             }
         }
+    }
+}
+
+// MARK: - Supporting Views
+struct FlowingCollectionsView: View {
+    let collections: [Archive]
+    
+    var body: some View {
+        FlowLayout(spacing: 8) {
+            ForEach(Array(collections.prefix(12).enumerated()), id: \.element.id) { index, archive in
+                if let metadata = archive.metadata {
+                    HStack(spacing: 8) {
+                        // Collection thumbnail
+                        AsyncImage(url: metadata.iconUrl) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 50, height: 50)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        } placeholder: {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 50, height: 50)
+                                .overlay(
+                                    Image(systemName: "folder")
+                                        .font(.caption)
+                                        .opacity(0.5)
+                                )
+                        }
+                        
+                        // Collection title
+                        Text(metadata.archiveTitle ?? "Collection")
+                            .font(.caption)
+                            .opacity(0.9)
+                            .lineLimit(1)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(10)
+                }
+            }
+        }
+    }
+}
+
+// Custom flow layout that wraps horizontally
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = FlowResult(
+            in: proposal.replacingUnspecifiedDimensions().width,
+            subviews: subviews,
+            spacing: spacing
+        )
+        return result.size
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = FlowResult(
+            in: bounds.width,
+            subviews: subviews,
+            spacing: spacing
+        )
+        for (index, subview) in subviews.enumerated() {
+            let position = result.positions[index]
+            subview.place(
+                at: CGPoint(x: bounds.minX + position.x, y: bounds.minY + position.y),
+                proposal: .unspecified
+            )
+        }
+    }
+    
+    struct FlowResult {
+        var size: CGSize = .zero
+        var positions: [CGPoint] = []
+        
+        init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
+            var currentX: CGFloat = 0
+            var currentY: CGFloat = 0
+            var lineHeight: CGFloat = 0
+            
+            for subview in subviews {
+                let size = subview.sizeThatFits(.unspecified)
+                
+                if currentX + size.width > maxWidth && currentX > 0 {
+                    // Move to next line
+                    currentX = 0
+                    currentY += lineHeight + spacing
+                    lineHeight = 0
+                }
+                
+                positions.append(CGPoint(x: currentX, y: currentY))
+                lineHeight = max(lineHeight, size.height)
+                currentX += size.width + spacing
+            }
+            
+            self.size = CGSize(width: maxWidth, height: currentY + lineHeight)
+        }
+    }
+}
+
+private struct InfoBadge: View {
+    let icon: String
+    let text: String
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption)
+            Text(text)
+                .font(.caption)
+                .lineLimit(1)
+        }
+        .foregroundColor(.white.opacity(0.9))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.white.opacity(0.15))
+        .cornerRadius(8)
+    }
+}
+
+private struct MetadataRow: View {
+    let label: String
+    let value: String
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(label + ":")
+                .font(.callout)
+                .fontWeight(.semibold)
+                .foregroundColor(.white.opacity(0.7))
+            
+            Text(value)
+                .font(.callout)
+                .foregroundColor(.white.opacity(0.9))
+                .lineLimit(2)
+        }
+    }
+}
+
+private struct FileRow: View {
+    let file: ArchiveFile
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Icon
+            Image(systemName: file.isVideo ? "play.rectangle.fill" : "music.note")
+                .font(.title2)
+                .frame(width: 50, height: 50)
+                .background(Color.white.opacity(0.15))
+                .cornerRadius(10)
+            
+            // File info
+            VStack(alignment: .leading, spacing: 4) {
+                Text(file.displayTitle)
+                    .font(.body)
+                    .lineLimit(2)
+                
+                HStack(spacing: 8) {
+                    Text(file.isVideo ? "Video" : "Audio")
+                        .font(.caption)
+                        .textCase(.uppercase)
+                    
+                    if let length = file.length, !length.isEmpty {
+                        Text("•")
+                        Text(length)
+                            .font(.caption)
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        .padding(.vertical, 8)
+        .listRowBackground(Color.white.opacity(0.05))
     }
 }
 
@@ -290,3 +503,307 @@ extension TVDetail {
     }
 
 }
+// MARK: - Video Player with Placeholder
+struct VideoPlayerWithPlaceholder: View {
+    let videoURL: URL
+    let placeholderImageURL: URL?
+    
+    @State private var player: AVPlayer?
+    @State private var isLoading = true
+    
+    var body: some View {
+        ZStack {
+            // Placeholder while loading
+            if isLoading {
+                ZStack {
+                    Color.black
+                    
+                    if let imageURL = placeholderImageURL {
+                        AsyncImage(url: imageURL) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .opacity(0.5)
+                        } placeholder: {
+                            ProgressView()
+                                .tint(.white)
+                        }
+                    } else {
+                        ProgressView()
+                            .tint(.white)
+                    }
+                    
+                    VStack(spacing: 12) {
+                        Spacer()
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(1.5)
+                        Text("Loading video...")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.8))
+                        Spacer()
+                    }
+                }
+                .ignoresSafeArea()
+            }
+            
+            // Video player
+            if let player = player {
+                VideoPlayer(player: player)
+                    .opacity(isLoading ? 0 : 1)
+                    .ignoresSafeArea()
+            }
+        }
+        .onAppear {
+            setupPlayer()
+        }
+        .onDisappear {
+            player?.pause()
+            player = nil
+        }
+    }
+    
+    private func setupPlayer() {
+        let playerItem = AVPlayerItem(url: videoURL)
+        let newPlayer = AVPlayer(playerItem: playerItem)
+        
+        // Observe when the player is ready to play
+        NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemNewAccessLogEntry,
+            object: playerItem,
+            queue: .main
+        ) { _ in
+            withAnimation {
+                isLoading = false
+            }
+        }
+        
+        // Also check player status
+        playerItem.publisher(for: \.status)
+            .sink { status in
+                if status == .readyToPlay {
+                    withAnimation {
+                        isLoading = false
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        
+        self.player = newPlayer
+        newPlayer.play()
+    }
+    
+    @State private var cancellables = Set<AnyCancellable>()
+}
+
+// MARK: - Audio Player View
+struct AudioPlayerView: View {
+    let audioFile: ArchiveFile
+    let artworkURL: URL?
+    
+    @State private var player: AVPlayer?
+    @State private var isPlaying = false
+    @State private var currentTime: TimeInterval = 0
+    @State private var duration: TimeInterval = 0
+    @State private var timeObserverToken: Any?
+    
+    var body: some View {
+        ZStack {
+            // Background gradient
+            LinearGradient(
+                colors: [Color.black, Color.black.opacity(0.8)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 40) {
+                Spacer()
+                
+                // Album artwork
+                if let imageURL = artworkURL {
+                    AsyncImage(url: imageURL) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 600, height: 600)
+                            .cornerRadius(20)
+                            .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 600, height: 600)
+                            .overlay(
+                                ProgressView()
+                                    .tint(.white)
+                            )
+                    }
+                } else {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 600, height: 600)
+                        .overlay(
+                            Image(systemName: "music.note")
+                                .font(.system(size: 120))
+                                .foregroundColor(.white.opacity(0.5))
+                        )
+                }
+                
+                // Track info
+                VStack(spacing: 12) {
+                    Text(audioFile.displayTitle)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                    
+                    if let artist = audioFile.artist ?? audioFile.creator?.joined(separator: ", ") {
+                        Text(artist)
+                            .font(.title3)
+                            .foregroundColor(.white.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .padding(.horizontal, 60)
+                
+                // Time progress bar
+                VStack(spacing: 8) {
+                    ProgressView(value: currentTime, total: max(duration, 0.1))
+                        .progressViewStyle(.linear)
+                        .tint(.white)
+                        .frame(width: 800)
+                    
+                    HStack {
+                        Text(formatTime(currentTime))
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.7))
+                        
+                        Spacer()
+                        
+                        Text(formatTime(duration))
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(width: 800)
+                }
+                
+                // Play/Pause button
+                Button(action: togglePlayPause) {
+                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                        .font(.system(size: 80))
+                        .foregroundColor(.white)
+                }
+                .buttonStyle(.plain)
+                
+                Spacer()
+            }
+        }
+        .onAppear {
+            setupPlayer()
+        }
+        .onDisappear {
+            cleanupPlayer()
+        }
+    }
+    
+    private func setupPlayer() {
+        guard let url = audioFile.url else { return }
+        
+        let playerItem = AVPlayerItem(url: url)
+        let newPlayer = AVPlayer(playerItem: playerItem)
+        
+        // Observe player status to get duration
+        playerItem.publisher(for: \.status)
+            .sink { status in
+                if status == .readyToPlay {
+                    let durationSeconds = playerItem.duration.seconds
+                    if !durationSeconds.isNaN && durationSeconds.isFinite {
+                        duration = durationSeconds
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        
+        // Add periodic time observer
+        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        timeObserverToken = newPlayer.addPeriodicTimeObserver(forInterval: interval, queue: .main) { time in
+            let timeSeconds = time.seconds
+            if !timeSeconds.isNaN && timeSeconds.isFinite {
+                currentTime = timeSeconds
+            }
+        }
+        
+        self.player = newPlayer
+        newPlayer.play()
+        isPlaying = true
+    }
+    
+    private func cleanupPlayer() {
+        if let token = timeObserverToken {
+            player?.removeTimeObserver(token)
+            timeObserverToken = nil
+        }
+        player?.pause()
+        player = nil
+        cancellables.removeAll()
+    }
+    
+    private func togglePlayPause() {
+        guard let player = player else { return }
+        
+        if isPlaying {
+            player.pause()
+        } else {
+            player.play()
+        }
+        isPlaying.toggle()
+    }
+    
+    private func formatTime(_ time: TimeInterval) -> String {
+        guard time.isFinite && !time.isNaN else { return "0:00" }
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+    
+    @State private var cancellables = Set<AnyCancellable>()
+}
+
+// MARK: - Player Time Observer (No longer needed, can be removed)
+class PlayerTimeObserver: ObservableObject {
+    var player: AVPlayer?
+    var timeObserver: Any?
+    var onTimeUpdate: ((TimeInterval, TimeInterval) -> Void)?
+    
+    init() {
+        startObserving()
+    }
+    
+    func startObserving() {
+        let interval = CMTime(seconds: 0.5, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
+            guard let self = self,
+                  let player = self.player else { return }
+            
+            let currentTime = time.seconds
+            let duration = player.currentItem?.duration.seconds ?? 0
+            
+            if !currentTime.isNaN && !duration.isNaN {
+                self.onTimeUpdate?(currentTime, duration)
+            }
+        }
+    }
+    
+    func stopObserving() {
+        if let timeObserver = timeObserver {
+            player?.removeTimeObserver(timeObserver)
+            self.timeObserver = nil
+        }
+    }
+    
+    deinit {
+        stopObserving()
+    }
+}
+

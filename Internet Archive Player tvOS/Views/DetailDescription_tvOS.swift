@@ -11,7 +11,6 @@ import iaAPI
 
 struct DetailDescription: View {
 
-    @Environment(\.dismiss) private var dismiss
     var doc: ArchiveMetaData
     
     // Helper function to scale attributed string fonts for tvOS
@@ -41,142 +40,104 @@ struct DetailDescription: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack(alignment: .top) {
-                Text(doc.archiveTitle ?? "Archive Details")
-                    .font(.title2)
-                    .foregroundColor(.fairyRed)
-                    .bold()
-                    .multilineTextAlignment(.leading)
-                
-                Spacer()
-                
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        dismiss()
+        ScrollView(.vertical, showsIndicators: true) {
+            VStack(alignment: .leading, spacing: 32) {
+                // Header section with icon and title
+                HStack(alignment: .top, spacing: 24) {
+                    AsyncImage(url: doc.iconUrl) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 150, height: 150)
+                            .cornerRadius(12)
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 150, height: 150)
                     }
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.fairyRed)
-                        .font(.title3)
-                }
-            }
-            .padding(.horizontal, 40)
-            .padding(.top, 40)
-            .padding(.bottom, 20)
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Icon and basic info
-                    HStack(alignment: .top, spacing: 20) {
-                        AsyncImage(
-                            url: doc.iconUrl,
-                            content: { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(maxWidth: 100, maxHeight: 100)
-                                    .background(Color.black)
-                            },
-                            placeholder: {
-                                Color(.black)
-                                    .frame(maxWidth: 100, maxHeight: 100)
-                            })
-                        .cornerRadius(8)
-                        .frame(width: 100, height: 100)
-
-                        VStack(alignment: .leading, spacing: 10) {
-                            if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
-                                Text(artist)
-                                    .foregroundColor(.primary)
-                                    .font(.title3)
-                                    .bold()
-                                    .multilineTextAlignment(.leading)
-                            }
-                            
-                            if let identifier = doc.identifier {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Identifier")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .bold()
-                                    Text(identifier)
-                                        .font(.body)
-                                        .foregroundColor(.primary)
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 40)
                     
-                    // Metadata section
-                    VStack(alignment: .leading, spacing: 16) {
-                        // Collections
-                        if !doc.collection.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Collections")
-                                    .font(.headline)
-                                    .foregroundColor(.secondary)
-                                
-                                Text(doc.collection.joined(separator: ", "))
-                                    .font(.body)
-                                    .foregroundColor(.primary)
-                            }
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(doc.archiveTitle ?? "Archive Details")
+                            .font(.system(size: 36, weight: .bold))
+                            .multilineTextAlignment(.leading)
+                        
+                        if let artist = doc.artist ?? doc.creator?.joined(separator: ", "), !artist.isEmpty {
+                            Text(artist)
+                                .font(.system(size: 24, weight: .medium))
+                                .opacity(0.9)
                         }
                         
-                        if let publisher = doc.publisher, !publisher.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Publisher")
-                                    .font(.headline)
-                                    .foregroundColor(.secondary)
-                                
-                                Text(publisher.joined(separator: ", "))
-                                    .font(.body)
-                                    .foregroundColor(.primary)
-                            }
-                        }
-
-                        if let uploader = doc.uploader {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Uploader")
-                                    .font(.headline)
-                                    .foregroundColor(.secondary)
-                                
-                                Text(uploader)
-                                    .font(.body)
-                                    .foregroundColor(.primary)
-                            }
+                        if let identifier = doc.identifier {
+                            Text(identifier)
+                                .font(.caption)
+                                .opacity(0.7)
                         }
                     }
-                    .padding(.horizontal, 40)
                     
-                    // Description section
-                    if !doc.description.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Description")
-                                .font(.title3)
-                                .foregroundColor(.fairyRed)
-                                .bold()
+                    Spacer()
+                }
+                
+                // Metadata section
+                VStack(alignment: .leading, spacing: 20) {
+                    if let publisher = doc.publisher, !publisher.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Publisher")
+                                .font(.headline)
+                                .opacity(0.7)
                             
+                            Text(publisher.joined(separator: ", "))
+                                .font(.body)
+                        }
+                    }
+                    
+                    if let uploader = doc.uploader {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Uploader")
+                                .font(.headline)
+                                .opacity(0.7)
+                            
+                            Text(uploader)
+                                .font(.body)
+                        }
+                    }
+                }
+                
+                // Collections with images (flowing layout)
+                if !doc.collectionArchives.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Collections")
+                            .font(.system(size: 24, weight: .semibold))
+                            .opacity(0.9)
+                        
+                        FlowingCollectionsView(collections: doc.collectionArchives)
+                    }
+                }
+                
+                // Description section
+                if !doc.description.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Description")
+                            .font(.system(size: 24, weight: .semibold))
+                        
+                        // Wrap description in a focusable container for tvOS scrolling
+                        Group {
                             if let att = doc.description.joined(separator: "").html2AttributedString {
                                 Text(AttributedString(scaledAttributedStringForTVOS(att)))
                                     .font(.body)
-                                    .foregroundColor(.primary)
                             } else {
                                 Text(doc.description.joined(separator: "\n"))
                                     .font(.body)
-                                    .foregroundColor(.primary)
                             }
                         }
-                        .padding(.horizontal, 40)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .focusable() // Makes the text focusable so users can scroll through it
                     }
                 }
-                .padding(.top, 20)
-                .padding(.bottom, 40)
             }
+            .padding(60)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.darkGray).opacity(0.3))
     }
 }
+
 
