@@ -20,8 +20,94 @@ struct TVDetail: View {
     static var backgroundPass = PassthroughSubject<URL, Never>()
 
     @State var imageUrl: URL?
+    @State var isLoading = true
 
     var body: some View {
+        ZStack {
+            if isLoading {
+                loadingView
+            } else {
+                contentView
+            }
+        }
+        .onReceive(TVDetail.backgroundPass) { url in
+            withAnimation(.linear(duration: 0.3)) {
+                imageUrl = url
+            }
+        }
+        .onAppear() {
+            if let identifier = doc.identifier {
+                self.viewModel.getArchiveDoc(identifier: identifier)
+            }
+        }
+        .onChange(of: viewModel.archiveDoc) { _, newValue in
+            if newValue != nil {
+                // Add a small delay to ensure smooth transition
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        isLoading = false
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Loading View
+    private var loadingView: some View {
+        ZStack {
+            // Background gradient
+            LinearGradient(
+                colors: [Color.black, Color.gray.opacity(0.3)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 40) {
+                Spacer()
+                
+                // Animated icon with pulsing effect
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.1))
+                        .frame(width: 200, height: 200)
+                    
+                    Circle()
+                        .fill(Color.white.opacity(0.05))
+                        .frame(width: 250, height: 250)
+                    
+                    Image(systemName: "archivebox")
+                        .font(.system(size: 80))
+                        .foregroundColor(.white)
+                        .symbolEffect(.pulse, options: .repeating)
+                }
+                
+                VStack(spacing: 16) {
+                    Text("Loading Archive")
+                        .font(.system(size: 42, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text("Fetching details from the Internet Archive...")
+                        .font(.system(size: 24))
+                        .foregroundColor(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 60)
+                    
+                    // Loading indicator
+                    ProgressView()
+                        .tint(.white)
+                        .scaleEffect(1.5)
+                        .padding(.top, 20)
+                }
+                
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+    
+    // MARK: - Content View
+    private var contentView: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Hero section with artwork and title (fixed at top)
             HStack(alignment: .top, spacing: 60) {
@@ -197,16 +283,6 @@ struct TVDetail: View {
                 )
             }
             .ignoresSafeArea()
-        }
-        .onReceive(TVDetail.backgroundPass) { url in
-            withAnimation(.linear(duration: 0.3)) {
-                imageUrl = url
-            }
-        }
-        .onAppear() {
-            if let identifier = doc.identifier {
-                self.viewModel.getArchiveDoc(identifier: identifier)
-            }
         }
     }
 }
