@@ -70,6 +70,14 @@ struct VideoPlayerWithPlaceholder: View {
     
     private func setupPlayer() {
         let playerItem = AVPlayerItem(url: videoURL)
+        
+        // Option #2: Increase buffer duration to preload more video data
+        playerItem.preferredForwardBufferDuration = 30.0 // Load 30 seconds ahead
+        
+        // Option #5: Configure player item for better buffering
+        playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = true
+        playerItem.preferredPeakBitRate = 0 // Let AVPlayer choose best quality based on network
+        
         let newPlayer = AVPlayer(playerItem: playerItem)
         
         // Observe when the player is ready to play
