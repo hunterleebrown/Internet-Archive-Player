@@ -13,41 +13,58 @@ import Combine
 struct TVSearchView: View {
     @StateObject var viewModel = TVSearchView.ViewModel()
 
-    // Adaptive columns that adjust based on available space
+    // Single row for horizontal scrolling
     let columns = [
-        GridItem(.adaptive(minimum: 300, maximum: 400), spacing: 10)
+        GridItem(.fixed(400), spacing: 10)
     ]
 
     var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .top) {
                 if viewModel.items.isEmpty && !viewModel.isSearching {
                     // Empty state - matches iOS aesthetic
                     VStack(spacing: 30) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 120, weight: .thin))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.4), .white.opacity(0.2)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .symbolEffect(.pulse, options: .repeating)
-                        
                         VStack(spacing: 12) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 120, weight: .bold))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [Color.fairyRed.opacity(1.0), Color.fairyRed.opacity(0.4)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .symbolEffect(.pulse, options: .repeating)
+                                .padding(.bottom, 10)
+                            
                             Text("Search the Internet Archive")
                                 .font(.title2)
                                 .fontWeight(.medium)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.white.opacity(0.9))
+                                .multilineTextAlignment(.center)
                             
                             if !viewModel.noDataFound {
                                 Text("Discover audio and video from the archive")
                                     .font(.body)
-                                    .foregroundColor(.white.opacity(0.5))
+                                    .foregroundColor(.white.opacity(0.6))
                                     .multilineTextAlignment(.center)
                             }
                         }
+                        .padding(.horizontal, 50)
+                        .padding(.vertical, 40)
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.black.opacity(0.6),
+                                            Color.black.opacity(0.4)
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                        )
                         
                         if viewModel.noDataFound {
                             VStack(spacing: 8) {
@@ -104,8 +121,8 @@ struct TVSearchView: View {
                     }
                     .transition(.opacity)
                 } else {
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 10) {
+                    ScrollView(.horizontal) {
+                        LazyHGrid(rows: columns, spacing: 10) {
                             ForEach(Array(viewModel.items.enumerated()), id: \.element) { index, doc in
                                 NavigationLink(destination: TVDetail(doc: doc)) {
                                     ItemCard(doc: doc)
@@ -141,26 +158,28 @@ struct ItemCard: View {
                 Text(doc.archiveTitle ?? "")
                     .font(.caption)
                     .fontWeight(.semibold)
+                    .foregroundColor(.white)
                     .multilineTextAlignment(.leading)
                     .lineLimit(2)
                 
                 Text(doc.formatDateString() ?? "")
                     .font(.system(size: 20))
                     .foregroundColor(.white.opacity(0.8))
+                
+                // Media type indicator
+                HStack(spacing: 6) {
+                    Image(systemName: mediaTypeIcon(for: doc.mediatype))
+                        .font(.system(size: 20))
+                    Text(mediaTypeLabel(for: doc.mediatype))
+                        .font(.system(size: 20))
+                }
+                .foregroundColor(.white.opacity(0.7))
+                .padding(.top, 4)
             }
-            .foregroundColor(.white)
             .padding(15)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                LinearGradient(
-                    colors: [
-                        Color.black.opacity(0.8),
-                        Color.black.opacity(0.4),
-                        Color.clear
-                    ],
-                    startPoint: .bottom,
-                    endPoint: .top
-                )
+                Color.black.opacity(0.7)
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
@@ -193,7 +212,47 @@ struct ItemCard: View {
         )
         .clipped()
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.fairyRed.opacity(1.0), lineWidth: isFocused ? 8 : 0)
+                .animation(.easeInOut(duration: 0.2), value: isFocused)
+        )
         .shadow(color: isFocused ? .white.opacity(0.3) : .clear, radius: 20, x: 0, y: 10)
+    }
+    
+    // Helper functions for media type display
+    private func mediaTypeIcon(for type: ArchiveMediaType) -> String {
+        switch type {
+        case .audio, .etree:
+            return "music.note"
+        case .movies:
+            return "film"
+        case .image:
+            return "photo"
+        case .texts:
+            return "book"
+        case .collection:
+            return "folder"
+        case .other:
+            return "questionmark.circle"
+        }
+    }
+    
+    private func mediaTypeLabel(for type: ArchiveMediaType) -> String {
+        switch type {
+        case .audio, .etree:
+            return "Audio"
+        case .movies:
+            return "Video"
+        case .image:
+            return "Image"
+        case .texts:
+            return "Text"
+        case .collection:
+            return "Collection"
+        case .other:
+            return "Media"
+        }
     }
 }
 
