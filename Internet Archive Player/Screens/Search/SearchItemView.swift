@@ -38,7 +38,7 @@ struct SearchItemView<Item: SearchItemDisplayable>: View {
                         .multilineTextAlignment(.leading)
                         .lineLimit(3)
                     
-                    Image(systemName: item.mediatypeDisplay == .audio || item.mediatypeDisplay == .etree ? "hifispeaker" : item.mediatypeDisplay == .movies ? "video" : "questionmark")
+                    Image(systemName: mediaTypeIconName(for: item.mediatypeDisplay))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -75,9 +75,17 @@ struct SearchItemView<Item: SearchItemDisplayable>: View {
         .padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(UIColor.systemGray6).opacity(0.5))
+                .fill(backgroundFillColor)
         )
         .frame(maxWidth: .infinity)
+    }
+    
+    private var backgroundFillColor: Color {
+        if item.mediatypeDisplay == .collection {
+            return Color(UIColor.systemGray3).opacity(0.85)
+        } else {
+            return Color(UIColor.systemGray6).opacity(0.5)
+        }
     }
 
     private func getCreators() -> String {
@@ -90,5 +98,21 @@ struct SearchItemView<Item: SearchItemDisplayable>: View {
         }
 
         return ""
+    }
+
+    private func mediaTypeIconName(for type: ArchiveMediaType?) -> String {
+
+        guard let type else { return "questionmark" }
+
+        switch type {
+        case .audio, .etree:
+            return "hifispeaker"
+        case .movies:
+            return "video"
+        case .collection:
+            return "tray.2"
+        default:
+            return "questionmark"
+        }
     }
 }

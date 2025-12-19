@@ -178,7 +178,7 @@ extension SearchView {
 
         @Published var identifier: String?
 
-        public let mediaTypes: [ArchiveMediaType] = [.audio, .movies]
+        public let mediaTypes: [ArchiveMediaType] = [.audio, .movies, .collection]
         private var isLoadingMore: Bool = false
         private var page: Int = 1
         private var numberOfResults = 0
@@ -215,10 +215,10 @@ extension SearchView {
                         self.items.removeAll()
                     }
 
-                    let format: ArchiveFileFormat? = self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
+                    let format: ArchiveFileFormat? = nil //self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
                     let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
                     print(query)
-                    let data = try await self.service.searchAsync(query: query, mediaTypes: [searchMediaType], rows: self.rows, page: self.page, format: format, collection: collection)
+                    let data = try await self.service.searchAsync(query: query, mediaTypes: self.mediaTypes, rows: self.rows, page: self.page, format: format, collection: collection)
 
                     self.numberOfResults = data.response.numFound
                     self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
