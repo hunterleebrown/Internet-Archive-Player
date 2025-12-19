@@ -207,15 +207,14 @@ private struct FullPlaylistCard: View {
                 } else {
                     // Default SF Symbol icon
                     Image(systemName: icon)
+                        .foregroundColor(color)
                         .font(.title2)
-                        .foregroundColor(.white)
                         .frame(width: 44, height: 44)
                 }
                 
                 Text(title)
                     .font(.subheadline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .fontWeight(.semibold)
                     .minimumScaleFactor(0.5)
                     .lineLimit(2)
                 
@@ -228,20 +227,12 @@ private struct FullPlaylistCard: View {
                     }) {
                         Image(systemName: "trash")
                             .font(.body)
-                            .foregroundColor(.white.opacity(0.9))
                     }
                 }
             }
-            .frame(height: 64)
-            .padding(.horizontal, 20)
-            .background(
-                LinearGradient(
-                    colors: [color, color.opacity(0.8)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
+            .padding(10)
+
+            Divider()
             
             // Embedded playlist content
             content
@@ -390,3 +381,4 @@ extension ListsView.ViewModel: NSFetchedResultsControllerDelegate {
 #Preview {
     ListsView()
 }
+

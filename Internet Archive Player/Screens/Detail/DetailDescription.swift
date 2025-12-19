@@ -40,15 +40,6 @@ struct DetailDescription: View {
                 
                 Spacer()
                 
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        dismiss()
-                    }
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.fairyRed)
-                        .font(.title3)
-                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -156,6 +147,7 @@ struct DetailDescription: View {
                 .padding(.top, 8)
             }
         }
+        .presentationDragIndicator(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
         .colorScheme(.light) // Force light mode
