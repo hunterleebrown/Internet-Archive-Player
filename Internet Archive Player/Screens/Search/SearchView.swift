@@ -343,11 +343,17 @@ extension SearchView {
                         // Keep original order for same type
                         return false
                     }
-                    
+
+                    // Filter out any docs where collection contains "tvarchive"
+                    var noTV = sortedDocs.filter { doc in
+                        // Exclude docs that have "tvarchive" in their collections
+                        return !doc.collection.contains { $0.lowercased() == "tvarchive" }
+                    }
+
                     if !isLoadingMore {
-                        self.items = sortedDocs
+                        self.items = noTV
                     } else {
-                        self.items += sortedDocs
+                        self.items += noTV
                     }
 
                     self.isSearching = false

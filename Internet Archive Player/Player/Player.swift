@@ -454,6 +454,14 @@ class Player: NSObject, ObservableObject {
         self.setActiveAudioSession()
         print(playUrl.absoluteString)
         let playerItem = AVPlayerItem(url: playUrl)
+
+        // Option #2: Increase buffer duration to preload more video data
+        playerItem.preferredForwardBufferDuration = 30.0 // Load 30 seconds ahead
+
+        // Option #5: Configure player item for better buffering
+        playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = true
+        playerItem.preferredPeakBitRate = 0 // Let AVPlayer choose best quality based on network
+
         avPlayer.addObserver(self, forKeyPath: "rate", options:.new, context: &observerContext)
         self.observing = true
         avPlayer.replaceCurrentItem(with: playerItem)
