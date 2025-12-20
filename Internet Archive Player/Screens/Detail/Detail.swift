@@ -330,7 +330,7 @@ struct Detail: View {
                                                     .resizable()
                                                     .font(.title2)
                                                     .frame(width:44, height: 44)
-                                                Text("Play All as New Playlist")
+                                                Text("Play All")
                                                     .font(.caption2)
                                                     .foregroundColor(.black)
                                             }
@@ -372,12 +372,28 @@ struct Detail: View {
                                     }
                                     .tint(Color.black)
 
-                                    Text("Tap a track to play it, or use Play All to queue everything.")
-                                        .font(.caption)
-                                        .multilineTextAlignment(.center)
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                        .padding(.horizontal, 8)
-                                        .padding(.bottom, 8)
+                                    VStack(spacing: 4) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "info.circle")
+                                                .font(.caption2)
+                                            Text("Tap a track to play it, or use Play All to queue everything.")
+                                                .font(.caption2)
+                                            Spacer()
+                                        }
+                                        
+                                        HStack(spacing: 4) {
+                                            Image(systemName: PlayerButtonType.ear.rawValue)
+                                                .font(.caption2)
+                                            Text("Long press the ear icon to preview audio.")
+                                                .font(.caption2)
+                                            Spacer()
+                                        }
+                                    }
+                                    .foregroundColor(.secondary)
+                                    .opacity(0.7)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.horizontal, 8)
+                                    .padding(.bottom, 8)
                                 }
                                 .padding(8)
                                 .background(

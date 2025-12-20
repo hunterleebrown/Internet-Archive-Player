@@ -70,7 +70,7 @@ struct VideoPlayerWithPlaceholder: View {
     
     private func setupPlayer() {
         let playerItem = AVPlayerItem(url: videoURL)
-        
+        print(videoURL.absoluteString)
         // Option #2: Increase buffer duration to preload more video data
         playerItem.preferredForwardBufferDuration = 30.0 // Load 30 seconds ahead
         

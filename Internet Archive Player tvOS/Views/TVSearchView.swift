@@ -20,7 +20,7 @@ struct TVSearchView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .top) {
+            VStack(alignment: .leading) {
                 if viewModel.items.isEmpty && !viewModel.isSearching {
                     // Empty state - matches iOS aesthetic
                     VStack(spacing: 30) {
@@ -101,6 +101,9 @@ struct TVSearchView: View {
                     }
                     .frame(maxWidth: 600)
                     .transition(.opacity.combined(with: .scale))
+
+                    Spacer()
+
                 } else if viewModel.isSearching && viewModel.items.isEmpty {
                     // Loading state
                     VStack(spacing: 25) {
@@ -119,7 +122,12 @@ struct TVSearchView: View {
                                 .foregroundColor(.white.opacity(0.5))
                         }
                     }
+                    .padding()
                     .transition(.opacity)
+
+                    Spacer()
+
+
                 } else {
                     ScrollView(.horizontal) {
                         LazyHGrid(rows: columns, spacing: 10) {
@@ -136,8 +144,12 @@ struct TVSearchView: View {
                                 ))
                             }
                         }
+                        .frame(height: 400)
                         .padding(.horizontal, 40)
                         .padding(.vertical, 20)
+
+                        Spacer()
+
                     }
                     .navigationDestination(item: $viewModel.selectedDoc) { doc in
                         TVDetail(doc: doc)
@@ -305,6 +317,7 @@ extension TVSearchView {
                         noDataFound = false
                         archiveError = nil
                         lastSearchedQuery = ""
+                        isSearching = false // Reset searching state when query is cleared
                         continue
                     }
                     
@@ -349,7 +362,11 @@ extension TVSearchView {
                 // Check if task was cancelled
                 guard !Task.isCancelled else { return }
                 
-                items = data.response.docs
+                // Filter out any docs where collection contains "tvarchive"
+                items = data.response.docs.filter { doc in
+                    // Exclude docs that have "tvarchive" in their collections
+                    return !doc.collection.contains { $0.lowercased() == "tvarchive" }
+                }
                 isSearching = false
                 
                 if items.isEmpty {

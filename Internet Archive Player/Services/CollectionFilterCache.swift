@@ -36,11 +36,11 @@ class CollectionFilterCache: ObservableObject {
         
         isLoading = true
         
-        async let audioTask = loadFilters(for: .audio)
-        async let moviesTask = loadFilters(for: .movies)
-        
         // Load both concurrently
-        _ = await (audioTask, moviesTask)
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask { await self.loadFilters(for: .audio) }
+            group.addTask { await self.loadFilters(for: .movies) }
+        }
         
         isLoading = false
     }
