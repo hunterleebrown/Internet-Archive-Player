@@ -13,165 +13,295 @@ import iaAPI
 
 struct AudioPlayerView: View {
     let artworkURL: URL?
-    
+    let archiveDoc: ArchiveMetaData
+
     @StateObject private var viewModel: ViewModel
     
     // Convenience initializer for single file playback
-    init(audioFile: ArchiveFile, artworkURL: URL?) {
+    init(audioFile: ArchiveFile, artworkURL: URL?, archiveDoc: ArchiveMetaData) {
         self.artworkURL = artworkURL
+        self.archiveDoc = archiveDoc
         _viewModel = StateObject(wrappedValue: ViewModel(audioFile: audioFile, playlist: nil))
     }
     
     // Full initializer with playlist support
-    init(audioFile: ArchiveFile, artworkURL: URL?, playlist: [ArchiveFile]?) {
+    init(audioFile: ArchiveFile, artworkURL: URL?, archiveDoc: ArchiveMetaData, playlist: [ArchiveFile]?) {
         self.artworkURL = artworkURL
+        self.archiveDoc = archiveDoc
         _viewModel = StateObject(wrappedValue: ViewModel(audioFile: audioFile, playlist: playlist))
+    }
+    
+    // MARK: - Playlist View
+    private var playlistView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
+            HStack(spacing: 8) {
+                Image(systemName: "music.note.list")
+                    .font(.body)
+                Text("Up Next")
+                    .font(.body)
+                    .fontWeight(.semibold)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Playlist items with ScrollViewReader for auto-scrolling
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 2) {
+                        ForEach(Array(viewModel.playlistFiles.enumerated()), id: \.element.name) { index, file in
+                            playlistRow(for: file, at: index)
+                                .id(index) // Add ID for scrolling
+                        }
+                    }
+                }
+                .onChange(of: viewModel.currentTrackIndex) { oldValue, newValue in
+                    // Scroll to currently playing track with animation
+                    withAnimation {
+                        proxy.scrollTo(newValue, anchor: .center)
+                    }
+                }
+                .onAppear {
+                    // Scroll to current track on appear
+                    proxy.scrollTo(viewModel.currentTrackIndex, anchor: .center)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(
+            RoundedRectangle(cornerRadius: 0)
+                .fill(Color.black.opacity(0.4))
+                .blur(radius: 6)
+        )
+        .allowsHitTesting(false) // Make playlist non-interactive
+        .clipped() // Ensure content doesn't go out of bounds
+    }
+    
+    private func playlistRow(for file: ArchiveFile, at index: Int) -> some View {
+        HStack(spacing: 8) {
+            // Playing indicator
+            if index == viewModel.currentTrackIndex {
+                Image(systemName: viewModel.isPlaying ? "speaker.wave.2.fill" : "pause.fill")
+                    .font(.system(size: 14))
+                    .frame(width: 20)
+            } else {
+                Text("\(index + 1)")
+                    .font(.system(size: 13))
+                    .frame(width: 20)
+            }
+            
+            // Track info
+            VStack(alignment: .leading, spacing: 2) {
+                Text(file.displayTitle)
+                    .font(.system(size: 20))
+                    .lineLimit(1)
+                
+                if let artist = file.artist ?? file.creator?.joined(separator: ", ") {
+                    Text(artist)
+                        .font(.system(size: 18))
+                        .opacity(0.8)
+                        .lineLimit(1)
+                }
+            }
+            
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            index == viewModel.currentTrackIndex
+                ? Color.white.opacity(0.15)
+                : Color.clear
+        )
     }
     
     var body: some View {
         ZStack {
-            // Background gradient
+            // Animated pastel gradient background
             LinearGradient(
-                colors: [Color.black, Color.black.opacity(0.8)],
-                startPoint: .top,
-                endPoint: .bottom
+                colors: viewModel.currentGradientColors,
+                startPoint: viewModel.gradientStartPoint,
+                endPoint: viewModel.gradientEndPoint
             )
             .ignoresSafeArea()
+            .animation(.easeInOut(duration: 2.0), value: viewModel.currentGradientColors)
             
-            VStack(spacing: 50) {
-                Spacer()
+            // Two-column layout
+            HStack(spacing: 0) {
+                // Left side: Playlist (only show if more than 1 track)
+                if viewModel.playlistFiles.count > 1 {
+                    playlistView
+                        .frame(width: 380)
+                }
                 
-                // Album artwork with seek indicator overlay
-                ZStack {
-                    if let imageURL = artworkURL {
-                        AsyncImage(url: imageURL) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 600, height: 600)
-                                .cornerRadius(20)
-                                .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
-                        } placeholder: {
+                // Right side: Main content
+                VStack(spacing: 0) {
+                    // Archive title (if available)
+                    if let archiveTitle = archiveDoc.archiveTitle {
+                        Text(archiveTitle)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .padding(.horizontal, 90)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.black.opacity(0.4))
+                                    .blur(radius: 10)
+                            )
+                            .padding(.bottom, 15)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    
+                    // Album artwork with seek indicator overlay
+                    ZStack {
+                        if let imageURL = artworkURL {
+                            AsyncImage(url: imageURL) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 450, height: 450)
+                                    .cornerRadius(20)
+                                    .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
+                            } placeholder: {
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(width: 450, height: 450)
+                                    .overlay(
+                                        ProgressView()
+                                            .tint(.white)
+                                    )
+                            }
+                        } else {
                             RoundedRectangle(cornerRadius: 20)
                                 .fill(Color.gray.opacity(0.3))
-                                .frame(width: 600, height: 600)
+                                .frame(width: 450, height: 450)
                                 .overlay(
-                                    ProgressView()
-                                        .tint(.white)
+                                    Image(systemName: "music.note")
+                                        .font(.system(size: 120))
                                 )
                         }
-                    } else {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 600, height: 600)
-                            .overlay(
-                                Image(systemName: "music.note")
-                                    .font(.system(size: 120))
-                                    .foregroundColor(.white.opacity(0.5))
-                            )
-                    }
-                    
-                    // Seek indicator overlay
-                    if let indicator = viewModel.seekIndicator {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.black.opacity(0.75))
-                                .frame(width: 200, height: 100)
-                            
-                            Text(indicator)
-                                .font(.system(size: 40, weight: .bold))
-                                .foregroundColor(.white)
+                        
+                        // Seek indicator overlay
+                        if let indicator = viewModel.seekIndicator {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.black.opacity(0.75))
+                                    .frame(width: 200, height: 100)
+                                
+                                Text(indicator)
+                                    .font(.system(size: 40, weight: .bold))
+                            }
+                            .transition(.scale.combined(with: .opacity))
                         }
-                        .transition(.scale.combined(with: .opacity))
                     }
-                }
-                .frame(width: 600, height: 600)
-                
-                // Track info
-                VStack(spacing: 12) {
-                    Text(viewModel.currentTrack.displayTitle)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
+                    .frame(width: 450, height: 450)
+                    .padding(.bottom, 20)
                     
-                    if let artist = viewModel.currentTrack.artist ?? viewModel.currentTrack.creator?.joined(separator: ", ") {
-                        Text(artist)
-                            .font(.title3)
-                            .foregroundColor(.white.opacity(0.8))
+                    // Track info
+                    VStack(spacing: 6) {
+                        Text(viewModel.currentTrack.displayTitle)
+                            .font(.title2)
+                            .fontWeight(.bold)
                             .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                        
+                        if let artist = viewModel.currentTrack.artist ?? viewModel.currentTrack.creator?.joined(separator: ", ") {
+                            Text(artist)
+                                .font(.title3)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(1)
+                        }
+                        
+                        // Show track position if in playlist mode
+                        if viewModel.playlistFiles.count > 1 {
+                            Text("Track \(viewModel.currentTrackIndex + 1) of \(viewModel.playlistFiles.count)")
+                                .font(.caption)
+                                .padding(.top, 2)
+                        }
                     }
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.black.opacity(0.35))
+                            .blur(radius: 8)
+                    )
+                    .padding(.bottom, 20)
                     
-                    // Show track position if in playlist mode
-                    if viewModel.playlistFiles.count > 1 {
-                        Text("Track \(viewModel.currentTrackIndex + 1) of \(viewModel.playlistFiles.count)")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                }
-                
-                // Time progress bar
-                VStack(spacing: 8) {
-                    ProgressView(value: viewModel.currentTime, total: max(viewModel.duration, 0.1))
-                        .progressViewStyle(.linear)
-                        .tint(.white)
+                    // Time progress bar
+                    VStack(spacing: 6) {
+                        ProgressView(value: viewModel.currentTime, total: max(viewModel.duration, 0.1))
+                            .progressViewStyle(.linear)
+                            .tint(.white)
+                            .frame(width: 800)
+                        
+                        HStack {
+                            Text(viewModel.formatTime(viewModel.currentTime))
+                                .font(.caption)
+                            
+                            Spacer()
+                            
+                            Text(viewModel.formatTime(viewModel.duration))
+                                .font(.caption)
+                        }
                         .frame(width: 800)
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.black.opacity(0.25))
+                            .blur(radius: 8)
+                    )
+                    .padding(.bottom, 20)
                     
-                    HStack {
-                        Text(viewModel.formatTime(viewModel.currentTime))
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                    // Playback controls
+                    HStack(spacing: 80) {
+                        // Skip to previous track
+                        Button(action: viewModel.playPrevious) {
+                            Image(systemName: "backward.end.fill")
+                                .font(.system(size: 44))
+                        }
+                        .disabled(!viewModel.canGoPrevious)
                         
-                        Spacer()
+                        // Seek backward 15 seconds
+                        Button(action: viewModel.seekBackward) {
+                            Image(systemName: "gobackward.\(Int(viewModel.seekInterval))")
+                                .font(.system(size: 44))
+                        }
                         
-                        Text(viewModel.formatTime(viewModel.duration))
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                        // Play/Pause button
+                        Button(action: viewModel.togglePlayPause) {
+                            Image(systemName: viewModel.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                .font(.system(size: 44))
+                        }
+                        
+                        // Seek forward 15 seconds
+                        Button(action: viewModel.seekForward) {
+                            Image(systemName: "goforward.\(Int(viewModel.seekInterval))")
+                                .font(.system(size: 44))
+                        }
+                        
+                        // Skip to next track
+                        Button(action: viewModel.playNext) {
+                            Image(systemName: "forward.end.fill")
+                                .font(.system(size: 44))
+                        }
+                        .disabled(!viewModel.canGoNext)
                     }
-                    .frame(width: 800)
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.black.opacity(0.4))
+                            .blur(radius: 10)
+                    )
                 }
-                
-                // Playback controls
-                HStack(spacing: 80) {
-                    // Skip to previous track
-                    Button(action: viewModel.playPrevious) {
-                        Image(systemName: "backward.end.fill")
-                            .font(.system(size: 44))
-                    }
-                    .disabled(!viewModel.canGoPrevious)
-                    
-                    // Seek backward 15 seconds
-                    Button(action: viewModel.seekBackward) {
-                        Image(systemName: "gobackward.\(Int(viewModel.seekInterval))")
-                            .font(.system(size: 44))
-                    }
-                    
-                    // Play/Pause button
-                    Button(action: viewModel.togglePlayPause) {
-                        Image(systemName: viewModel.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.system(size: 44))
-                    }
-                    
-                    // Seek forward 15 seconds
-                    Button(action: viewModel.seekForward) {
-                        Image(systemName: "goforward.\(Int(viewModel.seekInterval))")
-                            .font(.system(size: 44))
-                    }
-                    
-                    // Skip to next track
-                    Button(action: viewModel.playNext) {
-                        Image(systemName: "forward.end.fill")
-                            .font(.system(size: 44))
-                    }
-                    .disabled(!viewModel.canGoNext)
-                }
-                .padding(.bottom, 40)
-                
-                Spacer()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .padding(.horizontal, 90)
-            .padding(.top, 60)
         }
         .onPlayPauseCommand {
             print("this is magic")
@@ -191,15 +321,56 @@ extension AudioPlayerView {
     @MainActor
     final class ViewModel: ObservableObject {
         // MARK: - Published Properties
+        var audioFile: ArchiveFile
         @Published var isPlaying = false
         @Published var currentTime: TimeInterval = 0
         @Published var duration: TimeInterval = 0
         @Published var currentTrackIndex: Int = 0
         @Published var seekIndicator: String? = nil
+        @Published var currentGradientColors: [Color] = []
+        @Published var gradientStartPoint: UnitPoint = .topLeading
+        @Published var gradientEndPoint: UnitPoint = .bottomTrailing
         
         // MARK: - Public Properties
         let seekInterval: Double = 15
         private(set) var playlistFiles: [ArchiveFile] = []
+        
+        // Vibrant color palette - Bold, saturated colors for professional gradients
+        private let pastelColors: [Color] = [
+            // Sunset/Fire tones
+            Color(red: 1.0, green: 0.27, blue: 0.33),    // Vibrant coral/red
+            Color(red: 1.0, green: 0.42, blue: 0.0),     // Bright orange
+            Color(red: 0.98, green: 0.6, blue: 0.0),     // Golden amber
+            
+            // Ocean/Cool tones
+            Color(red: 0.0, green: 0.55, blue: 0.82),    // Ocean blue
+            Color(red: 0.0, green: 0.73, blue: 0.83),    // Turquoise
+            Color(red: 0.2, green: 0.4, blue: 0.76),     // Royal blue
+            
+            // Purple/Magenta spectrum
+            Color(red: 0.58, green: 0.24, blue: 0.82),   // Deep purple
+            Color(red: 0.74, green: 0.22, blue: 0.66),   // Magenta
+            Color(red: 0.91, green: 0.12, blue: 0.39),   // Hot pink
+            
+            // Jewel tones
+            Color(red: 0.0, green: 0.66, blue: 0.42),    // Emerald green
+            Color(red: 0.29, green: 0.0, blue: 0.51),    // Deep violet
+            Color(red: 0.82, green: 0.0, blue: 0.33),    // Ruby red
+            
+            // Electric/Neon accents
+            Color(red: 0.0, green: 0.8, blue: 0.6),      // Bright teal
+            Color(red: 0.5, green: 0.0, blue: 1.0),      // Electric purple
+            Color(red: 1.0, green: 0.0, blue: 0.5)       // Neon pink
+        ]
+        
+        private let gradientPoints: [(UnitPoint, UnitPoint)] = [
+            (.topLeading, .bottomTrailing),
+            (.top, .bottom),
+            (.topTrailing, .bottomLeading),
+            (.leading, .trailing),
+            (.bottomLeading, .topTrailing),
+            (.bottom, .top)
+        ]
         
         var currentTrack: ArchiveFile {
             playlistFiles[currentTrackIndex]
@@ -217,9 +388,13 @@ extension AudioPlayerView {
         private var player: AVPlayer?
         private var timeObserverToken: Any?
         private var cancellables = Set<AnyCancellable>()
+        private var gradientTimer: Timer?
+        private var lastGradientChangeTime: TimeInterval = 0
         
         // MARK: - Initialization
         init(audioFile: ArchiveFile, playlist: [ArchiveFile]?) {
+            self.audioFile = audioFile
+
             // Initialize playlist
             if let playlist = playlist {
                 self.playlistFiles = playlist
@@ -231,6 +406,9 @@ extension AudioPlayerView {
                 self.playlistFiles = [audioFile]
                 self.currentTrackIndex = 0
             }
+            
+            // Initialize with first gradient
+            generateNewGradient()
         }
         
         // MARK: - Public Methods
@@ -280,6 +458,12 @@ extension AudioPlayerView {
                 let timeSeconds = time.seconds
                 if !timeSeconds.isNaN && timeSeconds.isFinite {
                     self.currentTime = timeSeconds
+                    
+                    // Check if we should generate a new gradient (every 10 seconds while playing)
+                    if self.isPlaying && (timeSeconds - self.lastGradientChangeTime) >= 10.0 {
+                        self.generateNewGradient()
+                        self.lastGradientChangeTime = timeSeconds
+                    }
                 }
             }
             
@@ -292,6 +476,9 @@ extension AudioPlayerView {
             
             // Update Now Playing info
             updateNowPlayingInfo()
+            
+            // Reset gradient timer
+            lastGradientChangeTime = 0
         }
         
         func cleanupPlayer() {
@@ -302,6 +489,10 @@ extension AudioPlayerView {
             player?.pause()
             player = nil
             cancellables.removeAll()
+            
+            // Stop gradient timer
+            gradientTimer?.invalidate()
+            gradientTimer = nil
             
             // Clean up remote command center
             let commandCenter = MPRemoteCommandCenter.shared()
@@ -499,8 +690,33 @@ extension AudioPlayerView {
             currentTime = 0
             duration = 0
             
+            // Generate new gradient for new track
+            generateNewGradient()
+            
             // Setup new player for current track
             setupPlayer()
+        }
+        
+        private func generateNewGradient() {
+            // Select 3-4 random pastel colors
+            let colorCount = Int.random(in: 3...4)
+            var selectedColors: [Color] = []
+            
+            // Create a shuffled copy of available colors
+            var availableColors = pastelColors.shuffled()
+            
+            for _ in 0..<colorCount {
+                if !availableColors.isEmpty {
+                    selectedColors.append(availableColors.removeFirst())
+                }
+            }
+            
+            // Select random gradient points
+            let randomPoints = gradientPoints.randomElement() ?? (.topLeading, .bottomTrailing)
+            
+            currentGradientColors = selectedColors
+            gradientStartPoint = randomPoints.0
+            gradientEndPoint = randomPoints.1
         }
         
         private func showSeekIndicator(_ text: String) {

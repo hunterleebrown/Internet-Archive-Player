@@ -228,11 +228,14 @@ struct TVDetail: View {
                             List {
                                 ForEach(self.viewModel.audioFiles, id: \.self) { file in
                                     NavigationLink {
-                                        AudioPlayerView(
-                                            audioFile: file,
-                                            artworkURL: imageUrl,
-                                            playlist: self.viewModel.audioFiles
-                                        )
+                                        if let archiveDoc = self.viewModel.archiveDoc {
+                                            AudioPlayerView(
+                                                audioFile: file,
+                                                artworkURL: imageUrl,
+                                                archiveDoc: archiveDoc,
+                                                playlist: self.viewModel.audioFiles
+                                            )
+                                        }
                                     } label: {
                                         FileRow(file: file)
                                     }
