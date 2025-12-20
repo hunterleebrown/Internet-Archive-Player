@@ -24,6 +24,9 @@ protocol SearchItemDisplayable {
 
     /// Array of creator names
     var creatorDisplay: [String]? { get }
+    
+    /// Array of collection archives this item belongs to
+    var collectionArchivesDisplay: [Archive]? { get }
 }
 
 extension ArchiveMetaData: SearchItemDisplayable {
@@ -41,6 +44,10 @@ extension ArchiveMetaData: SearchItemDisplayable {
         
     var mediatypeDisplay: iaAPI.ArchiveMediaType? {
         self.mediatype
+    }
+    
+    var collectionArchivesDisplay: [Archive]? {
+        return self.collectionArchives.isEmpty ? nil : self.collectionArchives
     }
     
 }
@@ -62,6 +69,11 @@ extension ArchiveMetaDataEntity: SearchItemDisplayable {
     var mediatypeDisplay: iaAPI.ArchiveMediaType? {
         guard let mt = self.mediatype else { return nil }
         return iaAPI.ArchiveMediaType(rawValue: mt)
+    }
+    
+    var collectionArchivesDisplay: [Archive]? {
+        // Core Data entity doesn't store collection archives
+        return nil
     }
 
 }

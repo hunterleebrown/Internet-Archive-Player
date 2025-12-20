@@ -95,6 +95,7 @@ struct OtherPlaylist: View {
                 viewModel.getOtherLists()
             }
         }
+        .presentationDragIndicator(.visible)
         .safeAreaInset(edge: .bottom) {
             Spacer()
                 .frame(height: iaPlayer.playerHeight)

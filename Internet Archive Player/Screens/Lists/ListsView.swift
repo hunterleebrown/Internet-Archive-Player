@@ -78,7 +78,7 @@ private struct PlaylistsListView: View {
             .navigationTitle("Playlists")
             .toolbar {
                 Button(action: {
-                    Home.newPlaylistPass.send(true)
+                    Home.newPlaylistPass.send(nil)
                 }) {
                     Image(systemName: "plus")
                         .foregroundColor(.fairyRed)
@@ -102,41 +102,57 @@ private struct PlaylistsCarouselView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Page-style carousel with embedded content
-                TabView(selection: $selectedPlaylistIndex) {
-                    // Favorites card with embedded view
-                    FullPlaylistCard(
-                        title: "Favorites",
-                        icon: "heart.fill",
-                        color: .fairyRed,
-                        content: AnyView(NewFavoritesView()),
-                        showDeleteButton: false
-                    )
-                    .tag(-1)
-                    
-                    // Playlist cards with embedded SingleListView
-                    ForEach(Array(viewModel.lists.enumerated()), id: \.element) { index, list in
-                        FullPlaylistCard(
-                            title: list.name ?? "Untitled Playlist",
-                            icon: list.name == "Now Playing" ? "play.circle.fill" : "music.note.list",
-                            color: list.name == "Now Playing" ? .fairyRed : .secondary,
-                            content: AnyView(SingleListView(playlistEntity: list, showToolbar: false)),
-                            showDeleteButton: list.name != "Now Playing",
-                            onDelete: {
-                                viewModel.remove(at: IndexSet(integer: index), player: iaPlayer)
-                            },
-                            playlistEntity: list
-                        )
-                        .tag(index)
+                if viewModel.isLoading {
+                    // Loading state
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .tint(.fairyRed)
+                            .scaleEffect(1.5)
+                        Text("Loading playlists...")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Page-style carousel with embedded content
+                    TabView(selection: $selectedPlaylistIndex) {
+                        // Favorites card with embedded view
+                        // Only render when favorites playlist is ready
+                        if iaPlayer.favoritesPlaylist != nil {
+                            FullPlaylistCard(
+                                title: "Favorites",
+                                icon: "heart.fill",
+                                color: .fairyRed,
+                                content: AnyView(NewFavoritesView()),
+                                showDeleteButton: false
+                            )
+                            .tag(-1)
+                        }
+                        
+                        // Playlist cards with embedded SingleListView
+                        ForEach(Array(viewModel.lists.enumerated()), id: \.element) { index, list in
+                            FullPlaylistCard(
+                                title: list.name ?? "Untitled Playlist",
+                                icon: list.name == "Now Playing" ? "play.circle.fill" : "music.note.list",
+                                color: list.name == "Now Playing" ? .fairyRed : .secondary,
+                                content: AnyView(SingleListView(playlistEntity: list, showToolbar: false)),
+                                showDeleteButton: list.name != "Now Playing",
+                                onDelete: {
+                                    viewModel.remove(at: IndexSet(integer: index), player: iaPlayer)
+                                },
+                                playlistEntity: list
+                            )
+                            .tag(index)
+                        }
+                    }
+                    .tabViewStyle(.page(indexDisplayMode: .always))
+                    .indexViewStyle(.page(backgroundDisplayMode: .always))
                 }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(.page(backgroundDisplayMode: .always))
             }
             .navigationTitle("Playlists")
             .toolbar {
                 Button(action: {
-                    Home.newPlaylistPass.send(true)
+                    Home.newPlaylistPass.send(nil)
                 }) {
                     Image(systemName: "plus")
                         .foregroundColor(.fairyRed)
@@ -269,6 +285,7 @@ extension ListsView {
     @MainActor
     final class ViewModel: NSObject, ObservableObject {
         @Published var lists: [PlaylistEntity] = [PlaylistEntity]()
+        @Published var isLoading: Bool = true
         private let listsFetchController: NSFetchedResultsController<PlaylistEntity>
 
         override init() {
@@ -280,17 +297,50 @@ extension ListsView {
 
             super.init()
             listsFetchController.delegate = self
-
-            do {
-                try listsFetchController.performFetch()
-                if let playlists = listsFetchController.fetchedObjects {
-                    if playlists.count > 0 {
-                        self.lists = playlists.filter{!$0.permanent}
+            
+            // Perform fetch asynchronously to avoid blocking the main thread
+            Task { @MainActor in
+                await self.performInitialFetch()
+            }
+        }
+        
+        private func performInitialFetch() async {
+            // Perform the fetch on a background context to avoid blocking
+            await Task.detached(priority: .userInitiated) {
+                do {
+                    // Create a background context
+                    let backgroundContext = PersistenceController.shared.container.newBackgroundContext()
+                    let fetchRequest = PlaylistEntity.fetchRequestAllPlaylists()
+                    
+                    // Fetch on background thread
+                    let playlists = try backgroundContext.fetch(fetchRequest)
+                    let filteredPlaylists = playlists.filter { !$0.permanent }
+                    
+                    // Get object IDs to transfer to main context
+                    let objectIDs = filteredPlaylists.map { $0.objectID }
+                    
+                    // Switch back to main thread to update UI
+                    await MainActor.run {
+                        // Convert object IDs to objects in the main context
+                        self.lists = objectIDs.compactMap { objectID in
+                            try? PersistenceController.shared.container.viewContext.existingObject(with: objectID) as? PlaylistEntity
+                        }
+                        self.isLoading = false
+                        
+                        // Now set up the main thread fetch controller for live updates
+                        do {
+                            try self.listsFetchController.performFetch()
+                        } catch {
+                            print("Failed to perform fetch on main controller: \(error)")
+                        }
+                    }
+                } catch {
+                    print("Failed to fetch playlists: \(error)")
+                    await MainActor.run {
+                        self.isLoading = false
                     }
                 }
-            } catch {
-                print("failed to fetch items!")
-            }
+            }.value
         }
 
 

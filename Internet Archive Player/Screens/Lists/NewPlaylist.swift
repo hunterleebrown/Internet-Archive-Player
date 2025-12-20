@@ -13,9 +13,14 @@ import CoreData
 
 struct NewPlaylist: View {
     @StateObject var viewModel = NewPlaylist.ViewModel()
-    @State private var name: String = ""
+    @State private var name: String
     @Binding var isPresented: Bool
     @Environment(\.dismiss) private var dismiss
+    
+    init(isPresented: Binding<Bool>, initialName: String? = nil) {
+        self._isPresented = isPresented
+        self._name = State(initialValue: initialName ?? "")
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,16 +32,6 @@ struct NewPlaylist: View {
                     .bold()
                 
                 Spacer()
-                
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        isPresented = false
-                    }
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.fairyRed)
-                        .font(.title3)
-                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -71,6 +66,7 @@ struct NewPlaylist: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .presentationDragIndicator(.visible)
     }
 }
 
