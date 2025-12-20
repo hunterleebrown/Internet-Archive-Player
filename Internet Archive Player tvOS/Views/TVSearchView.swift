@@ -318,7 +318,7 @@ extension TVSearchView {
             page = 1
             
             do {
-                let data = try await service.searchAsync(
+                let data = try await service.searchPPSAsync(
                     query: query,
                     mediaTypes: mediaTypes,
                     rows: rows,
