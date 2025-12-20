@@ -317,6 +317,7 @@ extension TVSearchView {
                         noDataFound = false
                         archiveError = nil
                         lastSearchedQuery = ""
+                        isSearching = false // Reset searching state when query is cleared
                         continue
                     }
                     
