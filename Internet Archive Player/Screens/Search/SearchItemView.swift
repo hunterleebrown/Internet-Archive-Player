@@ -52,6 +52,22 @@ struct SearchItemView<Item: SearchItemDisplayable>: View {
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                 }
+                
+                // First collection badge
+                if let collections = item.collectionArchivesDisplay,
+                   let firstCollection = collections.first,
+                   let collectionTitle = firstCollection.metadata?.archiveTitle {
+                    HStack(spacing: 4) {
+                        Image(systemName: "tray.2.fill")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Text(collectionTitle)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                    .padding(.top, 2)
+                }
 
                 // Publisher (only if exists)
                 if let publisher = item.publisherDisplay, !publisher.isEmpty {

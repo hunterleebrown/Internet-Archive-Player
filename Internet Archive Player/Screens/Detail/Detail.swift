@@ -330,7 +330,7 @@ struct Detail: View {
                                                     .resizable()
                                                     .font(.title2)
                                                     .frame(width:44, height: 44)
-                                                Text("Play All")
+                                                Text("Play All as New Playlist")
                                                     .font(.caption2)
                                                     .foregroundColor(.black)
                                             }
@@ -341,6 +341,14 @@ struct Detail: View {
                                         Spacer()
 
                                         Menu {
+
+                                            Button(action: {
+                                                viewModel.playAllAudio(startPlayback: false)
+                                            }){
+                                                Label("Make Playlist \(self.viewModel.archiveDoc?.archiveTitle ?? "")", systemImage: PlayerButtonType.list.rawValue)
+                                            }
+                                            .frame(width: 44, height: 44)
+
 
                                             Button(action: {
                                                 viewModel.playlistArchiveFiles = viewModel.audioFiles + viewModel.movieFiles

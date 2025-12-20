@@ -22,7 +22,17 @@ struct NewFavoritesView: View {
 
     var body: some View {
         Group {
-            if iaPlayer.favoriteItems.isEmpty {
+            if iaPlayer.favoritesPlaylist == nil {
+                // Loading state - playlist not ready yet
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .tint(.fairyRed)
+                    Text("Loading favorites...")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if iaPlayer.favoriteItems.isEmpty {
                 // Empty state
                 VStack(alignment: .center, spacing: 16) {
                     Spacer()

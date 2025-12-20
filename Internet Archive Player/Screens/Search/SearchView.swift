@@ -20,6 +20,9 @@ struct SearchView: View {
     @State var collectionIdentifier: String?
 
     @State var searchFilter: SearchFilter = SearchFilter(name: "All", identifier: "")
+    
+    // Navigation state
+    @State private var selectedItemIdentifier: String?
 
     init() {
         searchFocused = false
@@ -27,129 +30,215 @@ struct SearchView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Media Type Picker - Cleaner header style
-            VStack(spacing: 0) {
-                Picker("What media type?", selection: $viewModel.mediaType) {
-                    Label("Audio", systemImage: "hifispeaker")
-                        .tag(0)
-                    Label("Video", systemImage: "video")
-                        .tag(1)
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
-                .onChange(of: viewModel.mediaType) {
-                    viewModel.search(query: viewModel.searchText, loadMore: false)
-                }
-                
-                // Collection Filter - Card style
-                HStack(spacing: 12) {
-                    Button {
-                        showCollections = true
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "line.3.horizontal.decrease.circle")
-                                .font(.body)
-                            Text("Filter")
-                                .font(.subheadline)
-                                .bold()
-                        }
-                        .foregroundColor(.fairyRed)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(Color.fairyRed, lineWidth: 1)
-                        )
-                    }
-                    
-                    // Collection display
-                    HStack(spacing: 8) {
-                        if let imageUrl = searchFilter.iconUrl {
-                            AsyncImage(
-                                url: imageUrl,
-                                content: { image in
-                                    image.resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 24, height: 24)
-                                        .background(Color.black)
-                                },
-                                placeholder: {
-                                    Color(.black)
-                                        .frame(width: 24, height: 24)
-                                })
-                            .cornerRadius(4)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Collection")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            Text(searchFilter.name)
-                                .font(.caption)
-                                .bold()
-                                .foregroundColor(.primary)
-                        }
-                        
-                        Spacer()
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(UIColor.systemGray6))
-                    )
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
-            }
-            .background(Color(UIColor.systemBackground))
+            headerView
             
             Divider()
 
-            List {
-                ForEach(viewModel.items, id: \.self) { doc in
-                    ZStack {
-                        NavigationLink(destination: Detail(doc.identifier!)) {
-                            EmptyView()
-                        }
-                        .opacity(0)
-
-                        SearchItemView(item: doc)
-                            .padding(.horizontal, 10)
-                            .onAppear {
-                                if doc == viewModel.items.last {
-                                    viewModel.search(query: viewModel.searchText, loadMore: true)
-                                }
-                            }
-                    }
-                    .listRowInsets(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
-                    .listRowBackground(Color.clear)
-                }
-            }
-            .listStyle(PlainListStyle())
-            .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search The Internet Archive")
-            .onSubmit(of: .search, {
-                viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
-            })
-            .zIndex(viewModel.noDataFound ? 2 : 1)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            searchResultsList
         }
         .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
         .sheet(isPresented: $showCollections) {
-            let type = self.viewModel.mediaTypes[self.viewModel.mediaType]
-            if let topCollectionType = ArchiveTopCollectionType(rawValue: type.rawValue) {
-                let filterViewModel = SearchFiltersViewModel(collectionType: topCollectionType)
-                SearchFilters(searchFiltersViewModel: filterViewModel, delegate: self)
-            }
+            collectionsSheet
         }
         .safeAreaInset(edge: .bottom) {
-            Spacer()
-                .frame(height: iaPlayer.playingFile != nil ? iaPlayer.playerHeight + 10 : 0)
+            playerSafeArea
         }
         .navigationTitle("Search")
         .tint(.fairyRed)
+        .navigationDestination(item: $selectedItemIdentifier) { identifier in
+            Detail(identifier)
+        }
+    }
+    
+    // MARK: - View Components
+    
+    private var headerView: some View {
+        VStack(spacing: 0) {
+            mediaTypePicker
+            collectionFilterRow
+        }
+        .background(Color(UIColor.systemBackground))
+    }
+    
+    private var mediaTypePicker: some View {
+        Picker("What media type?", selection: $viewModel.mediaType) {
+            Label("Audio", systemImage: "hifispeaker")
+                .tag(0)
+            Label("Video", systemImage: "video")
+                .tag(1)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .onChange(of: viewModel.mediaType) {
+            // Reset filter to "All" when switching media types
+            searchFilter = SearchFilter(name: "All", identifier: "")
+            collectionName = "All"
+            collectionIdentifier = nil
+            
+            viewModel.search(query: viewModel.searchText, collection: nil, loadMore: false)
+        }
+    }
+    
+    private var collectionFilterRow: some View {
+        HStack(spacing: 12) {
+            filterButton
+            collectionDisplayCard
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+    }
+    
+    private var filterButton: some View {
+        Button {
+            showCollections = true
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+                    .font(.body)
+                Text("Filter")
+                    .font(.subheadline)
+                    .bold()
+            }
+            .foregroundColor(.fairyRed)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(Color.fairyRed, lineWidth: 1)
+            )
+        }
+    }
+    
+    private var collectionDisplayCard: some View {
+        HStack(spacing: 8) {
+            if let imageUrl = searchFilter.iconUrl {
+                AsyncImage(
+                    url: imageUrl,
+                    content: { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 24, height: 24)
+                            .background(Color.black)
+                    },
+                    placeholder: {
+                        Color(.black)
+                            .frame(width: 24, height: 24)
+                    })
+                .cornerRadius(4)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Collection")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Text(searchFilter.name)
+                    .font(.caption)
+                    .bold()
+                    .foregroundColor(.primary)
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(UIColor.systemGray6))
+        )
+    }
+    
+    private var searchResultsList: some View {
+        List {
+            ForEach(viewModel.items, id: \.self) { doc in
+                SearchResultRow(
+                    doc: doc,
+                    isLastItem: doc == viewModel.items.last,
+                    onTap: { handleItemTap(doc) },
+                    onAppear: {
+                        if doc == viewModel.items.last {
+                            viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: true)
+                        }
+                    }
+                )
+                .contextMenu {
+
+                    if let meta = viewModel.firstCollection(doc) {
+                        Button {
+                            handleCollectionTap(meta)
+                        } label: {
+                            Label("Filter by Collection \(meta.archiveTitle ?? "Unknown")", systemImage: "line.3.horizontal.decrease.circle")
+                        }
+
+                    }
+
+                    Button {
+                        try? iaPlayer.addFavoriteArchive(doc)
+                    } label: {
+                        Label("Add to Bookmarks", systemImage: "bookmark")
+                    }
+                }
+            }
+        }
+        .listStyle(PlainListStyle())
+        .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search The Internet Archive")
+        .onSubmit(of: .search, {
+            viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
+        })
+        .zIndex(viewModel.noDataFound ? 2 : 1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    @ViewBuilder
+    private var collectionsSheet: some View {
+        let type = self.viewModel.mediaTypes[self.viewModel.mediaType]
+        if let topCollectionType = ArchiveTopCollectionType(rawValue: type.rawValue) {
+            let filterViewModel = SearchFiltersViewModel(collectionType: topCollectionType)
+            SearchFilters(searchFiltersViewModel: filterViewModel, delegate: self)
+        }
+    }
+    
+    private var playerSafeArea: some View {
+        Spacer()
+            .frame(height: iaPlayer.playingFile != nil ? iaPlayer.playerHeight + 10 : 0)
+    }
+    
+    // MARK: - Helper Methods
+    
+    /// Handles when any item is tapped
+    private func handleItemTap(_ item: ArchiveMetaData) {
+        if item.mediatype == .collection {
+            // If it's a collection, set it as filter and search
+            handleCollectionTap(item)
+        } else {
+            // If it's a regular item, navigate to detail
+            selectedItemIdentifier = item.identifier
+        }
+    }
+    
+    /// Handles when a collection item is tapped in search results
+    private func handleCollectionTap(_ collection: ArchiveMetaData) {
+        // Convert the collection to a SearchFilter
+        let filter = SearchFilter(
+            name: collection.archiveTitle ?? "Unknown Collection",
+            identifier: collection.identifier ?? "",
+            iconUrl: collection.iconUrl,
+            uiImage: nil,
+            image: nil
+        )
+        
+        // Update the UI state
+        searchFilter = filter
+        collectionName = filter.name
+        collectionIdentifier = filter.identifier
+        
+        // Trigger a new search with this collection filter
+        viewModel.search(
+            query: viewModel.searchText,
+            collection: filter.identifier.isEmpty ? nil : filter.identifier,
+            loadMore: false
+        )
     }
 
 }
@@ -218,7 +307,7 @@ extension SearchView {
                     let format: ArchiveFileFormat? = nil //self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
                     let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
                     print(query)
-                    let data = try await self.service.searchAsync(query: query, mediaTypes: self.mediaTypes, rows: self.rows, page: self.page, format: format, collection: collection)
+                    let data = try await self.service.searchPPSAsync(query: query, mediaTypes: [searchMediaType, .collection], rows: self.rows, page: self.page, format: format, collection: collection)
 
                     self.numberOfResults = data.response.numFound
                     self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
@@ -226,10 +315,26 @@ extension SearchView {
                     self.page += 1
 
                     print("The Page Number is: \(self.page)")
+                    
+                    // Sort results to put collections at the top
+                    let sortedDocs = data.response.docs.sorted { lhs, rhs in
+                        let lhsIsCollection = lhs.mediatype == .collection
+                        let rhsIsCollection = rhs.mediatype == .collection
+                        
+                        // Collections come first
+                        if lhsIsCollection && !rhsIsCollection {
+                            return true
+                        } else if !lhsIsCollection && rhsIsCollection {
+                            return false
+                        }
+                        // Keep original order for same type
+                        return false
+                    }
+                    
                     if !isLoadingMore {
-                        self.items = data.response.docs
+                        self.items = sortedDocs
                     } else {
-                        self.items += data.response.docs
+                        self.items += sortedDocs
                     }
 
                     self.isSearching = false
@@ -249,6 +354,14 @@ extension SearchView {
                 }
             }
         }
+
+        func firstCollection(_ metadata: ArchiveMetaData) -> ArchiveMetaData? {
+            guard let firstCollection = metadata.collectionArchives.first else {
+                return nil
+            }
+
+            return firstCollection.metadata
+        }
     }
 }
 
@@ -257,3 +370,25 @@ extension View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
+
+// MARK: - Search Result Row
+
+/// A row in the search results list that handles tap gestures
+private struct SearchResultRow: View {
+    let doc: ArchiveMetaData
+    let isLastItem: Bool
+    let onTap: () -> Void
+    let onAppear: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            SearchItemView(item: doc)
+                .padding(.horizontal, 10)
+        }
+        .buttonStyle(.plain)
+        .listRowInsets(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
+        .listRowBackground(Color.clear)
+        .onAppear(perform: onAppear)
+    }
+}
+

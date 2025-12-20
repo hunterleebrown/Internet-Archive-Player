@@ -246,7 +246,7 @@ final class DetailViewModel: ObservableObject {
     
     // MARK: - Play All Audio
     
-    public func playAllAudio() {
+    public func playAllAudio(startPlayback: Bool = true) {
         guard let player = iaPlayer else { return }
         
         let sortedFiles = sortedAudioFilesCache
@@ -326,15 +326,17 @@ final class DetailViewModel: ObservableObject {
             return
         }
         
-        // Start playing the first track from the playlist
-        guard let playlist = playlistToUse,
-              let files = playlist.files?.array as? [ArchiveFileEntity],
-              let firstEntity = files.first else { return }
-        
-        // Use the actual entity from the playlist, not a newly created one
-        player.playFileFromPlaylist(firstEntity, playlist: playlist)
-        
         // Store the playlist for navigation
+        guard let playlist = playlistToUse else { return }
         createdPlaylist = playlist
+        
+        // Optionally start playing the first track from the playlist
+        if startPlayback {
+            guard let files = playlist.files?.array as? [ArchiveFileEntity],
+                  let firstEntity = files.first else { return }
+            
+            // Use the actual entity from the playlist, not a newly created one
+            player.playFileFromPlaylist(firstEntity, playlist: playlist)
+        }
     }
 }

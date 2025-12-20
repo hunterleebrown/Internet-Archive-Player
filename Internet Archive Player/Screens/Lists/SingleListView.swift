@@ -26,7 +26,17 @@ struct SingleListView: View {
 
     var body: some View {
         Group {
-            if viewModel.files.isEmpty {
+            if playlistEntity.managedObjectContext == nil {
+                // Safety check: playlist entity not properly initialized
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .tint(.fairyRed)
+                    Text("Loading playlist...")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if viewModel.files.isEmpty {
                 // Empty state
                 VStack(alignment: .center, spacing: 16) {
                     Spacer()

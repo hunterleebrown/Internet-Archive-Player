@@ -11,6 +11,11 @@ import AVKit
 import Combine
 import iaAPI
 
+struct NewPlaylistData: Identifiable {
+    let id = UUID()
+    let name: String?
+}
+
 struct Home: View {
     @StateObject var iaPlayer = Player()
     @State var playingFile: ArchiveFileEntity? = nil
@@ -26,9 +31,9 @@ struct Home: View {
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var controlHeightPass = PassthroughSubject<Bool, Never>()
     static var otherPlaylistPass = PassthroughSubject<ArchiveFileEntity, Never>()
-    static var newPlaylistPass = PassthroughSubject<Bool, Never>()
+    static var newPlaylistPass = PassthroughSubject<String?, Never>()
 
-    @State var showingNewPlaylist = false
+    @State var newPlaylistName: NewPlaylistData? = nil
 
     @StateObject var viewModel: Home.ViewModel = Home.ViewModel()
 
@@ -219,8 +224,8 @@ struct Home: View {
             viewModel.archiveFileEntity = archiveFileEntiity
             otherPlaylistPresented = true
         })
-        .onReceive(Home.newPlaylistPass, perform: { show in
-            showingNewPlaylist = true
+        .onReceive(Home.newPlaylistPass, perform: { name in
+            newPlaylistName = NewPlaylistData(name: name)
         })
         .onReceive(PlayerControls.toggleHistory, perform: { _ in
             showHistory.toggle()
@@ -234,8 +239,11 @@ struct Home: View {
                 OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFileEntities: [f])
             }
         }
-        .sheet(isPresented: $showingNewPlaylist) {
-            NewPlaylist(isPresented: $showingNewPlaylist)
+        .sheet(item: $newPlaylistName) { data in
+            NewPlaylist(isPresented: Binding(
+                get: { newPlaylistName != nil },
+                set: { if !$0 { newPlaylistName = nil } }
+            ), initialName: data.name)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
