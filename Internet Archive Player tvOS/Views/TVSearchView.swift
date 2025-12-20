@@ -124,7 +124,9 @@ struct TVSearchView: View {
                     ScrollView(.horizontal) {
                         LazyHGrid(rows: columns, spacing: 10) {
                             ForEach(Array(viewModel.items.enumerated()), id: \.element) { index, doc in
-                                NavigationLink(destination: TVDetail(doc: doc)) {
+                                Button {
+                                    viewModel.selectedDoc = doc
+                                } label: {
                                     ItemCard(doc: doc)
                                 }
                                 .buttonStyle(CardButtonStyle())
@@ -132,11 +134,13 @@ struct TVSearchView: View {
                                     insertion: .scale.combined(with: .opacity),
                                     removal: .opacity
                                 ))
-                                .animation(.spring(response: 0.3, dampingFraction: 0.7).delay(Double(index) * 0.02), value: viewModel.items.count)
                             }
                         }
                         .padding(.horizontal, 40)
                         .padding(.vertical, 20)
+                    }
+                    .navigationDestination(item: $viewModel.selectedDoc) { doc in
+                        TVDetail(doc: doc)
                     }
                 }
             }
@@ -209,6 +213,7 @@ struct ItemCard: View {
                     Color.gray.opacity(0.3)
                 }
             }
+            .id(doc.identifier) // Stable ID for AsyncImage caching
         )
         .clipped()
         .cornerRadius(12)
@@ -273,11 +278,13 @@ extension TVSearchView {
         @Published var isSearching: Bool = false
         @Published var noDataFound: Bool = false
         @Published var archiveError: String?
+        @Published var selectedDoc: ArchiveMetaData?
 
         public let mediaTypes: [ArchiveMediaType] = [.audio, .movies]
         private var searchTask: Task<Void, Never>?
         private var page: Int = 1
         private let rows = 50
+        private var lastSearchedQuery: String = "" // Track last search
 
         let service: PlayerArchiveService
 
@@ -297,14 +304,26 @@ extension TVSearchView {
                         items = []
                         noDataFound = false
                         archiveError = nil
+                        lastSearchedQuery = ""
+                        continue
+                    }
+                    
+                    // Skip if we've already searched this query
+                    guard query != lastSearchedQuery else {
                         continue
                     }
                     
                     // Debounce
                     try? await Task.sleep(for: .milliseconds(500))
                     
+                    // Check again after debounce
+                    guard query == searchText.trimmingCharacters(in: .whitespaces) else {
+                        continue
+                    }
+                    
                     // Start search
                     searchTask = Task { @MainActor in
+                        lastSearchedQuery = query
                         await performSearch(query: query)
                     }
                 }
