@@ -81,9 +81,22 @@ struct SearchView: View {
     }
     
     private var collectionFilterRow: some View {
-        HStack(spacing: 12) {
-            filterButton
-            collectionDisplayCard
+        VStack(spacing: 8) {
+            HStack(spacing: 12) {
+                filterButton
+                collectionDisplayCard
+            }
+            
+            // Long press hint
+            HStack(spacing: 4) {
+                Image(systemName: "hand.tap")
+                    .font(.caption2)
+                Text("Tip: Long press items for more options")
+                    .font(.caption2)
+                Spacer()
+            }
+            .foregroundColor(.secondary)
+            .opacity(0.7)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
