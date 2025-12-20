@@ -35,17 +35,7 @@ struct HistoryDrawerView: View {
                             .foregroundColor(.fairyCream)
                     }
                     .padding(.trailing, 12)
-                }
-                
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        isPresented = false
-                    }
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.fairyCream)
-                        .font(.title3)
-                }
+                }                
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -97,6 +87,7 @@ struct HistoryDrawerView: View {
                 }
             }
         }
+        .presentationDragIndicator(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.fairyRed.opacity(0.95))
         .alert("Clear History", isPresented: $showClearAlert) {

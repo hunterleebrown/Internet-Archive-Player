@@ -427,8 +427,38 @@ class Player: NSObject, ObservableObject {
             }
             
             PersistenceController.shared.save()
+            
+            // Constrain history to 50 items by removing oldest entries
+            trimHistoryToLimit()
+            
         } catch {
             print("Error updating play history: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Trims history to maintain a maximum of 50 items
+    private func trimHistoryToLimit(maxItems: Int = 50) {
+        let context = PersistenceController.shared.container.viewContext
+        
+        // Fetch all history items sorted by playedAt (oldest first)
+        let fetchRequest: NSFetchRequest<HistoryArchiveFileEntity> = HistoryArchiveFileEntity.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "playedAt", ascending: true)]
+        
+        do {
+            let allHistoryItems = try context.fetch(fetchRequest)
+            let count = allHistoryItems.count
+            
+            // If we exceed the limit, delete the oldest items
+            if count > maxItems {
+                let itemsToDelete = allHistoryItems.prefix(count - maxItems)
+                for item in itemsToDelete {
+                    context.delete(item)
+                }
+                PersistenceController.shared.save()
+                print("🗑️ Trimmed \(itemsToDelete.count) old history items. Now at \(maxItems) items.")
+            }
+        } catch {
+            print("Error trimming history: \(error.localizedDescription)")
         }
     }
 

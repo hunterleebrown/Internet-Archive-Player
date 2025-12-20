@@ -541,8 +541,8 @@
 		5AFEC5052A9986D700E0BFD3 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
-				5A6D689F2EEB7ED700301357 /* Saved Archives */,
 				5AA391A42A4F4C8A00C65A48 /* Home.swift */,
+				5A6D689F2EEB7ED700301357 /* Saved Archives */,
 				5A35A6DA2ABBE88B00A127D6 /* Debug */,
 				5ADED063279B589600FB2E6D /* Favorites */,
 				5AFEC5042A9986BE00E0BFD3 /* NowPlaying */,
