@@ -335,20 +335,32 @@ extension AudioPlayerView {
         let seekInterval: Double = 15
         private(set) var playlistFiles: [ArchiveFile] = []
         
-        // Pastel color palette
+        // Vibrant color palette - Bold, saturated colors for professional gradients
         private let pastelColors: [Color] = [
-            Color(red: 1.0, green: 0.8, blue: 0.8),      // Pastel pink
-            Color(red: 1.0, green: 0.9, blue: 0.8),      // Pastel peach
-            Color(red: 1.0, green: 1.0, blue: 0.8),      // Pastel yellow
-            Color(red: 0.8, green: 1.0, blue: 0.8),      // Pastel mint
-            Color(red: 0.8, green: 1.0, blue: 1.0),      // Pastel cyan
-            Color(red: 0.8, green: 0.9, blue: 1.0),      // Pastel sky blue
-            Color(red: 0.9, green: 0.8, blue: 1.0),      // Pastel lavender
-            Color(red: 1.0, green: 0.8, blue: 1.0),      // Pastel magenta
-            Color(red: 1.0, green: 0.85, blue: 0.9),     // Pastel rose
-            Color(red: 0.85, green: 0.9, blue: 1.0),     // Pastel periwinkle
-            Color(red: 0.9, green: 1.0, blue: 0.85),     // Pastel lime
-            Color(red: 1.0, green: 0.95, blue: 0.85)     // Pastel cream
+            // Sunset/Fire tones
+            Color(red: 1.0, green: 0.27, blue: 0.33),    // Vibrant coral/red
+            Color(red: 1.0, green: 0.42, blue: 0.0),     // Bright orange
+            Color(red: 0.98, green: 0.6, blue: 0.0),     // Golden amber
+            
+            // Ocean/Cool tones
+            Color(red: 0.0, green: 0.55, blue: 0.82),    // Ocean blue
+            Color(red: 0.0, green: 0.73, blue: 0.83),    // Turquoise
+            Color(red: 0.2, green: 0.4, blue: 0.76),     // Royal blue
+            
+            // Purple/Magenta spectrum
+            Color(red: 0.58, green: 0.24, blue: 0.82),   // Deep purple
+            Color(red: 0.74, green: 0.22, blue: 0.66),   // Magenta
+            Color(red: 0.91, green: 0.12, blue: 0.39),   // Hot pink
+            
+            // Jewel tones
+            Color(red: 0.0, green: 0.66, blue: 0.42),    // Emerald green
+            Color(red: 0.29, green: 0.0, blue: 0.51),    // Deep violet
+            Color(red: 0.82, green: 0.0, blue: 0.33),    // Ruby red
+            
+            // Electric/Neon accents
+            Color(red: 0.0, green: 0.8, blue: 0.6),      // Bright teal
+            Color(red: 0.5, green: 0.0, blue: 1.0),      // Electric purple
+            Color(red: 1.0, green: 0.0, blue: 0.5)       // Neon pink
         ]
         
         private let gradientPoints: [(UnitPoint, UnitPoint)] = [
