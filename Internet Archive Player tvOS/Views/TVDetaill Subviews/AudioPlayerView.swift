@@ -68,13 +68,14 @@ struct AudioPlayerView: View {
                 }
             }
         }
-        .frame(maxHeight: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 0)
                 .fill(Color.black.opacity(0.4))
                 .blur(radius: 6)
         )
         .allowsHitTesting(false) // Make playlist non-interactive
+        .clipped() // Ensure content doesn't go out of bounds
     }
     
     private func playlistRow(for file: ArchiveFile, at index: Int) -> some View {
@@ -126,175 +127,180 @@ struct AudioPlayerView: View {
             .ignoresSafeArea()
             .animation(.easeInOut(duration: 2.0), value: viewModel.currentGradientColors)
             
-
-            // Floating playlist (only show if more than 1 track)
-            if viewModel.playlistFiles.count > 1 {
-                HStack(alignment: .top, spacing: 0) {
+            // Two-column layout
+            HStack(spacing: 0) {
+                // Left side: Playlist (only show if more than 1 track)
+                if viewModel.playlistFiles.count > 1 {
                     playlistView
-                        .frame(width: 380, alignment: .leading)
-                    Spacer()
-                }
-                .frame(maxHeight: .infinity, alignment: .leading)
-            }
-            
-            VStack(spacing: 0) {
-
-                // Archive title (if available)
-                if let archiveTitle = archiveDoc.archiveTitle {
-                    Text(archiveTitle)
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .padding(.horizontal, 90)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.black.opacity(0.4))
-                                .blur(radius: 10)
-                        )
-                        .padding(.bottom, 15)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(width: 380)
                 }
                 
-                // Album artwork with seek indicator overlay
-                ZStack {
-                    if let imageURL = artworkURL {
-                        AsyncImage(url: imageURL) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 450, height: 450)
-                                .cornerRadius(20)
-                                .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
-                        } placeholder: {
+                // Right side: Main content
+                VStack(spacing: 0) {
+                    // Archive title (if available)
+                    if let archiveTitle = archiveDoc.archiveTitle {
+                        Text(archiveTitle)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                            .padding(.horizontal, 90)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.black.opacity(0.4))
+                                    .blur(radius: 10)
+                            )
+                            .padding(.bottom, 15)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    
+                    // Album artwork with seek indicator overlay
+                    ZStack {
+                        if let imageURL = artworkURL {
+                            AsyncImage(url: imageURL) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 450, height: 450)
+                                    .cornerRadius(20)
+                                    .shadow(color: .black.opacity(0.5), radius: 20, x: 0, y: 10)
+                            } placeholder: {
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(width: 450, height: 450)
+                                    .overlay(
+                                        ProgressView()
+                                            .tint(.white)
+                                    )
+                            }
+                        } else {
                             RoundedRectangle(cornerRadius: 20)
                                 .fill(Color.gray.opacity(0.3))
                                 .frame(width: 450, height: 450)
                                 .overlay(
-                                    ProgressView()
-                                        .tint(.white)
+                                    Image(systemName: "music.note")
+                                        .font(.system(size: 120))
                                 )
                         }
-                    } else {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 450, height: 450)
-                            .overlay(
-                                Image(systemName: "music.note")
-                                    .font(.system(size: 120))
-                            )
-                    }
-                    
-                    // Seek indicator overlay
-                    if let indicator = viewModel.seekIndicator {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.black.opacity(0.75))
-                                .frame(width: 200, height: 100)
-                            
-                            Text(indicator)
-                                .font(.system(size: 40, weight: .bold))
+                        
+                        // Seek indicator overlay
+                        if let indicator = viewModel.seekIndicator {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.black.opacity(0.75))
+                                    .frame(width: 200, height: 100)
+                                
+                                Text(indicator)
+                                    .font(.system(size: 40, weight: .bold))
+                            }
+                            .transition(.scale.combined(with: .opacity))
                         }
-                        .transition(.scale.combined(with: .opacity))
                     }
-                }
-                .frame(width: 450, height: 450)
-                .padding(.bottom, 20)
-                
-                // Track info
-                VStack(spacing: 6) {
-                    Text(viewModel.currentTrack.displayTitle)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
+                    .frame(width: 450, height: 450)
+                    .padding(.bottom, 20)
                     
-                    if let artist = viewModel.currentTrack.artist ?? viewModel.currentTrack.creator?.joined(separator: ", ") {
-                        Text(artist)
-                            .font(.title3)
+                    // Track info
+                    VStack(spacing: 6) {
+                        Text(viewModel.currentTrack.displayTitle)
+                            .font(.title2)
+                            .fontWeight(.bold)
                             .multilineTextAlignment(.center)
-                            .lineLimit(1)
+                            .lineLimit(2)
+                        
+                        if let artist = viewModel.currentTrack.artist ?? viewModel.currentTrack.creator?.joined(separator: ", ") {
+                            Text(artist)
+                                .font(.title3)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(1)
+                        }
+                        
+                        // Show track position if in playlist mode
+                        if viewModel.playlistFiles.count > 1 {
+                            Text("Track \(viewModel.currentTrackIndex + 1) of \(viewModel.playlistFiles.count)")
+                                .font(.caption)
+                                .padding(.top, 2)
+                        }
                     }
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.black.opacity(0.35))
+                            .blur(radius: 8)
+                    )
+                    .padding(.bottom, 20)
                     
-                    // Show track position if in playlist mode
-                    if viewModel.playlistFiles.count > 1 {
-                        Text("Track \(viewModel.currentTrackIndex + 1) of \(viewModel.playlistFiles.count)")
-                            .font(.caption)
-                            .padding(.top, 2)
-                    }
-                }
-                .padding(.horizontal, 40)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.black.opacity(0.35))
-                        .blur(radius: 8)
-                )
-                .padding(.bottom, 20)
-                
-                // Time progress bar
-                VStack(spacing: 6) {
-                    ProgressView(value: viewModel.currentTime, total: max(viewModel.duration, 0.1))
-                        .progressViewStyle(.linear)
-                        .tint(.white)
+                    // Time progress bar
+                    VStack(spacing: 6) {
+                        ProgressView(value: viewModel.currentTime, total: max(viewModel.duration, 0.1))
+                            .progressViewStyle(.linear)
+                            .tint(.white)
+                            .frame(width: 800)
+                        
+                        HStack {
+                            Text(viewModel.formatTime(viewModel.currentTime))
+                                .font(.caption)
+                            
+                            Spacer()
+                            
+                            Text(viewModel.formatTime(viewModel.duration))
+                                .font(.caption)
+                        }
                         .frame(width: 800)
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.black.opacity(0.25))
+                            .blur(radius: 8)
+                    )
+                    .padding(.bottom, 20)
                     
-                    HStack {
-                        Text(viewModel.formatTime(viewModel.currentTime))
-                            .font(.caption)
+                    // Playback controls
+                    HStack(spacing: 80) {
+                        // Skip to previous track
+                        Button(action: viewModel.playPrevious) {
+                            Image(systemName: "backward.end.fill")
+                                .font(.system(size: 44))
+                        }
+                        .disabled(!viewModel.canGoPrevious)
                         
-                        Spacer()
+                        // Seek backward 15 seconds
+                        Button(action: viewModel.seekBackward) {
+                            Image(systemName: "gobackward.\(Int(viewModel.seekInterval))")
+                                .font(.system(size: 44))
+                        }
                         
-                        Text(viewModel.formatTime(viewModel.duration))
-                            .font(.caption)
+                        // Play/Pause button
+                        Button(action: viewModel.togglePlayPause) {
+                            Image(systemName: viewModel.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                .font(.system(size: 44))
+                        }
+                        
+                        // Seek forward 15 seconds
+                        Button(action: viewModel.seekForward) {
+                            Image(systemName: "goforward.\(Int(viewModel.seekInterval))")
+                                .font(.system(size: 44))
+                        }
+                        
+                        // Skip to next track
+                        Button(action: viewModel.playNext) {
+                            Image(systemName: "forward.end.fill")
+                                .font(.system(size: 44))
+                        }
+                        .disabled(!viewModel.canGoNext)
                     }
-                    .frame(width: 800)
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 20)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.black.opacity(0.4))
+                            .blur(radius: 10)
+                    )
                 }
-                .padding(.horizontal, 40)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.black.opacity(0.25))
-                        .blur(radius: 8)
-                )
-                .padding(.bottom, 20)
-                
-                // Playback controls
-                HStack(spacing: 80) {
-                    // Skip to previous track
-                    Button(action: viewModel.playPrevious) {
-                        Image(systemName: "backward.end.fill")
-                            .font(.system(size: 44))
-                    }
-                    .disabled(!viewModel.canGoPrevious)
-                    
-                    // Seek backward 15 seconds
-                    Button(action: viewModel.seekBackward) {
-                        Image(systemName: "gobackward.\(Int(viewModel.seekInterval))")
-                            .font(.system(size: 44))
-                    }
-                    
-                    // Play/Pause button
-                    Button(action: viewModel.togglePlayPause) {
-                        Image(systemName: viewModel.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.system(size: 44))
-                    }
-                    
-                    // Seek forward 15 seconds
-                    Button(action: viewModel.seekForward) {
-                        Image(systemName: "goforward.\(Int(viewModel.seekInterval))")
-                            .font(.system(size: 44))
-                    }
-                    
-                    // Skip to next track
-                    Button(action: viewModel.playNext) {
-                        Image(systemName: "forward.end.fill")
-                            .font(.system(size: 44))
-                    }
-                    .disabled(!viewModel.canGoNext)
-                }
-                
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .onPlayPauseCommand {
