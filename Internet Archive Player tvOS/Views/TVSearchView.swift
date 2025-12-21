@@ -12,6 +12,9 @@ import Combine
 
 struct TVSearchView: View {
     @StateObject var viewModel = TVSearchView.ViewModel()
+    @StateObject private var audioFiltersViewModel = SearchFiltersViewModel(collectionType: .audio)
+    @StateObject private var moviesFiltersViewModel = SearchFiltersViewModel(collectionType: .movies)
+    @State private var selectedFilter: SearchFilter?
 
     // Single row for horizontal scrolling
     let columns = [
@@ -20,7 +23,38 @@ struct TVSearchView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 0) {
+
+                // Filters - Simple horizontal scrolling
+                VStack(alignment: .leading, spacing: 12) {
+                    // Audio Filters
+                    if !audioFiltersViewModel.items.isEmpty {
+                        filterRow(
+                            title: "Audio Collections",
+                            filters: audioFiltersViewModel.items
+                        )
+                    }
+                    
+                    // Video Filters
+                    if !moviesFiltersViewModel.items.isEmpty {
+                        filterRow(
+                            title: "Video Collections",
+                            filters: moviesFiltersViewModel.items
+                        )
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 10)
+                .background(Color.black.opacity(0.3))
+                .onAppear {
+                    audioFiltersViewModel.search()
+                    moviesFiltersViewModel.search()
+                }
+                
+                Divider()
+                    .background(Color.white.opacity(0.2))
+                    .padding(.vertical, 10)
+
                 if viewModel.items.isEmpty && !viewModel.isSearching {
                     // Empty state - matches iOS aesthetic
                     VStack(spacing: 30) {
@@ -159,6 +193,85 @@ struct TVSearchView: View {
             .animation(.easeInOut, value: viewModel.items.isEmpty)
             .animation(.easeInOut, value: viewModel.isSearching)
             .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
+            .onChange(of: selectedFilter) { oldValue, newValue in
+                // When a filter is selected, trigger a search with that collection
+                Task {
+                    if let filter = newValue {
+                        await viewModel.performFilteredSearch(
+                            collection: filter.identifier.isEmpty ? nil : filter.identifier
+                        )
+                    } else if !viewModel.searchText.isEmpty {
+                        // Filter cleared - only re-search if there's search text
+                        await viewModel.performFilteredSearch(collection: nil)
+                    } else {
+                        // Clear results when filter is cleared and no search text
+                        await MainActor.run {
+                            viewModel.items = []
+                            viewModel.noDataFound = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Filter Row
+    
+    @ViewBuilder
+    private func filterRow(title: String, filters: [SearchFilter]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+
+            Text("Filter by \(title)")
+                .font(.subheadline)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+
+                    // Clear filter button
+                    Button {
+                        selectedFilter = nil
+                    } label: {
+                        Label("Clear", systemImage: "xmark.circle")
+                            .font(.caption)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                    }
+                    .opacity(selectedFilter != nil ? 1.0 : 0.5)
+                    
+                    // Filter buttons
+                    ForEach(filters) { filter in
+                        Button {
+                            selectedFilter = filter
+                        } label: {
+                            HStack(spacing: 6) {
+                                // Icon
+                                if let iconUrl = filter.iconUrl {
+                                    AsyncImage(url: iconUrl) { image in
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                    } placeholder: {
+                                        Image(systemName: "folder")
+                                    }
+                                    .frame(width: 28, height: 28)
+                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                }
+                                
+                                Text(filter.name)
+                                    .font(.caption)
+                                    .lineLimit(1)
+                                
+                                if selectedFilter?.identifier == filter.identifier {
+                                    Image(systemName: "checkmark")
+                                        .font(.caption)
+                                }
+                            }
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 3)
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -365,6 +478,52 @@ extension TVSearchView {
                 // Filter out any docs where collection contains "tvarchive"
                 items = data.response.docs.filter { doc in
                     // Exclude docs that have "tvarchive" in their collections
+                    return !doc.collection.contains { $0.lowercased() == "tvarchive" }
+                }
+                isSearching = false
+                
+                if items.isEmpty {
+                    noDataFound = true
+                    archiveError = "No results found"
+                }
+                
+            } catch let error as ArchiveServiceError {
+                guard !Task.isCancelled else { return }
+                archiveError = error.description
+                noDataFound = true
+                isSearching = false
+            } catch {
+                guard !Task.isCancelled else { return }
+                isSearching = false
+            }
+        }
+        
+        func performFilteredSearch(collection: String?) async {
+            let query = searchText.trimmingCharacters(in: .whitespaces)
+            
+            // If no search text, just filter by collection
+            let searchQuery = query.isEmpty ? "*" : query
+            
+            isSearching = true
+            noDataFound = false
+            archiveError = nil
+            page = 1
+            
+            do {
+                let data = try await service.searchPPSAsync(
+                    query: searchQuery,
+                    mediaTypes: mediaTypes,
+                    rows: rows,
+                    page: page,
+                    format: nil,
+                    collection: collection
+                )
+                
+                // Check if task was cancelled
+                guard !Task.isCancelled else { return }
+                
+                // Filter out any docs where collection contains "tvarchive"
+                items = data.response.docs.filter { doc in
                     return !doc.collection.contains { $0.lowercased() == "tvarchive" }
                 }
                 isSearching = false
