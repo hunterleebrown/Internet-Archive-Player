@@ -24,12 +24,10 @@ struct Home: View {
     @State var showNetworkAlert: Bool = false
     @State var showControls: Bool = false
     @State var showHistory: Bool = false
-    @State var maxControlHeight: Bool = true
     @State var otherPlaylistPresented: Bool = false
     @State var selectedTab: Int = 1
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
-    static var controlHeightPass = PassthroughSubject<Bool, Never>()
     static var otherPlaylistPass = PassthroughSubject<ArchiveFileEntity, Never>()
     static var newPlaylistPass = PassthroughSubject<String?, Never>()
 
@@ -50,16 +48,12 @@ struct Home: View {
                     Button(action: {
                         withAnimation {
                             showControls.toggle()
-                            // Don't change height when manually toggling - keep it at 160
-                            if showControls {
-                                iaPlayer.playerHeight = 160
-                            }
                         }
                     }, label: {
-                        Image(systemName: "rectangle.expand.vertical")
-                            .foregroundColor(.fairyRed)
+                        AnimatedSpeakerWave(isAnimating: !showControls)
+                            .foregroundColor(.fairyCream)
                             .frame(width: 44, height: 44)
-                            .background(Color.fairyCream)
+                            .background(Color.fairyRed)
                             .cornerRadius(10)
                     })
                     .padding(.trailing, 10)
@@ -81,33 +75,25 @@ struct Home: View {
 
                 // Now Playing Tab - Where the action happens
                 NavigationStack {
-                    VStack(spacing:0) {
-                        topView()
-                            .navigationTitle("Now Playing")
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    NavigationLink(destination: ListsView()) {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "music.note.list")
-                                            Text("Playlists")
-                                        }
-                                        .foregroundColor(.fairyRed)
+                    topView()
+                        .navigationTitle("Now Playing")
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                NavigationLink(destination: ListsView()) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "music.note.list")
+                                        Text("Playlists")
                                     }
+                                    .foregroundColor(.fairyRed)
                                 }
                             }
-                            .sheet(item: $playingFile, content: { file in
-                                if let identifier = file.identifier {
-                                    Detail(identifier, isPresented: true)
-                                }
-                            })
-                    }
-                    .safeAreaInset(edge: .bottom) {
-                        if showControls {
-                            Spacer()
-                                .frame(height: iaPlayer.playerHeight)
                         }
-                    }
-                    .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
+                        .sheet(item: $playingFile, content: { file in
+                            if let identifier = file.identifier {
+                                Detail(identifier, isPresented: true)
+                            }
+                        })
+                        .navigationBarColor(backgroundColor: Color("playerBackground").opacity(0.5), titleColor: .fairyRed)
                 }
                 .tabItem {
                     Label("Now Playing", systemImage: "play.circle.fill")
@@ -143,25 +129,42 @@ struct Home: View {
                     PlayerControls(showVideoPlayer: $showVideoPlayer)
                         .padding(5)
                 }
+                .padding(.bottom, 59)  // Include tab bar padding in measurement
+                .background(
+                    GeometryReader { geometry in
+                        Color.clear
+                            .preference(key: PlayerHeightPreferenceKey.self, value: geometry.size.height)
+                            .onAppear {
+                                // Ensure height is set when view appears
+                                if showControls {
+                                    iaPlayer.playerHeight = geometry.size.height
+                                }
+                            }
+                    }
+                )
+                .onPreferenceChange(PlayerHeightPreferenceKey.self) { height in
+                    // Update height with the full measurement including tab bar padding
+                    if height > 0 && showControls {
+                        iaPlayer.playerHeight = height
+                    }
+                }
+                .onChange(of: showControls) { _, isShowing in
+                    if isShowing {
+                        // Force layout and height calculation after a brief delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            // By this time, GeometryReader should have measured
+                            // If height is still 0, use fallback
+                            if iaPlayer.playerHeight == 0 {
+                                iaPlayer.playerHeight = 219
+                            }
+                        }
+                    } else {
+                        // When hiding, immediately set to 0
+                        iaPlayer.playerHeight = 0
+                    }
+                }
                 .opacity(showControls ? 1 : 0)
-                .frame(maxWidth: 428, minHeight: iaPlayer.playerHeight, maxHeight: iaPlayer.playerHeight, alignment: .top)
-//                .clipped()
-//                .gesture(DragGesture(minimumDistance: 3.0, coordinateSpace: .local)
-//                    .onEnded { value in
-//                        print(value.translation)
-//                        switch(value.translation.width, value.translation.height) {
-//                        case (...0, -30...30):  print("left swipe")
-//                        case (0..., -30...30):  print("right swipe")
-//                        case (-100...100, ...0):
-//                            print("up swipe")
-//                            Home.controlHeightPass.send(true)
-//                        case (-100...100, 0...):  print("down swipe")
-//                            Home.controlHeightPass.send(false)
-//                        default:  print("no clue")
-//                        }
-//                    }
-//                )
-                .padding(.bottom, 59)
+                .frame(maxWidth: 428)
             }
             .zIndex(showControls ? 3: 1)
 
@@ -211,17 +214,17 @@ struct Home: View {
         .onReceive(Home.showControlsPass) { show in
             withAnimation {
                 showControls = show
-                iaPlayer.playerHeight = show ? 160 : 0
+                // Set to 0 immediately when hiding, otherwise let GeometryReader calculate
+                if !show {
+                    iaPlayer.playerHeight = 0
+                } else if iaPlayer.playerHeight == 0 {
+                    // Fallback: player controls height + tab bar padding (160 + 59 = 219)
+                    iaPlayer.playerHeight = 219
+                }
             }
         }
         .onReceive(Player.networkAlert, perform: { badNetwork in
             showNetworkAlert = true
-        })
-        .onReceive(Home.controlHeightPass, perform: { show in
-            iaPlayer.playerHeight = show ? 160 : 58
-            withAnimation {
-                maxControlHeight = show
-            }
         })
         .onReceive(Home.otherPlaylistPass, perform: { archiveFileEntiity in
             viewModel.archiveFileEntity = archiveFileEntiity
@@ -416,6 +419,49 @@ extension Home {
             
             player.playFile(archiveFile)
             print("✅ Added to Now Playing")
+        }
+    }
+}
+
+// MARK: - Animated Speaker Wave View
+struct AnimatedSpeakerWave: View {
+    let isAnimating: Bool
+    
+    @EnvironmentObject private var player: Player
+    @State private var currentFrame: Int = 0
+    @State private var isPlaying: Bool = false
+    
+    private let frames = [
+        "speaker.wave.1",
+        "speaker.wave.2",
+        "speaker.wave.3"
+    ]
+    
+    private let timer = Timer.publish(every: 0.3, on: .main, in: .common).autoconnect()
+    
+    var body: some View {
+        Image(systemName: iconName)
+            .onReceive(timer) { _ in
+                if shouldAnimate {
+                    currentFrame = (currentFrame + 1) % frames.count
+                }
+            }
+            .onReceive(player.playingPublisher) { playing in
+                isPlaying = playing
+            }
+    }
+    
+    private var shouldAnimate: Bool {
+        isAnimating && isPlaying
+    }
+    
+    private var iconName: String {
+        if shouldAnimate {
+            return frames[currentFrame]
+        } else if isPlaying {
+            return "speaker.wave.3"
+        } else {
+            return "speaker"
         }
     }
 }

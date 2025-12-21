@@ -40,9 +40,7 @@ struct SearchView: View {
         .sheet(isPresented: $showCollections) {
             collectionsSheet
         }
-        .safeAreaInset(edge: .bottom) {
-            playerSafeArea
-        }
+        .avoidPlayer()
         .navigationTitle("Search")
         .tint(.fairyRed)
         .navigationDestination(item: $selectedItemIdentifier) { identifier in
@@ -220,11 +218,6 @@ struct SearchView: View {
             let filterViewModel = SearchFiltersViewModel(collectionType: topCollectionType)
             SearchFilters(searchFiltersViewModel: filterViewModel, delegate: self)
         }
-    }
-    
-    private var playerSafeArea: some View {
-        Spacer()
-            .frame(height: iaPlayer.playingFile != nil ? iaPlayer.playerHeight + 10 : 0)
     }
     
     // MARK: - Helper Methods

@@ -389,7 +389,6 @@ struct Detail: View {
                                             Spacer()
                                         }
                                     }
-                                    .foregroundColor(.secondary)
                                     .opacity(0.7)
                                     .frame(maxWidth: .infinity, alignment: .center)
                                     .padding(.horizontal, 8)

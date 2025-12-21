@@ -89,14 +89,11 @@ struct SingleListView: View {
                     .tint(.fairyRed)
             }
         }
-//        .navigationTitle(playlistEntity.name ?? "List")
+        .navigationTitle(playlistEntity.name ?? "List")
         .navigationBarTitleDisplayMode(.inline)
-//        .safeAreaInset(edge: .bottom) {
-//            Spacer()
-//                .frame(height: iaPlayer.playerHeight)
-//        }
+        .avoidPlayer()
         .task {
-            viewModel.setUpSubscribers(iaPlayer)
+            viewModel.configure(player: iaPlayer)
             viewModel.loadFiles(from: playlistEntity)
             iaPlayer.sendPlayingFileForPlaylist()
         }
@@ -106,7 +103,7 @@ struct SingleListView: View {
     }
 
     private func remove(at offsets: IndexSet) {
-        viewModel.removeFiles(at: offsets, from: playlistEntity, player: iaPlayer)
+        viewModel.removeFiles(at: offsets, from: playlistEntity)
     }
 
     private func move(fromOffsets source: IndexSet, toOffset destination: Int) {
@@ -139,25 +136,35 @@ struct SingleListView: View {
 }
 
 extension SingleListView {
+    @MainActor
     final class ViewModel: ObservableObject {
         @Published var playingFile: ArchiveFileEntity? = nil
         @Published var files: [ArchiveFileEntity] = []
-
+        
+        weak var player: Player?
         var cancellables = Set<AnyCancellable>()
-
-        public func setUpSubscribers(_ iaPlayer: Player) {
-            iaPlayer.playingFilePublisher
-                .sink { file in
-                    self.playingFile = file
+        
+        func configure(player: Player) {
+            self.player = player
+            setUpSubscribers()
+        }
+        
+        private func setUpSubscribers() {
+            guard let player = player else { return }
+            player.playingFilePublisher
+                .sink { [weak self] file in
+                    self?.playingFile = file
                 }
                 .store(in: &cancellables)
         }
         
-        public func loadFiles(from playlist: PlaylistEntity) {
+        func loadFiles(from playlist: PlaylistEntity) {
             files = playlist.files?.array as? [ArchiveFileEntity] ?? []
         }
         
-        public func removeFiles(at offsets: IndexSet, from playlist: PlaylistEntity, player: Player) {
+        func removeFiles(at offsets: IndexSet, from playlist: PlaylistEntity) {
+            guard let player = player else { return }
+            
             // Capture the entities to remove before modifying the array
             let entitiesToRemove = offsets.map { files[$0] }
             
@@ -174,7 +181,7 @@ extension SingleListView {
             }
         }
         
-        public func moveFiles(fromOffsets source: IndexSet, toOffset destination: Int, in playlist: PlaylistEntity) {
+        func moveFiles(fromOffsets source: IndexSet, toOffset destination: Int, in playlist: PlaylistEntity) {
             // First update the local array to keep UI in sync immediately
             files.move(fromOffsets: source, toOffset: destination)
             

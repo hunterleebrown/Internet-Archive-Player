@@ -84,10 +84,7 @@ struct NewFavoritesView: View {
             }
         }
         .tint(.fairyRed)
-        .safeAreaInset(edge: .bottom) {
-            Spacer()
-                .frame(height: iaPlayer.playerHeight)
-        }
+        .avoidPlayer()
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
                 .tint(Color.fairyRed)

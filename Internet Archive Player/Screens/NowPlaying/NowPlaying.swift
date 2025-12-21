@@ -75,12 +75,13 @@ struct NowPlaying: View {
             }
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Filter")
-        .onAppear() {
-            viewModel.setUpSubscribers(iaPlayer)
+        .task {
+            viewModel.configure(player: iaPlayer)
             iaPlayer.sendPlayingFileForPlaylist()
         }
         .scrollContentBackground(.hidden)
         .tint(.fairyRed)
+        .avoidPlayer()
 
     }
 
@@ -122,15 +123,23 @@ struct NowPlaying: View {
 }
 
 extension NowPlaying {
+    @MainActor
     final class ViewModel: ObservableObject {
         @Published var playingFile: ArchiveFileEntity? = nil
-
+        
+        weak var player: Player?
         var cancellables = Set<AnyCancellable>()
-
-        public func setUpSubscribers(_ iaPlayer: Player) {
-            iaPlayer.playingFilePublisher
-                .sink { file in
-                    self.playingFile = file
+        
+        func configure(player: Player) {
+            self.player = player
+            setUpSubscribers()
+        }
+        
+        private func setUpSubscribers() {
+            guard let player = player else { return }
+            player.playingFilePublisher
+                .sink { [weak self] file in
+                    self?.playingFile = file
                 }
                 .store(in: &cancellables)
         }

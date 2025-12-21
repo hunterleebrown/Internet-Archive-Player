@@ -46,6 +46,8 @@
 		5A4F2D5B2A53227C00DCDF95 /* AttString+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D5A2A53227C00DCDF95 /* AttString+Extension.swift */; };
 		5A4F2D5D2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */; };
 		5A5310D12EF79581002C6F5D /* SearchFiltersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD7C43E2EF7953E00BBBA1D /* SearchFiltersViewModel.swift */; };
+		5A5310D32EF88A2C002C6F5D /* PlayerSafeAreaModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5310D22EF88A2C002C6F5D /* PlayerSafeAreaModifier.swift */; };
+		5A5310D52EF88B25002C6F5D /* PLAYER_HEIGHT_REFACTOR.md in Resources */ = {isa = PBXBuildFile; fileRef = 5A5310D42EF88B25002C6F5D /* PLAYER_HEIGHT_REFACTOR.md */; };
 		5A576F822D0E432D0065647C /* ReflectiveGradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A576F812D0E43270065647C /* ReflectiveGradientView.swift */; };
 		5A600D4B2EF0F4AF00F7DCE8 /* CollectionFilterCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A600D4A2EF0F4AF00F7DCE8 /* CollectionFilterCache.swift */; };
 		5A600D4E2EF0F9DB00F7DCE8 /* DetailDescription_tvOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A600D4C2EF0F96C00F7DCE8 /* DetailDescription_tvOS.swift */; };
@@ -155,6 +157,8 @@
 		5A4F2D582A50781D00DCDF95 /* UIImageView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Extension.swift"; sourceTree = "<group>"; };
 		5A4F2D5A2A53227C00DCDF95 /* AttString+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AttString+Extension.swift"; sourceTree = "<group>"; };
 		5A4F2D5C2A5322B900DCDF95 /* ArchiveMetaData+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveMetaData+Extension.swift"; sourceTree = "<group>"; };
+		5A5310D22EF88A2C002C6F5D /* PlayerSafeAreaModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerSafeAreaModifier.swift; sourceTree = "<group>"; };
+		5A5310D42EF88B25002C6F5D /* PLAYER_HEIGHT_REFACTOR.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PLAYER_HEIGHT_REFACTOR.md; sourceTree = "<group>"; };
 		5A576F812D0E43270065647C /* ReflectiveGradientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReflectiveGradientView.swift; sourceTree = "<group>"; };
 		5A600D4A2EF0F4AF00F7DCE8 /* CollectionFilterCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionFilterCache.swift; sourceTree = "<group>"; };
 		5A600D4C2EF0F96C00F7DCE8 /* DetailDescription_tvOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailDescription_tvOS.swift; sourceTree = "<group>"; };
@@ -330,6 +334,8 @@
 		5A4151BB27B3644E007A3623 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				5A5310D22EF88A2C002C6F5D /* PlayerSafeAreaModifier.swift */,
+				5A5310D42EF88B25002C6F5D /* PLAYER_HEIGHT_REFACTOR.md */,
 				5ADED070279B63C300FB2E6D /* BackgroundColorModifier.swift */,
 				5A4151BC27B3645E007A3623 /* Inject.swift */,
 				5A4151BE27B364B4007A3623 /* ServiceContainer.swift */,
@@ -730,6 +736,7 @@
 				5ADED06D279B608F00FB2E6D /* Iconochive-Regular.ttf in Resources */,
 				5ABF75692AAFC4D8001B158B /* ci_post_xcodebuild.sh in Resources */,
 				5ADED040279B56F000FB2E6D /* Preview Assets.xcassets in Resources */,
+				5A5310D52EF88B25002C6F5D /* PLAYER_HEIGHT_REFACTOR.md in Resources */,
 				5ADED03D279B56F000FB2E6D /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -826,6 +833,7 @@
 				5ADA9D832CE9802D00A18ED6 /* WebView.swift in Sources */,
 				5A35A6DC2ABBE8A800A127D6 /* DebugView.swift in Sources */,
 				5A0E151E2EF207F2000A80D2 /* HistoryArchiveFileEntity+CoreDataClass.swift in Sources */,
+				5A5310D32EF88A2C002C6F5D /* PlayerSafeAreaModifier.swift in Sources */,
 				5AD5DAF72AB92FAF00EDB749 /* EntityFileCardView.swift in Sources */,
 				5A6D68A32EEB895200301357 /* SearchItemDisplayable.swift in Sources */,
 				5AD216F22AA5770300325087 /* ListsView.swift in Sources */,
