@@ -9,6 +9,7 @@ import SwiftUI
 import iaAPI
 import UIKit
 import Combine
+import AVKit
 
 struct Detail: View {
     @EnvironmentObject var iaPlayer: Player
@@ -35,6 +36,8 @@ struct Detail: View {
     static var backgroundPass = PassthroughSubject<URL, Never>()
 
     @State private var showFullscreenImage = false
+
+    @State var individualPlayerFile: ArchiveFile?
 
     var detailCornerRadius: CGFloat = 5.0
 
@@ -104,6 +107,11 @@ struct Detail: View {
             if let files = viewModel.playlistArchiveFiles {
                 OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFiles: files)
             }
+        }
+        .sheet(item: $individualPlayerFile) { file in
+//            if let file = individualPlayerFile {
+                DetailIndividualPlayer(archiveFile: file)
+//            }
         }
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
@@ -376,15 +384,32 @@ struct Detail: View {
                                         HStack(spacing: 4) {
                                             Image(systemName: "info.circle")
                                                 .font(.caption2)
-                                            Text("Tap a track to play it, or use Play All to queue everything.")
+                                            Text("Tap a track to queue it on Now Playing")
                                                 .font(.caption2)
                                             Spacer()
                                         }
-                                        
+
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "play.circle")
+                                                .font(.caption2)
+                                            Text("Tap Play All to queue everything in a new playlist")
+                                                .font(.caption2)
+                                            Spacer()
+                                        }
+
+
                                         HStack(spacing: 4) {
                                             Image(systemName: PlayerButtonType.ear.rawValue)
                                                 .font(.caption2)
-                                            Text("Long press the ear icon to preview audio.")
+                                            Text("Long press and hold the ear icon to preview audio")
+                                                .font(.caption2)
+                                            Spacer()
+                                        }
+
+                                        HStack(spacing: 4) {
+                                            Image(systemName: PlayerButtonType.ear.rawValue)
+                                                .font(.caption2)
+                                            Text("Long press track to play individual track")
                                                 .font(.caption2)
                                             Spacer()
                                         }
@@ -432,6 +457,9 @@ struct Detail: View {
                                                     return
                                                 } catch {}
                                                 iaPlayer.playFile(file)
+                                            }
+                                            .onLongPressGesture {
+                                                individualPlayerFile = file
                                             }
                                     }
                                     .onAppear {
