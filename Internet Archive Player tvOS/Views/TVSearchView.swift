@@ -195,16 +195,20 @@ struct TVSearchView: View {
             .searchable(text: $viewModel.searchText, prompt: "Search The Internet Archive")
             .onChange(of: selectedFilter) { oldValue, newValue in
                 // When a filter is selected, trigger a search with that collection
-                if let filter = newValue {
-                    Task {
+                Task {
+                    if let filter = newValue {
                         await viewModel.performFilteredSearch(
                             collection: filter.identifier.isEmpty ? nil : filter.identifier
                         )
-                    }
-                } else {
-                    // Filter cleared - search without collection filter
-                    Task {
+                    } else if !viewModel.searchText.isEmpty {
+                        // Filter cleared - only re-search if there's search text
                         await viewModel.performFilteredSearch(collection: nil)
+                    } else {
+                        // Clear results when filter is cleared and no search text
+                        await MainActor.run {
+                            viewModel.items = []
+                            viewModel.noDataFound = false
+                        }
                     }
                 }
             }
@@ -217,10 +221,11 @@ struct TVSearchView: View {
     private func filterRow(title: String, filters: [SearchFilter]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
 
+            Text("Filter by \(title)")
+                .font(.subheadline)
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    Text(title)
-                        .font(.subheadline)
 
                     // Clear filter button
                     Button {
