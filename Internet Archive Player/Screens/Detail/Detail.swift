@@ -525,6 +525,9 @@ struct Detail: View {
                                             } catch {}
                                             iaPlayer.playFile(file)
                                         }
+                                        .onLongPressGesture {
+                                            individualPlayerFile = file
+                                        }
                                 }
                             }
                         }
@@ -548,53 +551,54 @@ struct Detail: View {
                 }
             }
             .background(
+                GeometryReader { geometry in
+                    VStack(spacing: 0) {
+                        if let img = self.backgroundURL,
+                           let color = viewModel.averageColor {
 
-                VStack(spacing: 0) {
-                    if let img = self.backgroundURL,
-                       let color = viewModel.averageColor {
+                            ZStack(alignment: .top) {
 
-                        ZStack(alignment: .top) {
+                                Color(color)
 
-                            Color(color)
+                                AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        Color.clear
 
-                            AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
-                                switch phase {
-                                case .empty:
-                                    Color.clear
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: geometry.size.width, height: 400, alignment: .top)
+                                            .transition(.opacity)
+                                            .blur(radius: backgroundBlur)
 
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: UIScreen.main.bounds.width, height: 400, alignment: .top)
-                                        .transition(.opacity)
-                                        .blur(radius: backgroundBlur)
+                                    case .failure(_):
+                                        EmptyView()
 
-                                case .failure(_):
-                                    EmptyView()
-
-                                @unknown default:
-                                    EmptyView()
+                                    @unknown default:
+                                        EmptyView()
+                                    }
                                 }
+                                .frame(height: 400)
+                                .clipped()
                             }
-                            .frame(height: 400)
-                            .clipped()
-                        }
 
 
-                        if let gradient = viewModel.gradient {
-                            LinearGradient(
-                                gradient: gradient,
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .ignoresSafeArea() // Makes the gradient cover the entire screen
-                        } else {
-                            Color(color)
+                            if let gradient = viewModel.gradient {
+                                LinearGradient(
+                                    gradient: gradient,
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                                .ignoresSafeArea() // Makes the gradient cover the entire screen
+                            } else {
+                                Color(color)
+                            }
+
                         }
 
                     }
-
                 }
             )
             .listStyle(.plain)

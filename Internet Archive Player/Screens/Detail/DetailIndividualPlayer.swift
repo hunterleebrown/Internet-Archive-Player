@@ -58,6 +58,9 @@ struct DetailIndividualPlayer: View {
                                         .font(.caption)
                                         .foregroundColor(.fairyCream)
                                 }
+
+                                AirPlayButton()
+                                    .frame(width: 44, height: 44)
                             }
                         }
                         .shadow(radius: 10)
@@ -151,7 +154,7 @@ struct DetailIndividualPlayer: View {
         .onAppear {
             iaPlayer.avPlayer.pause()
             viewModel.setupPlayer()
-            if let player = viewModel.player {
+            if viewModel.player != nil {
                 viewModel.togglePlayPause()
             }
         }
@@ -236,14 +239,16 @@ extension DetailIndividualPlayer {
             // Add simple time observer
             let interval = CMTime(seconds: 0.5, preferredTimescale: 600)
             timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-                guard let self = self, !self.isSeeking else { return }
-                self.currentTime = time.seconds
-                
-                // Update duration if we didn't get it initially
-                if let currentItem = self.player?.currentItem {
-                    let itemDuration = currentItem.duration
-                    if itemDuration.isValid, !itemDuration.seconds.isNaN, !itemDuration.seconds.isInfinite, self.duration == 0 {
-                        self.duration = itemDuration.seconds
+                MainActor.assumeIsolated {
+                    guard let self = self, !self.isSeeking else { return }
+                    self.currentTime = time.seconds
+                    
+                    // Update duration if we didn't get it initially
+                    if let currentItem = self.player?.currentItem {
+                        let itemDuration = currentItem.duration
+                        if itemDuration.isValid, !itemDuration.seconds.isNaN, !itemDuration.seconds.isInfinite, self.duration == 0 {
+                            self.duration = itemDuration.seconds
+                        }
                     }
                 }
             }
@@ -254,8 +259,10 @@ extension DetailIndividualPlayer {
                 object: playerItem,
                 queue: .main
             ) { [weak self] _ in
-                self?.isPlaying = false
-                self?.player?.seek(to: .zero)
+                MainActor.assumeIsolated {
+                    self?.isPlaying = false
+                    self?.player?.seek(to: .zero)
+                }
             }
         }
         
