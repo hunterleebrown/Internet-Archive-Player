@@ -33,6 +33,9 @@ struct Home: View {
     static var otherPlaylistPass = PassthroughSubject<ArchiveFileEntity, Never>()
     static var newPlaylistPass = PassthroughSubject<String?, Never>()
 
+    static var searchPass = PassthroughSubject<ArchiveMetaData, Never>()
+    static var searchPassInternal = PassthroughSubject<ArchiveMetaData, Never>()
+
     @State var newPlaylistName: NewPlaylistData? = nil
 
     @StateObject var viewModel: Home.ViewModel = Home.ViewModel()
@@ -229,6 +232,16 @@ struct Home: View {
         })
         .onReceive(PlayerControls.toggleHistory, perform: { _ in
             showHistory.toggle()
+        })
+        .onReceive(Home.searchPass, perform: { collection in
+            // First, switch to the search tab
+            selectedTab = 0
+            
+            // Then, after a brief delay to ensure SearchView is visible,
+            // forward the collection to the internal publisher
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                Home.searchPassInternal.send(collection)
+            }
         })
         .sheet(isPresented: $showHistory) {
             HistoryDrawerView(isPresented: $showHistory)

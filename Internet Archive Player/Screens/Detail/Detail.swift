@@ -91,7 +91,9 @@ struct Detail: View {
             viewModel.passInPlayer(iaPlayer: iaPlayer)
             viewModel.checkFavoriteStatus(identifier: identifier)
             await viewModel.getArchiveDoc(identifier: identifier)
-            isLoading = false
+            withAnimation {
+                isLoading = false
+            }
         }
         .sheet(isPresented: $descriptionExpanded) {
             if let doc = self.viewModel.archiveDoc {
@@ -121,6 +123,9 @@ struct Detail: View {
             withAnimation(.linear(duration: 0.3)) {
                 self.backgroundURL = url
             }
+        }
+        .onReceive(Home.searchPass) { _ in
+            dismiss()
         }
         .edgesIgnoringSafeArea(.top)
         .safeAreaInset(edge: .top, content: {
@@ -267,13 +272,8 @@ struct Detail: View {
                     }
                     .background(
                         Color.white.opacity(0.5)
-                        //                Color(avgColor(viewModel) ?? .white).opacity(0.5)
                     )
-                    //            .cornerRadius(detailCornerRadius)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    //            .padding()
-
-
 
                     VStack(alignment: .center, spacing: 5.0) {
 
@@ -538,7 +538,8 @@ struct Detail: View {
                                 case .success(let image):
                                     image
                                         .resizable()
-                                        .scaledToFill()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: UIScreen.main.bounds.width, height: 400, alignment: .top)
                                         .transition(.opacity)
                                         .blur(radius: backgroundBlur)
 

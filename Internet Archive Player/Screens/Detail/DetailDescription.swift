@@ -85,7 +85,7 @@ struct DetailDescription: View {
                         
                         // Collections with icons
                         if !doc.collectionArchives.isEmpty {
-                            CollectionsMetadataRow(collectionArchives: doc.collectionArchives)
+                            CollectionsMetadataRow(collectionArchives: doc.collectionArchives, dismiss: dismiss)
                         }
                         
                         if let publisher = doc.publisher, !publisher.isEmpty {
@@ -225,6 +225,7 @@ private struct MetadataRow: View {
 // Helper view for displaying collections with icons
 private struct CollectionsMetadataRow: View {
     let collectionArchives: [Archive]
+    let dismiss: DismissAction
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -265,10 +266,22 @@ private struct CollectionsMetadataRow: View {
                             RoundedRectangle(cornerRadius: 6)
                                 .fill(Color.white)
                         )
+                        .onTapGesture {apGesture in
+                            guard let meta = archive.metadata else { return }
+                            goToSearchWithCollection(collection: meta)
+                        }
                     }
                 }
             }
         }
+    }
+
+    func goToSearchWithCollection(collection: ArchiveMetaData)  {
+        // Send the filter (this will dismiss both sheets via their respective onReceive handlers)
+        Home.searchPass.send(collection)
+
+        // Dismiss DetailDescription sheet
+        dismiss()
     }
 }
 
