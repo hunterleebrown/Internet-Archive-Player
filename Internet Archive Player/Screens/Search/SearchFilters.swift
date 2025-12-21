@@ -10,15 +10,22 @@ import iaAPI
 import SwiftUI
 import UIKit
 
-struct SearchFilter: Hashable {
+struct SearchFilter: Identifiable, Hashable {
     var name: String
     var identifier: String
     var iconUrl: URL?
     var uiImage: UIImage?
     var image: Image?
+    
+    // Use identifier as the unique id for Identifiable conformance
+    var id: String { identifier }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(name)
+        hasher.combine(identifier)
+    }
+    
+    static func == (lhs: SearchFilter, rhs: SearchFilter) -> Bool {
+        lhs.identifier == rhs.identifier
     }
 }
 
@@ -40,16 +47,6 @@ struct SearchFilters: View {
                     .bold()
                 
                 Spacer()
-                
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        dismiss()
-                    }
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.fairyRed)
-                        .font(.title3)
-                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -70,77 +67,48 @@ struct SearchFilters: View {
             Divider()
             
             // List of collections
-            List(searchFiltersViewModel.items, id: \.self, selection: $searchFilter) { filter in
-                HStack(spacing: 10) {
-                    // Collection icon
-                    Group {
-                        if let image = filter.image {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 40, height: 40)
-                        } else if let uiImage = filter.uiImage {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 40, height: 40)
-                        } else if filter.iconUrl != nil {
-                            AsyncImage(
-                                url: filter.iconUrl,
-                                content: { image in
-                                    image.resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 40, height: 40)
-                                        .background(Color.black)
-                                },
-                                placeholder: {
-                                    Color(.systemGray5)
-                                        .frame(width: 40, height: 40)
-                                })
-                            .cornerRadius(5)
-                        }
+            List {
+                // Collection-based filters section
+                Section {
+                    ForEach(searchFiltersViewModel.items) { filter in
+                        filterRow(for: filter)
+                            .onTapGesture {
+                                searchFilter = filter
+                            }
                     }
-                    .frame(width: 40, height: 40)
-                    
-                    // Collection name and identifier
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(filter.name)
+                } header: {
+                    if !searchFiltersViewModel.userFilters.isEmpty {
+                        Text("Collections")
                             .font(.subheadline)
-                            .foregroundColor(isSelected(filter) ? .white : .primary)
-                            .lineLimit(2)
-                        
-                        if !filter.identifier.isEmpty {
-                            Text(filter.identifier)
-                                .font(.caption2)
-                                .foregroundColor(isSelected(filter) ? .white.opacity(0.8) : .secondary)
-                                .lineLimit(1)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    // Checkmark for selected
-                    if isSelected(filter) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.white)
-                            .font(.callout)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.fairyRed)
+                            .textCase(nil)
+                            .padding(.top, 8)
                     }
                 }
-                .padding(.vertical, 10)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(isSelected(filter) ? Color.fairyRed : Color(UIColor.systemGray6))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(isSelected(filter) ? Color.fairyRed.opacity(0.3) : Color.clear, lineWidth: 2)
-                )
-                .listRowInsets(EdgeInsets(top: 3, leading: 16, bottom: 3, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
+                
+                // User filters section
+                if !searchFiltersViewModel.userFilters.isEmpty {
+                    Section {
+                        ForEach(searchFiltersViewModel.userFilters) { filter in
+                            filterRow(for: filter)
+                                .onTapGesture {
+                                    searchFilter = filter
+                                }
+                        }
+                    } header: {
+                        Text("My Filters")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.fairyRed)
+                            .textCase(nil)
+                            .padding(.top, 8)
+                    }
+                }
             }
             .listStyle(.plain)
         }
+        .presentationDragIndicator(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(UIColor.systemBackground))
         .onChange(of: searchFilter) { oldValue, newValue in
@@ -160,6 +128,80 @@ struct SearchFilters: View {
         }
     }
     
+    // MARK: - Helper Views
+    
+    /// Reusable filter row view
+    @ViewBuilder
+    private func filterRow(for filter: SearchFilter) -> some View {
+        HStack(spacing: 10) {
+            // Collection icon
+            Group {
+                if let image = filter.image {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 40, height: 40)
+                } else if let uiImage = filter.uiImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 40, height: 40)
+                } else if filter.iconUrl != nil {
+                    AsyncImage(
+                        url: filter.iconUrl,
+                        content: { image in
+                            image.resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 40, height: 40)
+                                .background(Color.black)
+                        },
+                        placeholder: {
+                            Color(.systemGray5)
+                                .frame(width: 40, height: 40)
+                        })
+                    .cornerRadius(5)
+                }
+            }
+            .frame(width: 40, height: 40)
+            
+            // Collection name and identifier
+            VStack(alignment: .leading, spacing: 2) {
+                Text(filter.name)
+                    .font(.subheadline)
+                    .foregroundColor(isSelected(filter) ? .white : .primary)
+                    .lineLimit(2)
+                
+                if !filter.identifier.isEmpty {
+                    Text(filter.identifier)
+                        .font(.caption2)
+                        .foregroundColor(isSelected(filter) ? .white.opacity(0.8) : .secondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            // Checkmark for selected
+            if isSelected(filter) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.white)
+                    .font(.callout)
+            }
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(isSelected(filter) ? Color.fairyRed : Color(UIColor.systemGray6))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isSelected(filter) ? Color.fairyRed.opacity(0.3) : Color.clear, lineWidth: 2)
+        )
+        .listRowInsets(EdgeInsets(top: 3, leading: 16, bottom: 3, trailing: 16))
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
+    }
+    
     private func isSelected(_ filter: SearchFilter) -> Bool {
         delegate?.collectionName == filter.name
     }
@@ -177,6 +219,7 @@ class SearchFiltersViewModel: ObservableObject {
 
     let collectionType : ArchiveTopCollectionType
     @Published var items: [SearchFilter] = []
+    @Published var userFilters: [SearchFilter] = []
     
     private let cache = CollectionFilterCache.shared
 
@@ -188,6 +231,9 @@ class SearchFiltersViewModel: ObservableObject {
         Task {
             // Use cached data instead of making a new network request
             self.items = await cache.getFilters(for: self.collectionType)
+            
+            // Load user filters (these appear on both audio and video screens)
+            self.userFilters = cache.userFilters
             
             if self.items.isEmpty {
                 print("No filters available for \(self.collectionType.rawValue)")

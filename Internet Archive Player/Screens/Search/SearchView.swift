@@ -31,7 +31,7 @@ struct SearchView: View {
     var body: some View {
         VStack(spacing: 0) {
             headerView
-            
+
             Divider()
 
             searchResultsList
@@ -48,8 +48,11 @@ struct SearchView: View {
         .navigationDestination(item: $selectedItemIdentifier) { identifier in
             Detail(identifier)
         }
+        .onReceive(Home.searchPassInternal, perform: { collection in
+            setSearchFilter(collection)
+        })
     }
-    
+
     // MARK: - View Components
     
     private var headerView: some View {
@@ -68,8 +71,9 @@ struct SearchView: View {
                 .tag(1)
         }
         .pickerStyle(.segmented)
+        .controlSize(.large)
         .padding(.horizontal, 20)
-        .padding(.top, 12)
+//        .padding(.vertical, 8) // Add vertical padding for better tap targets
         .onChange(of: viewModel.mediaType) {
             // Reset filter to "All" when switching media types
             searchFilter = SearchFilter(name: "All", identifier: "")
@@ -94,7 +98,13 @@ struct SearchView: View {
                 Text("Tip: Long press items for more options")
                     .font(.caption2)
                 Spacer()
+
+                if viewModel.isSearching {
+                    ProgressView()
+                        .frame(width: 24, height: 24)
+                }
             }
+            .frame(height: 24)
             .foregroundColor(.secondary)
             .opacity(0.7)
         }
@@ -179,7 +189,7 @@ struct SearchView: View {
 
                     if let meta = viewModel.firstCollection(doc) {
                         Button {
-                            handleCollectionTap(meta)
+                            setSearchFilter(meta)
                         } label: {
                             Label("Filter by Collection \(meta.archiveTitle ?? "Unknown")", systemImage: "line.3.horizontal.decrease.circle")
                         }
@@ -223,15 +233,15 @@ struct SearchView: View {
     private func handleItemTap(_ item: ArchiveMetaData) {
         if item.mediatype == .collection {
             // If it's a collection, set it as filter and search
-            handleCollectionTap(item)
+            setSearchFilter(item)
         } else {
             // If it's a regular item, navigate to detail
             selectedItemIdentifier = item.identifier
         }
     }
     
-    /// Handles when a collection item is tapped in search results
-    private func handleCollectionTap(_ collection: ArchiveMetaData) {
+    /// Sets the search filter based on a collection and triggers a search
+    private func setSearchFilter(_ collection: ArchiveMetaData) {
         // Convert the collection to a SearchFilter
         let filter = SearchFilter(
             name: collection.archiveTitle ?? "Unknown Collection",
@@ -240,6 +250,9 @@ struct SearchView: View {
             uiImage: nil,
             image: nil
         )
+        
+        // Add filter to cache (will only add if identifier doesn't already exist)
+        CollectionFilterCache.shared.addUserFilter(filter)
         
         // Update the UI state
         searchFilter = filter

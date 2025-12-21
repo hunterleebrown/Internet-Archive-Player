@@ -19,6 +19,7 @@ class CollectionFilterCache: ObservableObject {
     // Cached filters by collection type
     @Published private(set) var audioFilters: [SearchFilter] = []
     @Published private(set) var moviesFilters: [SearchFilter] = []
+    @Published private(set) var userFilters: [SearchFilter] = []
     
     // Dictionary for fast lookup by identifier
     private var filtersByIdentifier: [String: SearchFilter] = [:]
@@ -119,10 +120,36 @@ class CollectionFilterCache: ObservableObject {
         await loadFilters(for: type)
     }
     
+    /// Add a user-defined filter
+    /// - Parameter filter: The filter to add
+    /// - Returns: True if successfully added, false if identifier already exists
+    @discardableResult
+    func addUserFilter(_ filter: SearchFilter) -> Bool {
+        // Check if identifier already exists in any filter collection
+        guard !filter.identifier.isEmpty else {
+            print("Cannot add filter: identifier is empty")
+            return false
+        }
+        
+        if filtersByIdentifier[filter.identifier] != nil {
+            print("Cannot add filter: identifier '\(filter.identifier)' already exists")
+            return false
+        }
+        
+        // Add to user filters array
+        userFilters.append(filter)
+        
+        // Add to lookup dictionary
+        filtersByIdentifier[filter.identifier] = filter
+        
+        return true
+    }
+    
     /// Clear all cached data
     func clearCache() {
         audioFilters = []
         moviesFilters = []
+        userFilters = []
         filtersByIdentifier = [:]
         hasLoadedAudio = false
         hasLoadedMovies = false
