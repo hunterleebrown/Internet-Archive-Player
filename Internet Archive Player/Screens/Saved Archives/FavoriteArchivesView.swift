@@ -91,10 +91,7 @@ struct FavoriteArchivesView: View {
                     .padding(.bottom, 16)
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                Spacer()
-                    .frame(height: iaPlayer.playerHeight)
-            }
+            .avoidPlayer()
             .background(Color(UIColor.systemBackground))
             .navigationTitle("Bookmarks")
             .navigationDestination(for: ArchiveMetaDataEntity.self) { archive in

@@ -164,11 +164,15 @@ struct PlayerControls: View {
             .tint(foregroundColor)
         }
         .padding(5)
-        .background(
-            backgroundColor
-        )
+        .background(backgroundColor)
         .coordinateSpace(name: "playerControls")
         .cornerRadius(10)
+        .background(
+            GeometryReader { geometry in
+                Color.clear
+                    .preference(key: PlayerHeightPreferenceKey.self, value: geometry.size.height)
+            }
+        )
         .onAppear() {
             viewModel.setSubscribers(iaPlayer)
         }
@@ -263,6 +267,14 @@ extension PlayerControls {
             }
             return 0
         }
+    }
+}
+
+// MARK: - Preference Key for Player Height
+struct PlayerHeightPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 

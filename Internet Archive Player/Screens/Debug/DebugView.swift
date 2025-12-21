@@ -65,6 +65,7 @@ struct DebugView: View {
                 }
             }
             .listStyle(PlainListStyle())
+            .avoidPlayer()
         }
         .navigationTitle("Debug")
         .padding()

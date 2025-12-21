@@ -16,15 +16,21 @@ struct ListsView: View {
     @EnvironmentObject var iaPlayer: Player
     
     // Toggle this to test different layouts
-    private let useCarouselLayout = true
+    private let useCarouselLayout = false
 
     var body: some View {
         if useCarouselLayout {
             PlaylistsCarouselView(viewModel: viewModel)
                 .environmentObject(iaPlayer)
+                .task {
+                    viewModel.configure(player: iaPlayer)
+                }
         } else {
             PlaylistsListView(viewModel: viewModel)
                 .environmentObject(iaPlayer)
+                .task {
+                    viewModel.configure(player: iaPlayer)
+                }
         }
     }
 }
@@ -55,15 +61,34 @@ private struct PlaylistsListView: View {
                         SingleListView(playlistEntity: list)
                     }   label: {
                         HStack(spacing: 12) {
-                            if list.name == "Now Playing" {
+                            // Show first item's image or fallback to SF Symbol icon
+                            if let imageUrl = list.firstFileImageUrl {
+                                CachedAsyncImage(url: imageUrl) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 40, height: 40)
+                                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                                } placeholder: {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(Color(.systemGray5))
+                                            .frame(width: 40, height: 40)
+                                        ProgressView()
+                                    }
+                                }
+                            } else if list.name == "Now Playing" {
                                 Image(systemName: "play.circle.fill")
                                     .foregroundColor(.fairyRed)
                                     .font(.body)
+                                    .frame(width: 40, height: 40)
                             } else {
                                 Image(systemName: "music.note.list")
                                     .foregroundColor(.secondary)
                                     .font(.body)
+                                    .frame(width: 40, height: 40)
                             }
+                            
                             Text(list.name ?? "Untitled Playlist")
                                 .foregroundColor(list.name == "Now Playing" ? .fairyRed : .primary)
                                 .fontWeight(list.name == "Now Playing" ? .semibold : .regular)
@@ -71,7 +96,7 @@ private struct PlaylistsListView: View {
                     }
                 }
                 .onDelete { offsets in
-                    viewModel.remove(at: offsets, player: iaPlayer)
+                    viewModel.remove(at: offsets)
                 }
             }
             .listStyle(PlainListStyle())
@@ -85,10 +110,7 @@ private struct PlaylistsListView: View {
                     Text("Create Playlist")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                Spacer()
-                    .frame(height: iaPlayer.playerHeight)
-            }
+            .avoidPlayer()
         }
     }
 }
@@ -138,7 +160,7 @@ private struct PlaylistsCarouselView: View {
                                 content: AnyView(SingleListView(playlistEntity: list, showToolbar: false)),
                                 showDeleteButton: list.name != "Now Playing",
                                 onDelete: {
-                                    viewModel.remove(at: IndexSet(integer: index), player: iaPlayer)
+                                    viewModel.remove(at: IndexSet(integer: index))
                                 },
                                 playlistEntity: list
                             )
@@ -159,10 +181,7 @@ private struct PlaylistsCarouselView: View {
                     Text("Create Playlist")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                Spacer()
-                    .frame(height: iaPlayer.playerHeight)
-            }
+            .avoidPlayer()
         }
     }
 }
@@ -180,29 +199,12 @@ private struct FullPlaylistCard: View {
     
     @State private var showDeleteConfirmation = false
     
-    // Get the first file's image URL from the playlist
-    private var firstFileImageUrl: URL? {
-        guard let playlist = playlistEntity,
-              let files = playlist.files?.array as? [ArchiveFileEntity],
-              let firstFile = files.first else {
-            return nil
-        }
-        
-        // Try to get the archive's icon URL from the identifier
-        if let identifier = firstFile.identifier {
-            // Construct the archive.org thumbnail URL
-            return URL(string: "https://archive.org/services/img/\(identifier)")
-        }
-        
-        return nil
-    }
-    
     var body: some View {
         VStack(spacing: 0) {
             // Header with icon/image, title, and gradient background
             HStack(alignment: .center, spacing: 12) {
                 // Show first item's image or fallback to SF Symbol icon
-                if let imageUrl = firstFileImageUrl {
+                if let imageUrl = playlistEntity?.firstFileImageUrl {
                     CachedAsyncImage(url: imageUrl) { image in
                         image
                             .resizable()
@@ -280,12 +282,29 @@ private struct FullPlaylistCard: View {
     }
 }
 
+// MARK: - PlaylistEntity Extension
+extension PlaylistEntity {
+    /// Get the first file's image URL from the playlist
+    var firstFileImageUrl: URL? {
+        guard let files = self.files?.array as? [ArchiveFileEntity],
+              let firstFile = files.first,
+              let identifier = firstFile.identifier else {
+            return nil
+        }
+        
+        // Construct the archive.org thumbnail URL
+        return URL(string: "https://archive.org/services/img/\(identifier)")
+    }
+}
+
 extension ListsView {
 
     @MainActor
     final class ViewModel: NSObject, ObservableObject {
         @Published var lists: [PlaylistEntity] = [PlaylistEntity]()
         @Published var isLoading: Bool = true
+        
+        weak var player: Player?
         private let listsFetchController: NSFetchedResultsController<PlaylistEntity>
 
         override init() {
@@ -302,6 +321,10 @@ extension ListsView {
             Task { @MainActor in
                 await self.performInitialFetch()
             }
+        }
+        
+        func configure(player: Player) {
+            self.player = player
         }
         
         private func performInitialFetch() async {
@@ -344,7 +367,8 @@ extension ListsView {
         }
 
 
-        func remove(at offsets: IndexSet, player: Player) {
+        func remove(at offsets: IndexSet) {
+            guard let player = player else { return }
             Task { @MainActor in
                 for index in offsets {
                     let list = lists[index]

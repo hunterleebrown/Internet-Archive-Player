@@ -96,10 +96,7 @@ struct OtherPlaylist: View {
             }
         }
         .presentationDragIndicator(.visible)
-        .safeAreaInset(edge: .bottom) {
-            Spacer()
-                .frame(height: iaPlayer.playerHeight)
-        }
+        .avoidPlayer()
     }
 }
 
