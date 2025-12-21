@@ -538,7 +538,8 @@ struct Detail: View {
                                 case .success(let image):
                                     image
                                         .resizable()
-                                        .scaledToFill()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: UIScreen.main.bounds.width, height: 400, alignment: .top)
                                         .transition(.opacity)
                                         .blur(radius: backgroundBlur)
 

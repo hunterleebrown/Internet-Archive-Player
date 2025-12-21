@@ -9,6 +9,14 @@ import Foundation
 import iaAPI
 import SwiftUI
 
+/// Codable wrapper for persisting filter data
+private struct CachedFilterData: Codable {
+    let audioFilters: [SearchFilter]
+    let moviesFilters: [SearchFilter]
+    let userFilters: [SearchFilter]
+    let timestamp: Date
+}
+
 /// Cache manager for collection filters
 @MainActor
 class CollectionFilterCache: ObservableObject {
@@ -29,7 +37,18 @@ class CollectionFilterCache: ObservableObject {
     @Published private(set) var hasLoadedAudio = false
     @Published private(set) var hasLoadedMovies = false
     
-    private init() {}
+    // Cache configuration
+    private let cacheExpirationInterval: TimeInterval = 7 * 24 * 60 * 60 // 7 days
+    private let cacheFileName = "collection-filters-cache.json"
+    
+    private var cacheFileURL: URL {
+        let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        return cacheDirectory.appendingPathComponent(cacheFileName)
+    }
+    
+    private init() {
+        loadFromDisk()
+    }
     
     /// Preload both audio and movies filters at app startup
     func preloadFilters() async {
@@ -37,13 +56,101 @@ class CollectionFilterCache: ObservableObject {
         
         isLoading = true
         
-        // Load both concurrently
+        // Check if disk cache is still valid
+        if isCacheValid() {
+            // Cache is still valid, just use what's loaded
+            isLoading = false
+            return
+        }
+        
+        // Cache expired or doesn't exist, fetch fresh data
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadFilters(for: .audio) }
             group.addTask { await self.loadFilters(for: .movies) }
         }
         
+        // Save fresh data to disk
+        saveToDisk()
+        
         isLoading = false
+    }
+    
+    // MARK: - Disk Persistence
+    
+    /// Load cached filters from disk
+    private func loadFromDisk() {
+        guard FileManager.default.fileExists(atPath: cacheFileURL.path) else {
+            return
+        }
+        
+        do {
+            let data = try Data(contentsOf: cacheFileURL)
+            let cachedData = try JSONDecoder().decode(CachedFilterData.self, from: data)
+            
+            // Restore filters
+            audioFilters = cachedData.audioFilters
+            moviesFilters = cachedData.moviesFilters
+            userFilters = cachedData.userFilters
+            
+            // Rebuild lookup dictionary
+            filtersByIdentifier = [:]
+            for filter in (audioFilters + moviesFilters + userFilters) {
+                if !filter.identifier.isEmpty {
+                    filtersByIdentifier[filter.identifier] = filter
+                }
+            }
+            
+            // Mark as loaded if we have data
+            hasLoadedAudio = !audioFilters.isEmpty
+            hasLoadedMovies = !moviesFilters.isEmpty
+            
+            print("Loaded filters from disk cache")
+        } catch {
+            print("Error loading filters from disk: \(error)")
+            // If loading fails, delete corrupted cache
+            try? FileManager.default.removeItem(at: cacheFileURL)
+        }
+    }
+    
+    /// Save current filters to disk
+    private func saveToDisk() {
+        let cacheData = CachedFilterData(
+            audioFilters: audioFilters,
+            moviesFilters: moviesFilters,
+            userFilters: userFilters,
+            timestamp: Date()
+        )
+        
+        do {
+            let data = try JSONEncoder().encode(cacheData)
+            try data.write(to: cacheFileURL, options: .atomic)
+            print("Saved filters to disk cache")
+        } catch {
+            print("Error saving filters to disk: \(error)")
+        }
+    }
+    
+    /// Check if the disk cache is still valid (not expired)
+    private func isCacheValid() -> Bool {
+        guard FileManager.default.fileExists(atPath: cacheFileURL.path) else {
+            return false
+        }
+        
+        do {
+            let data = try Data(contentsOf: cacheFileURL)
+            let cachedData = try JSONDecoder().decode(CachedFilterData.self, from: data)
+            
+            let age = Date().timeIntervalSince(cachedData.timestamp)
+            let isValid = age < cacheExpirationInterval
+            
+            if !isValid {
+                print("Cache expired (age: \(Int(age/86400)) days)")
+            }
+            
+            return isValid
+        } catch {
+            return false
+        }
     }
     
     /// Load filters for a specific collection type
@@ -64,7 +171,8 @@ class CollectionFilterCache: ObservableObject {
             let allFilter = SearchFilter(
                 name: "All \(type.rawValue.capitalized)",
                 identifier: "",
-                image: Image(systemName: iconName)
+                image: Image(systemName: iconName),
+                systemImageName: iconName
             )
             filters.insert(allFilter, at: 0)
             
@@ -86,6 +194,9 @@ class CollectionFilterCache: ObservableObject {
                     filtersByIdentifier[filter.identifier] = filter
                 }
             }
+            
+            // Save to disk after updating
+            saveToDisk()
             
         } catch {
             print("Error loading filters for \(type.rawValue): \(error)")
@@ -142,6 +253,9 @@ class CollectionFilterCache: ObservableObject {
         // Add to lookup dictionary
         filtersByIdentifier[filter.identifier] = filter
         
+        // Save to disk
+        saveToDisk()
+        
         return true
     }
     
@@ -153,5 +267,8 @@ class CollectionFilterCache: ObservableObject {
         filtersByIdentifier = [:]
         hasLoadedAudio = false
         hasLoadedMovies = false
+        
+        // Remove disk cache
+        try? FileManager.default.removeItem(at: cacheFileURL)
     }
 }
