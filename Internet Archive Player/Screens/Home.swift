@@ -52,7 +52,8 @@ struct Home: View {
                     }, label: {
                         AnimatedSpeakerWave(isAnimating: !showControls)
                             .foregroundColor(.fairyCream)
-                            .frame(width: 44, height: 44)
+                            .padding(2)
+                            .frame(width: 44, height: 44, alignment: .leading)
                             .background(Color.fairyRed)
                             .cornerRadius(10)
                     })
@@ -432,6 +433,7 @@ struct AnimatedSpeakerWave: View {
     @State private var isPlaying: Bool = false
     
     private let frames = [
+        "speaker",
         "speaker.wave.1",
         "speaker.wave.2",
         "speaker.wave.3"

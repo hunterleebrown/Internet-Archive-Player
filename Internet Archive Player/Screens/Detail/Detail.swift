@@ -9,6 +9,7 @@ import SwiftUI
 import iaAPI
 import UIKit
 import Combine
+import AVKit
 
 struct Detail: View {
     @EnvironmentObject var iaPlayer: Player
@@ -35,6 +36,8 @@ struct Detail: View {
     static var backgroundPass = PassthroughSubject<URL, Never>()
 
     @State private var showFullscreenImage = false
+
+    @State var individualPlayerFile: ArchiveFile?
 
     var detailCornerRadius: CGFloat = 5.0
 
@@ -104,6 +107,11 @@ struct Detail: View {
             if let files = viewModel.playlistArchiveFiles {
                 OtherPlaylist(isPresented: $otherPlaylistPresented, archiveFiles: files)
             }
+        }
+        .sheet(item: $individualPlayerFile) { file in
+//            if let file = individualPlayerFile {
+                DetailIndividualPlayer(archiveFile: file)
+//            }
         }
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
@@ -376,15 +384,32 @@ struct Detail: View {
                                         HStack(spacing: 4) {
                                             Image(systemName: "info.circle")
                                                 .font(.caption2)
-                                            Text("Tap a track to play it, or use Play All to queue everything.")
+                                            Text("Tap a track to queue it on Now Playing")
                                                 .font(.caption2)
                                             Spacer()
                                         }
-                                        
+
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "play.circle")
+                                                .font(.caption2)
+                                            Text("Tap Play All to queue everything in a new playlist")
+                                                .font(.caption2)
+                                            Spacer()
+                                        }
+
+
                                         HStack(spacing: 4) {
                                             Image(systemName: PlayerButtonType.ear.rawValue)
                                                 .font(.caption2)
-                                            Text("Long press the ear icon to preview audio.")
+                                            Text("Long press and hold the ear icon to preview audio")
+                                                .font(.caption2)
+                                            Spacer()
+                                        }
+
+                                        HStack(spacing: 4) {
+                                            Image(systemName: PlayerButtonType.ear.rawValue)
+                                                .font(.caption2)
+                                            Text("Long press track to play individual track")
                                                 .font(.caption2)
                                             Spacer()
                                         }
@@ -432,6 +457,9 @@ struct Detail: View {
                                                     return
                                                 } catch {}
                                                 iaPlayer.playFile(file)
+                                            }
+                                            .onLongPressGesture {
+                                                individualPlayerFile = file
                                             }
                                     }
                                     .onAppear {
@@ -497,6 +525,9 @@ struct Detail: View {
                                             } catch {}
                                             iaPlayer.playFile(file)
                                         }
+                                        .onLongPressGesture {
+                                            individualPlayerFile = file
+                                        }
                                 }
                             }
                         }
@@ -520,53 +551,54 @@ struct Detail: View {
                 }
             }
             .background(
+                GeometryReader { geometry in
+                    VStack(spacing: 0) {
+                        if let img = self.backgroundURL,
+                           let color = viewModel.averageColor {
 
-                VStack(spacing: 0) {
-                    if let img = self.backgroundURL,
-                       let color = viewModel.averageColor {
+                            ZStack(alignment: .top) {
 
-                        ZStack(alignment: .top) {
+                                Color(color)
 
-                            Color(color)
+                                AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        Color.clear
 
-                            AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
-                                switch phase {
-                                case .empty:
-                                    Color.clear
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: geometry.size.width, height: 400, alignment: .top)
+                                            .transition(.opacity)
+                                            .blur(radius: backgroundBlur)
 
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: UIScreen.main.bounds.width, height: 400, alignment: .top)
-                                        .transition(.opacity)
-                                        .blur(radius: backgroundBlur)
+                                    case .failure(_):
+                                        EmptyView()
 
-                                case .failure(_):
-                                    EmptyView()
-
-                                @unknown default:
-                                    EmptyView()
+                                    @unknown default:
+                                        EmptyView()
+                                    }
                                 }
+                                .frame(height: 400)
+                                .clipped()
                             }
-                            .frame(height: 400)
-                            .clipped()
-                        }
 
 
-                        if let gradient = viewModel.gradient {
-                            LinearGradient(
-                                gradient: gradient,
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .ignoresSafeArea() // Makes the gradient cover the entire screen
-                        } else {
-                            Color(color)
+                            if let gradient = viewModel.gradient {
+                                LinearGradient(
+                                    gradient: gradient,
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                                .ignoresSafeArea() // Makes the gradient cover the entire screen
+                            } else {
+                                Color(color)
+                            }
+
                         }
 
                     }
-
                 }
             )
             .listStyle(.plain)
