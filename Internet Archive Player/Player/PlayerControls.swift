@@ -78,6 +78,7 @@ struct PlayerControls: View {
                         }
                     }
                 }
+                .padding(.horizontal, 5)
             }
 
             Slider(value: $viewModel.progress,
