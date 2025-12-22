@@ -72,26 +72,10 @@ struct PlayerControls: View {
 
                     Spacer()
 
-                    HStack(alignment: .center, spacing: 15) {
-
-                        PlayerButton(.history, CGSize(width: 20, height: 20)) {
-                            PlayerControls.toggleHistory.send()
+                    if viewModel.isPlayingVideo {
+                        PlayerButton(.video, CGSize(width: 20, height: 20)) {
+                            showVideoPlayer = true
                         }
-
-                        if viewModel.isPlayingVideo {
-                            PlayerButton(.video, CGSize(width: 20, height: 20)) {
-                                showVideoPlayer = true
-                            }
-                        }
-
-                        PlayerButton(.hidePlay, CGSize(width: 20, height: 20)) {
-                            withAnimation{
-                                Home.showControlsPass.send(false)
-                            }
-                        }
-
-                        AirPlayButton()
-                            .frame(width: 44, height: 44)
                     }
                 }
             }

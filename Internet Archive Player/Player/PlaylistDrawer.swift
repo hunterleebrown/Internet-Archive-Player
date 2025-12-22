@@ -5,32 +5,60 @@ import SwiftUI
 struct PlaylistDrawer: View {
     @EnvironmentObject var iaPlayer: Player
     @State private var expanded: Bool = false
-    private let collapsedHeight: CGFloat = 22
+    private let collapsedHeight: CGFloat = 44
     private let expandedHeight: CGFloat = 200
     
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
-                HStack {
-                    Text("Playlist")
-                        .foregroundColor(.fairyCream)
-                        .font(.caption)
-                    
-                    Image(systemName: expanded ? "chevron.down" : "chevron.up")
-                        .foregroundColor(.fairyCream)
-                        .font(.caption2)
-                        .imageScale(.small)
+                HStack(spacing: 15) {
+                    Button(action: {
+                        withAnimation(.spring()) {
+                            expanded.toggle()
+                        }
+                    }) {
+                        HStack(spacing: 5) {
+                            Text("Playlist")
+                                .foregroundColor(.fairyCream)
+                                .font(.caption)
+
+                            Image(systemName: expanded ? "chevron.down" : "chevron.up")
+                                .foregroundColor(.fairyCream)
+                                .font(.caption2)
+                                .imageScale(.small)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .frame(height: 24)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.fairyCream, lineWidth: 1)
+                    )
+
+
+                    Spacer()
+
+                    PlayerButton(.history, CGSize(width: 20, height: 20)) {
+                        PlayerControls.toggleHistory.send()
+                    }
+
+                    PlayerButton(.hidePlay, CGSize(width: 20, height: 20)) {
+                        withAnimation{
+                            Home.showControlsPass.send(false)
+                        }
+                    }
+
+                    AirPlayButton()
+                        .frame(width: 33, height: 33)
+                        .offset(CGSize(width: 0, height: -5))
                 }
                 .frame(maxWidth: .infinity)
             }
             .frame(height: collapsedHeight)
             .contentShape(Rectangle())
-            .onTapGesture {
-                withAnimation(.spring()) {
-                    expanded.toggle()
-                }
-            }
-            
+
             if expanded {
                 // Compact list of playlist items
                 ScrollViewReader { proxy in
