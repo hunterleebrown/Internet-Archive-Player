@@ -44,16 +44,18 @@ struct PlaylistDrawer: View {
                         PlayerControls.toggleHistory.send()
                     }
 
+                    AirPlayButton()
+                        .frame(width: 33, height: 33)
+                        .offset(CGSize(width: 0, height: -5))
+
                     PlayerButton(.hidePlay, CGSize(width: 20, height: 20)) {
                         withAnimation{
                             Home.showControlsPass.send(false)
                         }
                     }
 
-                    AirPlayButton()
-                        .frame(width: 33, height: 33)
-                        .offset(CGSize(width: 0, height: -5))
                 }
+                .padding(.horizontal, 5)
                 .frame(maxWidth: .infinity)
             }
             .frame(height: collapsedHeight)

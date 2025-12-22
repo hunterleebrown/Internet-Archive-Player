@@ -21,7 +21,7 @@ enum PlayerButtonType: String {
     case listFill = "list.bullet.rectangle.portrait.fill"
     case tv = "tv.circle"
     case magnifyingGlass = "magnifyingGlass"
-    case hidePlay = "chevron.down"
+    case hidePlay = "arrow.down.right"
     case ear = "ear"
     case x = "xmark.circle"
     case history = "clock.arrow.circlepath"
