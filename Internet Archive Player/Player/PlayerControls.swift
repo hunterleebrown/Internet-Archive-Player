@@ -24,6 +24,8 @@ struct PlayerControls: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5){
+            
+            PlaylistDrawer()
 
             if let file = viewModel.playingFile {
                 HStack(alignment: .center) {
@@ -312,3 +314,4 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
 //        Player.shared.avPlayer = nil
     }
 }
+
