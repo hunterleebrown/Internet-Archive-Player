@@ -18,6 +18,7 @@ struct NewPlaylistData: Identifiable {
 
 struct Home: View {
     @StateObject var iaPlayer = Player()
+    @StateObject var errorManager = ArchiveErrorManager.shared
     @State var playingFile: ArchiveFileEntity? = nil
     @State var showVideoPlayer: Bool = false
     @State var showVideoPlayerIPad: Bool = false
@@ -25,7 +26,7 @@ struct Home: View {
     @State var showControls: Bool = false
     @State var showHistory: Bool = false
     @State var otherPlaylistPresented: Bool = false
-    @State var selectedTab: Int = 1
+    @State var selectedTab: Int = 2
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var otherPlaylistPass = PassthroughSubject<ArchiveFileEntity, Never>()
@@ -66,13 +67,22 @@ struct Home: View {
 
             TabView(selection: $selectedTab) {
                 // Search Tab - First for discovery
+
+                NavigationStack {
+                    Browse()
+                }
+                .tabItem {
+                    Label("Browse", systemImage: "list.bullet.rectangle")
+                }
+                .tag(0)
+
                 NavigationStack {
                     SearchView()
                 }
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
-                .tag(0)
+                .tag(1)
 
                 // Now Playing Tab - Where the action happens
                 NavigationStack {
@@ -99,7 +109,7 @@ struct Home: View {
                 .tabItem {
                     Label("Now Playing", systemImage: "play.circle.fill")
                 }
-                .tag(1)
+                .tag(2)
 
                 // Bookmarks Tab - Saved favorites
                 NavigationStack {
@@ -108,8 +118,10 @@ struct Home: View {
                 .tabItem {
                     Label("Bookmarks", systemImage: "books.vertical")
                 }
-                .tag(2)
+                .tag(3)
 
+
+                #if DEBUG
                 // Debug Tab
                 NavigationStack {
                     DebugView()
@@ -117,7 +129,9 @@ struct Home: View {
                 .tabItem {
                     Label("Debug", systemImage: "ant.circle")
                 }
-                .tag(3)
+                .tag(4)
+                #endif
+
 
             }
             .tint(.fairyRed)
@@ -275,6 +289,7 @@ struct Home: View {
                 showNetworkAlert = false
             }
         }
+        .archiveErrorOverlay($errorManager.errorMessage)
         .environmentObject(iaPlayer)
     }
 

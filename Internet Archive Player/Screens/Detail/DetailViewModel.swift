@@ -28,6 +28,10 @@ final class DetailViewModel: ObservableObject {
     @Published var createdPlaylist: PlaylistEntity?
 
     @Published var pressedStates: [ArchiveFile.ID: Bool] = [:]
+    
+    // Error handling
+    @Published var errorMessage: String?
+    @Published var hasError: Bool = false
 
     // MARK: - Pagination Properties
     private let itemsPerPage = 10
@@ -95,8 +99,34 @@ final class DetailViewModel: ObservableObject {
                     self.gradient = image.gradientToBlack()
                 }
             }
+            
+            // Clear any previous errors on success
+            self.hasError = false
+            self.errorMessage = nil
+            
+        } catch let error as ArchiveServiceError {
+            // Handle specific Archive service errors
+            self.errorMessage = "Failed to load archive: \(error.description)"
+            self.hasError = true
+            print("ArchiveServiceError in getArchiveDoc: \(error.description)")
+            
+            // Also show in universal error overlay
+            ArchiveErrorManager.shared.showError(error)
+            
         } catch {
-            print(error)
+            // Handle any other errors (except user cancellations)
+            let errorDescription = error.localizedDescription.lowercased()
+            guard !errorDescription.contains("cancelled") && !errorDescription.contains("canceled") else {
+                // User cancelled the operation, don't show error
+                return
+            }
+            
+            self.errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+            self.hasError = true
+            print("Unexpected error in getArchiveDoc: \(error)")
+            
+            // Also show in universal error overlay
+            ArchiveErrorManager.shared.showError(error)
         }
     }
     

@@ -37,6 +37,10 @@ class CollectionFilterCache: ObservableObject {
     @Published private(set) var hasLoadedAudio = false
     @Published private(set) var hasLoadedMovies = false
     
+    // Error handling
+    @Published var errorMessage: String?
+    @Published var hasError: Bool = false
+    
     // Cache configuration
     private let cacheExpirationInterval: TimeInterval = 7 * 24 * 60 * 60 // 7 days
     private let cacheFileName = "collection-filters-cache.json"
@@ -198,8 +202,33 @@ class CollectionFilterCache: ObservableObject {
             // Save to disk after updating
             saveToDisk()
             
+            // Clear any previous errors on success
+            hasError = false
+            errorMessage = nil
+            
+        } catch let error as ArchiveServiceError {
+            // Handle specific Archive service errors
+            errorMessage = "Failed to load \(type.rawValue) collections: \(error.description)"
+            hasError = true
+            print("ArchiveServiceError loading filters for \(type.rawValue): \(error.description)")
+            
+            // Also show in universal error overlay
+            ArchiveErrorManager.shared.showError(error)
+            
         } catch {
-            print("Error loading filters for \(type.rawValue): \(error)")
+            // Handle any other errors (except user cancellations)
+            let errorDescription = error.localizedDescription.lowercased()
+            guard !errorDescription.contains("cancelled") && !errorDescription.contains("canceled") else {
+                // User cancelled the operation, don't show error
+                return
+            }
+            
+            errorMessage = "An unexpected error occurred loading \(type.rawValue) collections: \(error.localizedDescription)"
+            hasError = true
+            print("Unexpected error loading filters for \(type.rawValue): \(error)")
+            
+            // Also show in universal error overlay
+            ArchiveErrorManager.shared.showError(error)
         }
     }
     

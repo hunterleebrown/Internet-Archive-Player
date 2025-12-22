@@ -376,6 +376,31 @@ extension SearchView {
                         self.isSearching = false
                         self.searchStarted = false
                     }
+                    
+                    // Also show in universal error overlay
+                    Task { @MainActor in
+                        ArchiveErrorManager.shared.showError(error)
+                    }
+                    
+                } catch {
+                    // Catch any other errors (except user cancellations)
+                    let errorDescription = error.localizedDescription.lowercased()
+                    guard !errorDescription.contains("cancelled") && !errorDescription.contains("canceled") else {
+                        // User cancelled the operation, don't show error
+                        return
+                    }
+                    
+                    withAnimation(.easeIn(duration: 0.33)) {
+                        self.archiveError = "An unexpected error occurred: \(error.localizedDescription)"
+                        self.noDataFound = true
+                        self.isSearching = false
+                        self.searchStarted = false
+                    }
+                    
+                    // Also show in universal error overlay
+                    Task { @MainActor in
+                        ArchiveErrorManager.shared.showError(error)
+                    }
                 }
             }
         }
