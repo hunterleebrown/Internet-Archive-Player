@@ -494,6 +494,10 @@ class Player: NSObject, ObservableObject {
 
         avPlayer.addObserver(self, forKeyPath: "rate", options:.new, context: &observerContext)
         self.observing = true
+        
+        // Add observer for player item status to catch errors
+        avPlayer.addObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status), options: [.new, .initial], context: &observerContext)
+        
         avPlayer.replaceCurrentItem(with: playerItem)
         avPlayer.play()
 
@@ -512,6 +516,7 @@ class Player: NSObject, ObservableObject {
             avPlayer.pause()
             if(self.observing) {
                 avPlayer.removeObserver(self, forKeyPath: "rate", context: &observerContext)
+                avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status), context: &observerContext)
                 self.observing = false
             }
             self.sliderProgressSubject.send(0)
@@ -567,8 +572,18 @@ class Player: NSObject, ObservableObject {
                 } else {
                     newStatus = .unknown
                 }
+                
                 if newStatus == .failed {
-                    print("Error: \(String(describing: self.avPlayer.currentItem?.error?.localizedDescription)), error: \(String(describing: self.avPlayer.currentItem?.error))")
+                    print("❌ AVPlayer Error: \(String(describing: self.avPlayer.currentItem?.error?.localizedDescription)), error: \(String(describing: self.avPlayer.currentItem?.error))")
+                    
+                    // Surface the error to the user via the universal error overlay
+                    if let error = self.avPlayer.currentItem?.error {
+                        Task { @MainActor in
+                            let fileName = self.playingFile?.title ?? self.playingFile?.name ?? "Unknown file"
+                            let errorMessage = "Failed to play \"\(fileName)\": \(error.localizedDescription)"
+                            ArchiveErrorManager.shared.showError(message: errorMessage)
+                        }
+                    }
                 }
             }
     }

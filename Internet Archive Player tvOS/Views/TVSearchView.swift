@@ -494,6 +494,15 @@ extension TVSearchView {
                 isSearching = false
             } catch {
                 guard !Task.isCancelled else { return }
+                
+                // Also check for user cancellation in error description
+                let errorDescription = error.localizedDescription.lowercased()
+                guard !errorDescription.contains("cancelled") && !errorDescription.contains("canceled") else {
+                    // User cancelled the operation, don't show error
+                    isSearching = false
+                    return
+                }
+                
                 isSearching = false
             }
         }
@@ -540,6 +549,15 @@ extension TVSearchView {
                 isSearching = false
             } catch {
                 guard !Task.isCancelled else { return }
+                
+                // Also check for user cancellation in error description
+                let errorDescription = error.localizedDescription.lowercased()
+                guard !errorDescription.contains("cancelled") && !errorDescription.contains("canceled") else {
+                    // User cancelled the operation, don't show error
+                    isSearching = false
+                    return
+                }
+                
                 isSearching = false
             }
         }

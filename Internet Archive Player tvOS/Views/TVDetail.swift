@@ -362,6 +362,10 @@ extension TVDetail {
         @Published var playlistArchiveFiles: [ArchiveFile]?
         @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
         @Published var uiImage: UIImage?
+        
+        // Error handling
+        @Published var errorMessage: String?
+        @Published var hasError: Bool = false
 
         var player: AVPlayer? = nil
 
@@ -392,8 +396,34 @@ extension TVDetail {
                         TVDetail.backgroundPass.send(art)
                         //                        self.uiImage = await IAMediaUtils.getImage(url: art)
                     }
+                    
+                    // Clear any previous errors on success
+                    self.hasError = false
+                    self.errorMessage = nil
+                    
+                } catch let error as ArchiveServiceError {
+                    // Handle specific Archive service errors
+                    self.errorMessage = "Failed to load archive: \(error.description)"
+                    self.hasError = true
+                    print("ArchiveServiceError in getArchiveDoc: \(error.description)")
+                    
+                    // Also show in universal error overlay
+                    ArchiveErrorManager.shared.showError(error)
+                    
                 } catch {
-                    print(error)
+                    // Handle any other errors (except user cancellations)
+                    let errorDescription = error.localizedDescription.lowercased()
+                    guard !errorDescription.contains("cancelled") && !errorDescription.contains("canceled") else {
+                        // User cancelled the operation, don't show error
+                        return
+                    }
+                    
+                    self.errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+                    self.hasError = true
+                    print("Unexpected error in getArchiveDoc: \(error)")
+                    
+                    // Also show in universal error overlay
+                    ArchiveErrorManager.shared.showError(error)
                 }
             }
         }
