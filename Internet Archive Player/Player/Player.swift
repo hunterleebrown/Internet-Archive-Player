@@ -42,7 +42,6 @@ class Player: NSObject, ObservableObject {
     }
 
     static let shared = Player()
-    static var networkAlert = PassthroughSubject<Bool, Never>()
     static var mainListName = "Now Playing"
     static var favoritesListName = "Favorites"
 
@@ -389,16 +388,25 @@ class Player: NSObject, ObservableObject {
         self.playingFileSubject.send(archiveFileEntity)
 
         if archiveFileEntity.workingUrl!.absoluteString.contains("https") {
-            guard IAReachability.isConnectedToNetwork() else {
-                Player.networkAlert.send(true)
-                return
+            // Check network connectivity on main actor
+            Task { @MainActor in
+                let isConnected = IAReachability.isConnectedToNetwork()
+                if !isConnected {
+                    ArchiveErrorManager.shared.showError(message: "The internet connection appears to be offline.")
+                    return
+                }
+                
+                // Create or update history entry
+                self.updatePlayHistory(for: archiveFileEntity)
+                
+                self.loadAndPlay(archiveFileEntity.workingUrl!)
             }
+        } else {
+            // Create or update history entry
+            self.updatePlayHistory(for: archiveFileEntity)
+            
+            self.loadAndPlay(archiveFileEntity.workingUrl!)
         }
-
-        // Create or update history entry
-        self.updatePlayHistory(for: archiveFileEntity)
-
-        self.loadAndPlay(archiveFileEntity.workingUrl!)
     }
     
     /// Creates or updates a history entry for the played file

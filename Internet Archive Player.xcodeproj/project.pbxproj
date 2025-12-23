@@ -538,11 +538,10 @@
 		5ADED074279B8A4A00FB2E6D /* Player */ = {
 			isa = PBXGroup;
 			children = (
-				5A4151B727B0FDF8007A3623 /* IAReachability.swift */,
+				5A4151B927B0FEAA007A3623 /* Player.swift */,
 				5AD6BC51279CCB7000495070 /* PlayerControls.swift */,
 				5AD6BC53279CCED100495070 /* PlayerButton.swift */,
 				5AD6BC55279CDE2100495070 /* AirPlayButton.swift */,
-				5A4151B927B0FEAA007A3623 /* Player.swift */,
 				5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */,
 				5ABAAAC42EF8BEA0004C1AD7 /* PlaylistDrawer.swift */,
 				5AEEA0AA2EF8F807008243DA /* AVPLAYER_ERROR_HANDLING.md */,
@@ -610,6 +609,7 @@
 		CE1ACD502812FA5F00EF968A /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				5A4151B727B0FDF8007A3623 /* IAReachability.swift */,
 				5AEEA0B12EFB3F00008243DA /* ImageCacheManager.swift */,
 				CE1ACD512812FA8B00EF968A /* PlayerArchiveService.swift */,
 				5A600D4A2EF0F4AF00F7DCE8 /* CollectionFilterCache.swift */,

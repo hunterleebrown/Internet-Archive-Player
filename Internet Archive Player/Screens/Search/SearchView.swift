@@ -301,12 +301,8 @@ extension SearchView {
             self.service = PlayerArchiveService()
         }
 
+        @MainActor
         func search(query: String, collection:String? = nil, loadMore: Bool) {
-
-            guard IAReachability.isConnectedToNetwork() else {
-                Player.networkAlert.send(true)
-                return
-            }
 
             guard !searchText.isEmpty, searchText.count > 2, !searchStarted  else { return }
             self.isSearching = true
@@ -351,7 +347,7 @@ extension SearchView {
                     }
 
                     // Filter out any docs where collection contains "tvarchive"
-                    var noTV = sortedDocs.filter { doc in
+                    let noTV = sortedDocs.filter { doc in
                         // Exclude docs that have "tvarchive" in their collections
                         return !doc.collection.contains { $0.lowercased() == "tvarchive" }
                     }
