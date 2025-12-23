@@ -73,7 +73,11 @@ final class DetailViewModel: ObservableObject {
     public func getArchiveDoc(identifier: String) async {
         do {
             let doc = try await self.service.getArchiveAsync(with: identifier)
-            self.archiveDoc = doc.metadata
+
+            withAnimation {
+                self.archiveDoc = doc.metadata
+            }
+
             self.audioFiles = doc.non78Audio.sorted{
                 guard let track1 = $0.track, let track2 = $1.track else { return false}
                 return track1 < track2

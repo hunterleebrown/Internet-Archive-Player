@@ -30,7 +30,6 @@ struct Detail: View {
     @State var hideNavigationBar: Bool = false
 
     @State var backgroundBlur: Double = 0.0
-    @State var isLoading = true
 
     @State var backgroundURL: URL?
     static var backgroundPass = PassthroughSubject<URL, Never>()
@@ -48,7 +47,7 @@ struct Detail: View {
 
     var body: some View {
         ZStack {
-            if isLoading {
+            if viewModel.archiveDoc == nil {
                 VStack(alignment: .center, spacing: 20) {
                     Spacer()
                     
@@ -94,9 +93,6 @@ struct Detail: View {
             viewModel.passInPlayer(iaPlayer: iaPlayer)
             viewModel.checkFavoriteStatus(identifier: identifier)
             await viewModel.getArchiveDoc(identifier: identifier)
-            withAnimation {
-                isLoading = false
-            }
         }
         .sheet(isPresented: $descriptionExpanded) {
             if let doc = self.viewModel.archiveDoc {
@@ -109,9 +105,7 @@ struct Detail: View {
             }
         }
         .sheet(item: $individualPlayerFile) { file in
-//            if let file = individualPlayerFile {
-                DetailIndividualPlayer(archiveFile: file)
-//            }
+            DetailIndividualPlayer(archiveFile: file)
         }
         .alert(PlayerError.alreadyOnPlaylist.description, isPresented: $playlistErrorAlertShowing) {
             Button("Okay", role: .cancel) { }
@@ -140,10 +134,7 @@ struct Detail: View {
             Spacer()
                 .frame(height: 20)
         })
-        .safeAreaInset(edge: .bottom, content: {
-            Spacer()
-                .frame(height: iaPlayer.playerHeight)
-        })
+        .avoidPlayer()
     }
 
     private var mainContentView: some View {

@@ -30,7 +30,6 @@ struct Home: View {
     @State var playingFile: ArchiveFileEntity? = nil
     @State var showVideoPlayer: Bool = false
     @State var showVideoPlayerIPad: Bool = false
-    @State var showNetworkAlert: Bool = false
     @State var showControls: Bool = false
     @State var showHistory: Bool = false
     @State var otherPlaylistPresented: Bool = false
@@ -242,9 +241,6 @@ struct Home: View {
                 }
             }
         }
-        .onReceive(Player.networkAlert, perform: { badNetwork in
-            showNetworkAlert = true
-        })
         .onReceive(Home.otherPlaylistPass, perform: { archiveFileEntiity in
             viewModel.archiveFileEntity = archiveFileEntiity
             otherPlaylistPresented = true
@@ -287,11 +283,6 @@ struct Home: View {
             print("📂 URL scheme: \(url.scheme ?? "none")")
             print("📂 URL path: \(url.path)")
             viewModel.handleIncomingURL(url, player: iaPlayer)
-        }
-        .alert("There is no network connection", isPresented: $showNetworkAlert) {
-            Button("OK") {
-                showNetworkAlert = false
-            }
         }
         .archiveErrorOverlay($errorManager.errorMessage)
         .environmentObject(iaPlayer)

@@ -14,3 +14,4 @@ class PlayerArchiveService: ArchiveService {
         super.init(serviceType)
     }
 }
+

@@ -42,7 +42,6 @@ class Player: NSObject, ObservableObject {
     }
 
     static let shared = Player()
-    static var networkAlert = PassthroughSubject<Bool, Never>()
     static var mainListName = "Now Playing"
     static var favoritesListName = "Favorites"
 
@@ -82,20 +81,17 @@ class Player: NSObject, ObservableObject {
     var mainPlaylist: PlaylistEntity? = nil
     var favoritesPlaylist: PlaylistEntity? = nil
 
-    private var playingMediaType: MPNowPlayingInfoMediaType? = nil
     public var nowPlayingSession: MPNowPlayingSession
 
     private var observing = false
+    private var observingStatus = false
     fileprivate var observerContext = 0
     private var playing = false
 
     private var playingImage: MPMediaItemArtwork?
+    private var artworkLoadTask: Task<Void, Never>?
 
-    var fileTitle: String?
     var fileIdentifierTitle: String?
-    var fileIdentifier: String?
-
-    let presentingController = AVPlayerViewController()
 
     private let playlistFetchController: NSFetchedResultsController<PlaylistEntity>
     private let favoritesFetchController: NSFetchedResultsController<PlaylistEntity>
@@ -179,11 +175,10 @@ class Player: NSObject, ObservableObject {
         }
     }
 
-    private let sliderProgressSubject = PassthroughSubject<Double, Never>()
+    private var sliderProgressSubject = PassthroughSubject<Double, Never>()
     public var sliderProgressPublisher: AnyPublisher<Double, Never> {
         sliderProgressSubject.eraseToAnyPublisher()
     }
-    private var sliderProgress: Double = 0.0
     private var pauseSliderProgress = false
     public func shouldPauseSliderProgress(_ shouldPause: Bool){
         self.pauseSliderProgress = shouldPause
@@ -266,7 +261,10 @@ class Player: NSObject, ObservableObject {
     }
     
     public func refreshFavoriteArchives() {
-        favoriteArchives = PersistenceController.shared.fetchAllFavoriteArchives()
+        let archives = PersistenceController.shared.fetchAllFavoriteArchives()
+        DispatchQueue.main.async {
+            self.favoriteArchives = archives
+        }
     }
 
     public func checkDupes(archiveFile: ArchiveFileEntity, list: [ArchiveFileEntity], error: PlayerError) throws {
@@ -385,28 +383,44 @@ class Player: NSObject, ObservableObject {
             }
         }
 
-        self.fileTitle = archiveFileEntity.title ?? archiveFileEntity.name
         self.fileIdentifierTitle = archiveFileEntity.archiveTitle
-        self.fileIdentifier = archiveFileEntity.identifier
         self.playingFile = archiveFileEntity
         self.playingFileSubject.send(archiveFileEntity)
 
         if archiveFileEntity.workingUrl!.absoluteString.contains("https") {
-            guard IAReachability.isConnectedToNetwork() else {
-                Player.networkAlert.send(true)
-                return
+            // Check network connectivity on main actor
+            Task { @MainActor in
+                let isConnected = IAReachability.isConnectedToNetwork()
+                if !isConnected {
+                    ArchiveErrorManager.shared.showError(message: "The internet connection appears to be offline.")
+                    return
+                }
+                
+                // Create or update history entry
+                self.updatePlayHistory(for: archiveFileEntity)
+                
+                self.loadAndPlay(archiveFileEntity.workingUrl!)
             }
+        } else {
+            // Create or update history entry
+            self.updatePlayHistory(for: archiveFileEntity)
+            
+            self.loadAndPlay(archiveFileEntity.workingUrl!)
         }
-
-        // Create or update history entry
-        self.updatePlayHistory(for: archiveFileEntity)
-
-        self.loadAndPlay(archiveFileEntity.workingUrl!)
     }
     
     /// Creates or updates a history entry for the played file
     private func updatePlayHistory(for archiveFileEntity: ArchiveFileEntity) {
+        // Perform Core Data operations on the appropriate context
         let context = PersistenceController.shared.container.viewContext
+        
+        // Ensure we're on the main thread for viewContext
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async {
+                self.updatePlayHistory(for: archiveFileEntity)
+            }
+            return
+        }
         
         // Check if history entry already exists with matching identifier and name
         let fetchRequest: NSFetchRequest<HistoryArchiveFileEntity> = HistoryArchiveFileEntity.fetchRequest()
@@ -452,6 +466,14 @@ class Player: NSObject, ObservableObject {
     
     /// Trims history to maintain a maximum of 50 items
     private func trimHistoryToLimit(maxItems: Int = 50) {
+        // Ensure we're on the main thread for viewContext
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async {
+                self.trimHistoryToLimit(maxItems: maxItems)
+            }
+            return
+        }
+        
         let context = PersistenceController.shared.container.viewContext
         
         // Fetch all history items sorted by playedAt (oldest first)
@@ -494,6 +516,11 @@ class Player: NSObject, ObservableObject {
             avPlayer.removeObserver(self, forKeyPath: "rate", context: &observerContext)
             self.observing = false
         }
+        
+        if(self.observingStatus) {
+            avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status), context: &observerContext)
+            self.observingStatus = false
+        }
 
         self.setActiveAudioSession()
         print(playUrl.absoluteString)
@@ -515,6 +542,7 @@ class Player: NSObject, ObservableObject {
         
         // Add observer for player item status to catch errors
         avPlayer.addObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status), options: [.new, .initial], context: &observerContext)
+        self.observingStatus = true
 
         avPlayer.replaceCurrentItem(with: playerItem)
 
@@ -565,22 +593,41 @@ class Player: NSObject, ObservableObject {
             avPlayer.pause()
             if(self.observing) {
                 avPlayer.removeObserver(self, forKeyPath: "rate", context: &observerContext)
-                avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status), context: &observerContext)
                 self.observing = false
             }
+            
+            if(self.observingStatus) {
+                avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status), context: &observerContext)
+                self.observingStatus = false
+            }
+            
             self.sliderProgressSubject.send(0)
     }
 
     private func loadNowPlayingMediaArtwork() {
-        guard let url = self.playingFile?.iconUrl else { return }
-        DispatchQueue.global().async { [weak self] in
-            if let data = try? Data(contentsOf: url) {
-                if let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self?.playingImage = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-                        self?.setPlayingInfo(playing: false)
-                    }
-                }
+        guard let url = self.playingFile?.iconUrl else { 
+            // Clear artwork if no URL
+            self.playingImage = nil
+            self.setPlayingInfo(playing: false)
+            return 
+        }
+        
+        // Cancel any previous artwork loading task
+        artworkLoadTask?.cancel()
+        
+        // Use the shared ImageCacheManager for loading and caching
+        artworkLoadTask = ImageCacheManager.shared.loadImage(from: url) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let image):
+                self.playingImage = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+                self.setPlayingInfo(playing: false)
+                
+            case .failure(let error):
+                print("Failed to load artwork: \(error.localizedDescription)")
+                // Optionally clear artwork on error
+                self.playingImage = nil
             }
         }
     }
@@ -605,57 +652,47 @@ class Player: NSObject, ObservableObject {
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-            if avPlayer == object as! AVPlayer && "rate" == keyPath {
-                DispatchQueue.main.async {
-                    self.playing  = self.avPlayer.rate > 0.0
-                    self.playingSubject.send(self.avPlayer.rate > 0.0)
-                    self.setPlayingInfo(playing: self.playing)
-                    self.monitorPlayback()
-                }
-            }
+        guard let player = object as? AVPlayer, player == avPlayer else { return }
 
-            if avPlayer == object as? AVPlayer && keyPath == #keyPath(AVPlayer.currentItem.status) {
+        if keyPath == "rate" {
+            DispatchQueue.main.async {
+                self.playing  = self.avPlayer.rate > 0.0
+                self.playingSubject.send(self.avPlayer.rate > 0.0)
+                self.setPlayingInfo(playing: self.playing)
+                self.monitorPlayback()
+            }
+        }
+
+        if keyPath == #keyPath(AVPlayer.currentItem.status) {
+            DispatchQueue.main.async {
                 let newStatus: AVPlayerItem.Status
                 if let newStatusAsNumber = change?[NSKeyValueChangeKey.newKey] as? NSNumber {
                     newStatus = AVPlayerItem.Status(rawValue: newStatusAsNumber.intValue)!
                 } else {
                     newStatus = .unknown
                 }
-                
+
                 if newStatus == .failed {
                     print("❌ AVPlayer Error: \(String(describing: self.avPlayer.currentItem?.error?.localizedDescription)), error: \(String(describing: self.avPlayer.currentItem?.error))")
-                    
+
                     // Surface the error to the user via the universal error overlay
                     if let error = self.avPlayer.currentItem?.error {
-                        Task { @MainActor in
-                            let fileName = self.playingFile?.title ?? self.playingFile?.name ?? "Unknown file"
-                            let errorMessage = "Failed to play \"\(fileName)\": \(error.localizedDescription)"
-                            ArchiveErrorManager.shared.showError(message: errorMessage)
-                        }
+                        let fileName = self.playingFile?.title ?? self.playingFile?.name ?? "Unknown file"
+                        let errorMessage = "Failed to play \"\(fileName)\": \(error.localizedDescription)"
+                        ArchiveErrorManager.shared.showError(message: errorMessage)
                     }
                 }
             }
-
-//        // NEW: Handle currentItem changes
-//        if avPlayer == object as? AVPlayer && keyPath == #keyPath(AVPlayer.currentItem) {
-//            // Remove observer from old item
-//            removeBitrateObserver()
-//
-//            // Add observer to new item
-//            if let newItem = change?[NSKeyValueChangeKey.newKey] as? AVPlayerItem {
-//                observeBitrate(for: newItem)
-//            }
-//        }
-
+        }
     }
 
     private func monitorPlayback() {
 
             if(avPlayer.currentItem != nil) {
                 let progress = CMTimeGetSeconds(avPlayer.currentTime()) / CMTimeGetSeconds((avPlayer.currentItem?.duration)!)
-                self.sliderProgress = progress
                 if !pauseSliderProgress {
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
                         self.sliderProgressSubject.send(progress)
                         self.durationSubject.send(CMTimeGetSeconds((self.avPlayer.currentItem?.duration)!))
                     }
@@ -667,21 +704,12 @@ class Player: NSObject, ObservableObject {
                     
                     let delay = 0.1 * Double(NSEC_PER_SEC)
                     let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
-                    DispatchQueue.main.asyncAfter(deadline: time) {
-                        self.monitorPlayback()
+                    DispatchQueue.main.asyncAfter(deadline: time) { [weak self] in
+                        self?.monitorPlayback()
                     }
                 }
             }
             return
-    }
-
-    private func elapsedSeconds()->Int {
-        let calcTime = CMTimeGetSeconds((avPlayer.currentItem?.duration)!) - CMTimeGetSeconds(avPlayer.currentTime())
-        if(!calcTime.isNaN) {
-            let duration = CMTimeGetSeconds((avPlayer.currentItem?.duration)!)
-            return Int(duration) - Int(calcTime)
-        }
-        return 0
     }
 
     private func setPlayingInfo(playing:Bool) {
@@ -852,9 +880,17 @@ class Player: NSObject, ObservableObject {
     }
 
     deinit {
-        avPlayer.removeObserver(self, forKeyPath: "rate")
-        avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status))
-        avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem))
+        seekTimer?.invalidate()
+        artworkLoadTask?.cancel()
+        NotificationCenter.default.removeObserver(self)
+        
+        if observing {
+            avPlayer.removeObserver(self, forKeyPath: "rate", context: &observerContext)
+        }
+        
+        if observingStatus {
+            avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status), context: &observerContext)
+        }
     }
 }
 
