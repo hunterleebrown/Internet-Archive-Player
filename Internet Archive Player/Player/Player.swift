@@ -13,6 +13,7 @@ import AVKit
 import UIKit
 import Combine
 import CoreData
+import SwiftUI
 
 enum PlayerError: Error {
     case alreadyOnPlaylist
@@ -57,6 +58,20 @@ class Player: NSObject, ObservableObject {
         }
     }
     @Published public var playerHeight: CGFloat = 0
+
+    @AppStorage("playerSkin") public var playerSkin: PlayerControlsSkin?  // Store as Data
+
+    var useSkin: PlayerControlsSkin {
+        get {
+            playerSkin ?? .classic
+        }
+        set {
+            playerSkin = newValue
+            objectWillChange.send()
+        }
+    }
+
+    @Published var sampleRate: String = "0"
 
     var playingPlaylist: PlaylistEntity? = nil {
         didSet {
@@ -145,7 +160,6 @@ class Player: NSObject, ObservableObject {
 
         // Load favorite archives
         favoriteArchives = PersistenceController.shared.fetchAllFavoriteArchives()
-
 
         NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
     }
@@ -492,13 +506,18 @@ class Player: NSObject, ObservableObject {
         playerItem.canUseNetworkResourcesForLiveStreamingWhilePaused = true
         playerItem.preferredPeakBitRate = 0 // Let AVPlayer choose best quality based on network
 
+        Task {
+            await self.getAudioDetails(for: playerItem)
+        }
+
         avPlayer.addObserver(self, forKeyPath: "rate", options:.new, context: &observerContext)
         self.observing = true
         
         // Add observer for player item status to catch errors
         avPlayer.addObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status), options: [.new, .initial], context: &observerContext)
-        
+
         avPlayer.replaceCurrentItem(with: playerItem)
+
         avPlayer.play()
 
         print("Playing File: ")
@@ -510,6 +529,36 @@ class Player: NSObject, ObservableObject {
             PlayerControls.showVideo.send(false)
         }
 
+    }
+
+    private func getAudioDetails(for playerItem: AVPlayerItem) async {
+        do {
+            let tracks = try await playerItem.asset.loadTracks(withMediaType: .audio)
+            guard let track = tracks.first else {
+                await MainActor.run {
+                    self.sampleRate = ""
+                }
+                print("No audio track found")
+                return
+            }
+
+            let formatDescriptions = try await track.load(.formatDescriptions) as [CMAudioFormatDescription]
+            guard let basicDescription = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescriptions.first!)?.pointee else {
+                return
+            }
+
+            let sampleRateHz = basicDescription.mSampleRate
+            let sampleRateKhz = sampleRateHz / 1000.0
+//            print("Sample Rate: \(sampleRateKhz) kHz") //
+            // Note: This method provides the static, inherent sample rate of the file, not the real-time playback frequency.
+
+            await MainActor.run {
+                self.sampleRate = "\(sampleRateKhz)"
+            }
+
+        } catch {
+            print("Failed to load audio tracks: \(error.localizedDescription)")
+        }
     }
 
     private func stopPlaying() {
@@ -586,6 +635,18 @@ class Player: NSObject, ObservableObject {
                     }
                 }
             }
+
+//        // NEW: Handle currentItem changes
+//        if avPlayer == object as? AVPlayer && keyPath == #keyPath(AVPlayer.currentItem) {
+//            // Remove observer from old item
+//            removeBitrateObserver()
+//
+//            // Add observer to new item
+//            if let newItem = change?[NSKeyValueChangeKey.newKey] as? AVPlayerItem {
+//                observeBitrate(for: newItem)
+//            }
+//        }
+
     }
 
     private func monitorPlayback() {
@@ -790,6 +851,11 @@ class Player: NSObject, ObservableObject {
         avPlayer.rate = 1.0
     }
 
+    deinit {
+        avPlayer.removeObserver(self, forKeyPath: "rate")
+        avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status))
+        avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem))
+    }
 }
 
 extension Player: NSFetchedResultsControllerDelegate {

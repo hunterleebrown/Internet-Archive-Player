@@ -11,11 +11,13 @@ import AVKit
 enum PlayerButtonType: String {
     case video = "video"
     case play = "play.circle"
+    case playNoCilcle = "play.fill"
     case backwards = "backward.end.fill"
     case forwards = "forward.end.fill"
     case ff = "forward.fill"
     case bb = "backward.fill"
     case pause = "pause.circle"
+    case pauseNoCirlc = "pause.fill"
     case expand = "arrow.up.left.and.arrow.down.right"
     case list = "list.bullet.rectangle.portrait"
     case listFill = "list.bullet.rectangle.portrait.fill"
@@ -29,12 +31,14 @@ enum PlayerButtonType: String {
 
 struct PlayerButton: View {
     var type: PlayerButtonType
+    var tint: Color?
     var size: CGSize?
     var action: (() -> ())?
-    init(_ type: PlayerButtonType, _ size: CGSize? = CGSize(width: 20.0, height: 20.0), _ action: (()->())? = nil){
+    init(_ type: PlayerButtonType, tint: Color? = .fairyCream, _ size: CGSize? = CGSize(width: 20.0, height: 20.0), _ action: (()->())? = nil){
         self.type = type
         self.size = size
         self.action = action
+        self.tint = tint
     }
     var body: some View {
         Button(action: {
@@ -47,7 +51,7 @@ struct PlayerButton: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size?.width, height: size?.height)
         }
-        .tint(.fairyCream)
+        .tint(tint)
     }
 }
 
