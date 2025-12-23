@@ -10,11 +10,29 @@ import SwiftUI
 import CoreData
 
 struct DebugView: View {
-
+    @EnvironmentObject var iaPlayer: Player
     @ObservedObject var viewModel: ViewModel = ViewModel()
+    @State private var playerSkin: PlayerControlsSkin = .classic
 
     var body: some View {
         VStack{
+            HStack{
+                Text("Player skin: ")
+                    .foregroundColor(.fairyRed)
+                Picker("Player Skin", selection: $playerSkin) {
+                    ForEach(PlayerControlsSkin.allCases, id: \.self) {
+                        Text($0.rawValue.capitalized)
+                    }
+                    .onChange(of: playerSkin) {
+                        withAnimation {
+                            iaPlayer.playerSkin = playerSkin
+                        }
+                    }
+                }
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             HStack{
                 Text("Downloaded files: ")
                     .foregroundColor(.fairyRed)
@@ -72,6 +90,9 @@ struct DebugView: View {
         .task{
             viewModel.startDownloadReport()
             viewModel.fetchLocalFiles()
+            if let skin = iaPlayer.playerSkin {
+                playerSkin = skin
+            }
         }
     }
 

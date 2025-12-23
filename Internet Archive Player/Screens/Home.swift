@@ -11,6 +11,14 @@ import AVKit
 import Combine
 import iaAPI
 
+enum SelectedTab: Int {
+    case browse
+    case search
+    case home
+    case bookmarks
+    case settings
+}
+
 struct NewPlaylistData: Identifiable {
     let id = UUID()
     let name: String?
@@ -26,7 +34,7 @@ struct Home: View {
     @State var showControls: Bool = false
     @State var showHistory: Bool = false
     @State var otherPlaylistPresented: Bool = false
-    @State var selectedTab: Int = 2
+    @State var selectedTab: SelectedTab = .home
 
     static var showControlsPass = PassthroughSubject<Bool, Never>()
     static var otherPlaylistPass = PassthroughSubject<ArchiveFileEntity, Never>()
@@ -74,7 +82,7 @@ struct Home: View {
                 .tabItem {
                     Label("Browse", systemImage: "list.bullet.rectangle")
                 }
-                .tag(0)
+                .tag(SelectedTab.browse)
 
                 NavigationStack {
                     SearchView()
@@ -82,7 +90,7 @@ struct Home: View {
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
-                .tag(1)
+                .tag(SelectedTab.search)
 
                 // Now Playing Tab - Where the action happens
                 NavigationStack {
@@ -109,7 +117,7 @@ struct Home: View {
                 .tabItem {
                     Label("Now Playing", systemImage: "play.circle.fill")
                 }
-                .tag(2)
+                .tag(SelectedTab.home)
 
                 // Bookmarks Tab - Saved favorites
                 NavigationStack {
@@ -118,20 +126,16 @@ struct Home: View {
                 .tabItem {
                     Label("Bookmarks", systemImage: "books.vertical")
                 }
-                .tag(3)
+                .tag(SelectedTab.bookmarks)
 
-
-                #if DEBUG
                 // Debug Tab
                 NavigationStack {
                     DebugView()
                 }
                 .tabItem {
-                    Label("Debug", systemImage: "ant.circle")
+                    Label("Settings", systemImage: "gear")
                 }
-                .tag(4)
-                #endif
-
+                .tag(SelectedTab.settings)
 
             }
             .tint(.fairyRed)
@@ -253,8 +257,8 @@ struct Home: View {
         })
         .onReceive(Home.searchPass, perform: { collection in
             // First, switch to the search tab
-            selectedTab = 0
-            
+            selectedTab = .search
+
             // Then, after a brief delay to ensure SearchView is visible,
             // forward the collection to the internal publisher
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -317,7 +321,7 @@ struct Home: View {
                 // Action buttons
                 HStack(spacing: 12) {
                     Button(action: {
-                        selectedTab = 0  // Switch to Search tab
+                        selectedTab = .search  // Switch to Search tab
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: "magnifyingglass")

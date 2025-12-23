@@ -10,6 +10,12 @@ import iaAPI
 import Combine
 import AVKit
 
+enum PlayerControlsSkin: String, CaseIterable {
+    case classic
+    case winAmp
+}
+
+
 struct PlayerControls: View {
     @EnvironmentObject var iaPlayer: Player
     @StateObject var viewModel: PlayerControls.ViewModel = PlayerControls.ViewModel()
@@ -20,11 +26,165 @@ struct PlayerControls: View {
     static var toggleHistory = PassthroughSubject<Void, Never>()
 
     var foregroundColor: Color = .fairyCream
-    var backgroundColor: Color = .fairyRed.opacity(0.8)
+    var backgroundColor: Color = .fairyRed//.opacity(0.8)
 
     var body: some View {
+        VStack {
+            switch iaPlayer.playerSkin {
+            case .classic:
+                self.classicPlayerControls
+            case .winAmp:
+                self.winAmp
+            case .none:
+                self.classicPlayerControls
+            }
+        }
+    }
+
+    var winAmp: some View {
+        VStack(alignment: .leading, spacing: 5) {
+
+            PlaylistDrawer(skin: .winAmp)
+
+            HStack(alignment: .top) {
+                Text(viewModel.minimumValue)
+                    .padding(2)
+                    .frame(alignment: .leading)
+                    .font(.title)
+                    .frame(maxHeight: .infinity, alignment: .topLeading)
+                    .winAmpValue()
+
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(viewModel.playingFile?.displayTitle ?? "")
+                        .padding(2)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .font(.callout)
+                        .winAmpValue()
+                        .lineLimit(1)
+
+                    HStack(spacing: 2) {
+                        HStack(spacing: 2) {
+                            Text(iaPlayer.sampleRate)
+                                .padding(2)
+                                .font(.caption)
+                                .winAmpValue()
+                                .lineLimit(1)
+
+                            Text("khz")
+                                .padding(2)
+                                .font(.caption)
+                                .foregroundColor(Color.gray)
+                                .lineLimit(1)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 60, alignment: .topLeading)
+
+            Slider(value: $viewModel.progress,
+                   in: 0...1,
+                   onEditingChanged: sliderEditingChanged)
+            .tint(.black)
+            .disabled(viewModel.playingFile == nil)
+
+            HStack(alignment:.top, spacing:5) {
+                PlayerButton(.backwards, tint: .white)  {
+                    iaPlayer.advancePlayer(.backwards)
+                }
+                .padding(5)
+                .border(Color.gray, width: 1)
+
+                PlayerButton(.bb, tint: .white) {
+                }
+                .onTouchDownUp { pressed in
+                    if pressed {
+                        iaPlayer.seek(forward: false)
+                    } else {
+                        iaPlayer.stopSeeking()
+                    }
+                }
+                .padding(5)
+                .border(Color.white, width: 1)
+
+                PlayerButton(viewModel.playing ? .pauseNoCirlc : .playNoCilcle, tint: .white) {
+                    iaPlayer.didTapPlayButton()
+                }
+                .padding(5)
+                .border(Color.white, width: 1)
+
+                PlayerButton(.ff, tint: .white) {
+                }
+                .onTouchDownUp { pressed in
+                    if pressed {
+                        iaPlayer.seek(forward: true)
+                    } else {
+                        iaPlayer.stopSeeking()
+                    }
+                }
+                .padding(5)
+                .border(Color.white, width: 1)
+
+
+                PlayerButton(.forwards, tint: .white)  {
+                    iaPlayer.advancePlayer(.forwards)
+                }
+                .padding(5)
+                .border(Color.white, width: 1)
+
+                Spacer()
+
+                PlayerButton(.history, tint: .white) {
+                    PlayerControls.toggleHistory.send()
+                }
+                .padding(5)
+                .border(Color.white, width: 1)
+
+                AirPlayButton(tintColor: .white, size: 20)
+                    .frame(width: 20, height: 20)
+                    .padding(5)
+                    .border(Color.white, width: 1)
+
+                PlayerButton(.hidePlay, tint: .white) {
+                    withAnimation{
+                        Home.showControlsPass.send(false)
+                    }
+                }
+                .padding(5)
+                .border(Color.white, width: 1)
+
+
+
+            }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .padding(5)
+        .border(Color.gray, width: 2)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            ZStack {
+                Color.white
+
+                LinearGradient(
+                    colors: [Color.black.opacity(1.0), Color.black.opacity(0.5)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+        }
+        .coordinateSpace(name: "playerControls")
+        .onAppear {
+            viewModel.setSubscribers(iaPlayer)
+        }
+    }
+
+    var classicPlayerControls: some View {
         VStack(alignment: .leading, spacing: 5){
-            
+
             PlaylistDrawer()
 
             if let file = viewModel.playingFile {
@@ -81,76 +241,78 @@ struct PlayerControls: View {
                 .padding(.horizontal, 5)
             }
 
-            Slider(value: $viewModel.progress,
-                   in: 0...1,
-                   onEditingChanged: sliderEditingChanged)
-            .tint(foregroundColor)
-            .disabled(viewModel.playingFile == nil)
+            VStack {
+                Slider(value: $viewModel.progress,
+                       in: 0...1,
+                       onEditingChanged: sliderEditingChanged)
+                .tint(foregroundColor)
+                .disabled(viewModel.playingFile == nil)
 
-            HStack(alignment: .center, spacing: 5.0){
-                Text(viewModel.minimumValue)
-                    .foregroundColor(foregroundColor)
-                    .font(.caption)
-                    .frame(minWidth: 44.0)
+                HStack(alignment: .center, spacing: 5.0){
+                    Text(viewModel.minimumValue)
+                        .foregroundColor(foregroundColor)
+                        .font(.caption)
+                        .frame(minWidth: 44.0)
 
-                Spacer()
+                    Spacer()
 
-                Text(viewModel.remainingValue)
-                    .foregroundColor(foregroundColor)
-                    .font(.caption)
-                    .frame(minWidth: 44.0)
-            }
-
-            HStack(alignment: .center, spacing: 10.0) {
-
-                Spacer()
-
-                PlayerButton(.backwards)  {
-                    iaPlayer.advancePlayer(.backwards)
+                    Text(viewModel.remainingValue)
+                        .foregroundColor(foregroundColor)
+                        .font(.caption)
+                        .frame(minWidth: 44.0)
                 }
 
-                Spacer()
+                HStack(alignment: .center, spacing: 10.0) {
 
-                PlayerButton(.bb) {
-                }
-                .onTouchDownUp { pressed in
-                    if pressed {
-                        iaPlayer.seek(forward: false)
-                    } else {
-                        iaPlayer.stopSeeking()
+                    Spacer()
+
+                    PlayerButton(.backwards)  {
+                        iaPlayer.advancePlayer(.backwards)
                     }
-                }
-                
-                Spacer()
 
-                PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 40, height: 40)) {
-                    iaPlayer.didTapPlayButton()
-                }
+                    Spacer()
 
-                Spacer()
-
-                PlayerButton(.ff) {
-                }
-                .onTouchDownUp { pressed in
-                    if pressed {
-                        iaPlayer.seek(forward: true)
-                    } else {
-                        iaPlayer.stopSeeking()
+                    PlayerButton(.bb) {
                     }
+                    .onTouchDownUp { pressed in
+                        if pressed {
+                            iaPlayer.seek(forward: false)
+                        } else {
+                            iaPlayer.stopSeeking()
+                        }
+                    }
+
+                    Spacer()
+
+                    PlayerButton(viewModel.playing ? .pause : .play, CGSize(width: 40, height: 40)) {
+                        iaPlayer.didTapPlayButton()
+                    }
+
+                    Spacer()
+
+                    PlayerButton(.ff) {
+                    }
+                    .onTouchDownUp { pressed in
+                        if pressed {
+                            iaPlayer.seek(forward: true)
+                        } else {
+                            iaPlayer.stopSeeking()
+                        }
+                    }
+
+                    Spacer()
+
+                    PlayerButton(.forwards) {
+                        iaPlayer.advancePlayer(.forwards)
+                    }
+
+                    Spacer()
+
                 }
-
-                Spacer()
-
-                PlayerButton(.forwards) {
-                    iaPlayer.advancePlayer(.forwards)
-                }
-
-                Spacer()
-
             }
+            .padding(5)
             .tint(foregroundColor)
         }
-        .padding(5)
         .background(backgroundColor)
         .coordinateSpace(name: "playerControls")
         .cornerRadius(10)
@@ -165,6 +327,7 @@ struct PlayerControls: View {
         }
     }
 
+
     private func sliderEditingChanged(editingStarted: Bool) {
         if editingStarted {
             iaPlayer.shouldPauseSliderProgress(true)
@@ -172,8 +335,6 @@ struct PlayerControls: View {
             iaPlayer.seekTo(with: viewModel.progress)
         }
     }
-
-
 }
 
 extension PlayerControls {
@@ -257,6 +418,52 @@ extension PlayerControls {
     }
 }
 
+// MARK: - Custom View Modifiers
+
+struct WinAmpMofifier: ViewModifier {
+    var backgroundColor: Color = .black
+    var borderColor: Color = .white
+    var borderWidth: CGFloat = 1
+    var edges: Edge.Set = [.trailing, .bottom]
+    
+    func body(content: Content) -> some View {
+        content
+            .monospaced(true)
+            .foregroundColor(Color.green)
+            .background(backgroundColor)
+            .overlay(alignment: .trailing) {
+                if edges.contains(.trailing) {
+                    Rectangle()
+                        .fill(borderColor)
+                        .frame(width: borderWidth)
+                }
+            }
+            .overlay(alignment: .bottom) {
+                if edges.contains(.bottom) {
+                    Rectangle()
+                        .fill(borderColor)
+                        .frame(height: borderWidth)
+                }
+            }
+    }
+}
+
+extension View {
+    func winAmpValue(
+        backgroundColor: Color = .black,
+        borderColor: Color = .white,
+        borderWidth: CGFloat = 1,
+        edges: Edge.Set = [.trailing, .bottom]
+    ) -> some View {
+        modifier(WinAmpMofifier(
+            backgroundColor: backgroundColor,
+            borderColor: borderColor,
+            borderWidth: borderWidth,
+            edges: edges
+        ))
+    }
+}
+
 // MARK: - Preference Key for Player Height
 struct PlayerHeightPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
@@ -270,10 +477,10 @@ struct PlayerControls_Previews: PreviewProvider {
         PreviewWrapper()
             .environmentObject(Player())
     }
-    
+
     struct PreviewWrapper: View {
         @State private var showVideoPlayer: Bool = false
-        
+
         var body: some View {
             PlayerControls(showVideoPlayer: $showVideoPlayer)
         }
@@ -296,7 +503,7 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
     }
 
     static func dismantleUIViewController(_ uiViewController: AVPlayerViewController, coordinator: ()) {
-//        Player.shared.avPlayer = nil
+        //        Player.shared.avPlayer = nil
     }
 }
 

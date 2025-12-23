@@ -414,6 +414,7 @@ struct Detail: View {
                                             Spacer()
                                         }
                                     }
+                                    .foregroundColor(.black)
                                     .opacity(0.7)
                                     .frame(maxWidth: .infinity, alignment: .center)
                                     .padding(.horizontal, 8)
