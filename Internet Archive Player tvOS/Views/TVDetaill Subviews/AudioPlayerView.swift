@@ -457,12 +457,14 @@ extension AudioPlayerView {
                 guard let self = self else { return }
                 let timeSeconds = time.seconds
                 if !timeSeconds.isNaN && timeSeconds.isFinite {
-                    self.currentTime = timeSeconds
-                    
-                    // Check if we should generate a new gradient (every 10 seconds while playing)
-                    if self.isPlaying && (timeSeconds - self.lastGradientChangeTime) >= 10.0 {
-                        self.generateNewGradient()
-                        self.lastGradientChangeTime = timeSeconds
+                    Task { @MainActor in
+                        self.currentTime = timeSeconds
+
+                        // Check if we should generate a new gradient (every 10 seconds while playing)
+                        if self.isPlaying && (timeSeconds - self.lastGradientChangeTime) >= 10.0 {
+                            self.generateNewGradient()
+                            self.lastGradientChangeTime = timeSeconds
+                        }
                     }
                 }
             }

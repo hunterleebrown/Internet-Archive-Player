@@ -165,8 +165,8 @@ extension SingleListView {
         func removeFiles(at offsets: IndexSet, from playlist: PlaylistEntity) {
             guard let player = player else { return }
             
-            // Capture the entities to remove before modifying the array
-            let entitiesToRemove = offsets.map { files[$0] }
+//            // Capture the entities to remove before modifying the array
+//            let entitiesToRemove = offsets.map { files[$0] }
             
             // Update the UI immediately by removing from the local array
             files.remove(atOffsets: offsets)
