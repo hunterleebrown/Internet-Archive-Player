@@ -82,7 +82,6 @@ class Player: NSObject, ObservableObject {
     var mainPlaylist: PlaylistEntity? = nil
     var favoritesPlaylist: PlaylistEntity? = nil
 
-    private var playingMediaType: MPNowPlayingInfoMediaType? = nil
     public var nowPlayingSession: MPNowPlayingSession
 
     private var observing = false
@@ -93,11 +92,7 @@ class Player: NSObject, ObservableObject {
     private var playingImage: MPMediaItemArtwork?
     private var artworkLoadTask: Task<Void, Never>?
 
-    var fileTitle: String?
     var fileIdentifierTitle: String?
-    var fileIdentifier: String?
-
-    let presentingController = AVPlayerViewController()
 
     private let playlistFetchController: NSFetchedResultsController<PlaylistEntity>
     private let favoritesFetchController: NSFetchedResultsController<PlaylistEntity>
@@ -181,11 +176,10 @@ class Player: NSObject, ObservableObject {
         }
     }
 
-    private let sliderProgressSubject = PassthroughSubject<Double, Never>()
+    private var sliderProgressSubject = PassthroughSubject<Double, Never>()
     public var sliderProgressPublisher: AnyPublisher<Double, Never> {
         sliderProgressSubject.eraseToAnyPublisher()
     }
-    private var sliderProgress: Double = 0.0
     private var pauseSliderProgress = false
     public func shouldPauseSliderProgress(_ shouldPause: Bool){
         self.pauseSliderProgress = shouldPause
@@ -390,9 +384,7 @@ class Player: NSObject, ObservableObject {
             }
         }
 
-        self.fileTitle = archiveFileEntity.title ?? archiveFileEntity.name
         self.fileIdentifierTitle = archiveFileEntity.archiveTitle
-        self.fileIdentifier = archiveFileEntity.identifier
         self.playingFile = archiveFileEntity
         self.playingFileSubject.send(archiveFileEntity)
 
@@ -690,7 +682,6 @@ class Player: NSObject, ObservableObject {
 
             if(avPlayer.currentItem != nil) {
                 let progress = CMTimeGetSeconds(avPlayer.currentTime()) / CMTimeGetSeconds((avPlayer.currentItem?.duration)!)
-                self.sliderProgress = progress
                 if !pauseSliderProgress {
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
@@ -711,15 +702,6 @@ class Player: NSObject, ObservableObject {
                 }
             }
             return
-    }
-
-    private func elapsedSeconds()->Int {
-        let calcTime = CMTimeGetSeconds((avPlayer.currentItem?.duration)!) - CMTimeGetSeconds(avPlayer.currentTime())
-        if(!calcTime.isNaN) {
-            let duration = CMTimeGetSeconds((avPlayer.currentItem?.duration)!)
-            return Int(duration) - Int(calcTime)
-        }
-        return 0
     }
 
     private func setPlayingInfo(playing:Bool) {
