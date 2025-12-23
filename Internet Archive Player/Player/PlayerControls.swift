@@ -43,7 +43,9 @@ struct PlayerControls: View {
 
     var winAmp: some View {
         VStack(alignment: .leading, spacing: 5) {
+
             PlaylistDrawer(skin: .winAmp)
+
             HStack(alignment: .top) {
                 Text(viewModel.minimumValue)
                     .padding(2)

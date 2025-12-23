@@ -30,13 +30,14 @@ struct PlaylistDrawer: View {
                                     .font(.caption2)
                                     .imageScale(.small)
                             } else {
+
                                 VStack(spacing:2) {
                                     Rectangle()
                                         .fill(.white)
-                                        .frame(height: 1)
+                                        .frame(height: 2)
                                     Rectangle()
                                         .fill(.gray)
-                                        .frame(height: 1)
+                                        .frame(height: 2)
                                 }
 
                                 Text("Playlist")
@@ -54,10 +55,10 @@ struct PlaylistDrawer: View {
                                 VStack(spacing:2) {
                                     Rectangle()
                                         .fill(.white)
-                                        .frame(height: 1)
+                                        .frame(height: 2)
                                     Rectangle()
                                         .fill(.gray)
-                                        .frame(height: 1)
+                                        .frame(height: 2)
                                 }
 
                             }
