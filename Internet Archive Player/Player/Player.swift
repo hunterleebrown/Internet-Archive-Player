@@ -90,6 +90,7 @@ class Player: NSObject, ObservableObject {
     private var playing = false
 
     private var playingImage: MPMediaItemArtwork?
+    private var artworkLoadTask: Task<Void, Never>?
 
     var fileTitle: String?
     var fileIdentifierTitle: String?
@@ -572,15 +573,29 @@ class Player: NSObject, ObservableObject {
     }
 
     private func loadNowPlayingMediaArtwork() {
-        guard let url = self.playingFile?.iconUrl else { return }
-        DispatchQueue.global().async { [weak self] in
-            if let data = try? Data(contentsOf: url) {
-                if let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self?.playingImage = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-                        self?.setPlayingInfo(playing: false)
-                    }
-                }
+        guard let url = self.playingFile?.iconUrl else { 
+            // Clear artwork if no URL
+            self.playingImage = nil
+            self.setPlayingInfo(playing: false)
+            return 
+        }
+        
+        // Cancel any previous artwork loading task
+        artworkLoadTask?.cancel()
+        
+        // Use the shared ImageCacheManager for loading and caching
+        artworkLoadTask = ImageCacheManager.shared.loadImage(from: url) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let image):
+                self.playingImage = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+                self.setPlayingInfo(playing: false)
+                
+            case .failure(let error):
+                print("Failed to load artwork: \(error.localizedDescription)")
+                // Optionally clear artwork on error
+                self.playingImage = nil
             }
         }
     }
@@ -605,7 +620,9 @@ class Player: NSObject, ObservableObject {
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-            if avPlayer == object as! AVPlayer && "rate" == keyPath {
+            guard let player = object as? AVPlayer, player == avPlayer else { return }
+            
+            if keyPath == "rate" {
                 DispatchQueue.main.async {
                     self.playing  = self.avPlayer.rate > 0.0
                     self.playingSubject.send(self.avPlayer.rate > 0.0)
@@ -614,20 +631,20 @@ class Player: NSObject, ObservableObject {
                 }
             }
 
-            if avPlayer == object as? AVPlayer && keyPath == #keyPath(AVPlayer.currentItem.status) {
-                let newStatus: AVPlayerItem.Status
-                if let newStatusAsNumber = change?[NSKeyValueChangeKey.newKey] as? NSNumber {
-                    newStatus = AVPlayerItem.Status(rawValue: newStatusAsNumber.intValue)!
-                } else {
-                    newStatus = .unknown
-                }
-                
-                if newStatus == .failed {
-                    print("❌ AVPlayer Error: \(String(describing: self.avPlayer.currentItem?.error?.localizedDescription)), error: \(String(describing: self.avPlayer.currentItem?.error))")
+            if keyPath == #keyPath(AVPlayer.currentItem.status) {
+                DispatchQueue.main.async {
+                    let newStatus: AVPlayerItem.Status
+                    if let newStatusAsNumber = change?[NSKeyValueChangeKey.newKey] as? NSNumber {
+                        newStatus = AVPlayerItem.Status(rawValue: newStatusAsNumber.intValue)!
+                    } else {
+                        newStatus = .unknown
+                    }
                     
-                    // Surface the error to the user via the universal error overlay
-                    if let error = self.avPlayer.currentItem?.error {
-                        Task { @MainActor in
+                    if newStatus == .failed {
+                        print("❌ AVPlayer Error: \(String(describing: self.avPlayer.currentItem?.error?.localizedDescription)), error: \(String(describing: self.avPlayer.currentItem?.error))")
+                        
+                        // Surface the error to the user via the universal error overlay
+                        if let error = self.avPlayer.currentItem?.error {
                             let fileName = self.playingFile?.title ?? self.playingFile?.name ?? "Unknown file"
                             let errorMessage = "Failed to play \"\(fileName)\": \(error.localizedDescription)"
                             ArchiveErrorManager.shared.showError(message: errorMessage)
@@ -667,8 +684,8 @@ class Player: NSObject, ObservableObject {
                     
                     let delay = 0.1 * Double(NSEC_PER_SEC)
                     let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
-                    DispatchQueue.main.asyncAfter(deadline: time) {
-                        self.monitorPlayback()
+                    DispatchQueue.main.asyncAfter(deadline: time) { [weak self] in
+                        self?.monitorPlayback()
                     }
                 }
             }
@@ -852,9 +869,14 @@ class Player: NSObject, ObservableObject {
     }
 
     deinit {
-        avPlayer.removeObserver(self, forKeyPath: "rate")
-        avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status))
-        avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem))
+        seekTimer?.invalidate()
+        artworkLoadTask?.cancel()
+        NotificationCenter.default.removeObserver(self)
+        
+        if observing {
+            avPlayer.removeObserver(self, forKeyPath: "rate")
+            avPlayer.removeObserver(self, forKeyPath: #keyPath(AVPlayer.currentItem.status))
+        }
     }
 }
 
