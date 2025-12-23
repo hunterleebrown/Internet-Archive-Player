@@ -11,11 +11,19 @@ import SwiftUI
 import UIKit
 
 struct SearchFilters: View {
-
-    @State private var searchFilter: SearchFilter?
+    
+    // MARK: - Properties
+    
     @StateObject var searchFiltersViewModel: SearchFiltersViewModel
     @Environment(\.dismiss) private var dismiss
-    var delegate: SearchView?
+    
+    /// Binding to the currently selected filter in the parent view
+    @Binding var selectedFilter: SearchFilter
+    
+    /// Callback when a filter is selected - allows parent to respond without tight coupling
+    var onFilterSelected: ((SearchFilter) -> Void)?
+    
+    // MARK: - Body
 
     var body: some View {
         VStack(spacing: 0) {
@@ -52,8 +60,9 @@ struct SearchFilters: View {
                 Section {
                     ForEach(searchFiltersViewModel.items) { filter in
                         filterRow(for: filter)
+                            .contentShape(Rectangle()) // Improve tap target
                             .onTapGesture {
-                                searchFilter = filter
+                                handleFilterSelection(filter)
                             }
                     }
                 } header: {
@@ -72,8 +81,9 @@ struct SearchFilters: View {
                     Section {
                         ForEach(searchFiltersViewModel.userFilters) { filter in
                             filterRow(for: filter)
+                                .contentShape(Rectangle()) // Improve tap target
                                 .onTapGesture {
-                                    searchFilter = filter
+                                    handleFilterSelection(filter)
                                 }
                         }
                     } header: {
@@ -91,21 +101,27 @@ struct SearchFilters: View {
         .presentationDragIndicator(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(UIColor.systemBackground))
-        .onChange(of: searchFilter) { oldValue, newValue in
-            if let val = newValue {
-                searchFiltersViewModel.collectionSelection = val
-                if let del = delegate {
-                    del.searchFilter = val
-                    del.collectionName = val.name
-                    del.collectionIdentifier = val.identifier
-                    del.showCollections = false
-                    del.viewModel.search(query: del.viewModel.searchText, collection: searchFiltersViewModel.collectionSelection.identifier.isEmpty ? nil : searchFiltersViewModel.collectionSelection.identifier, loadMore: false)
-                }
-            }
+        .task {
+            // Use .task instead of .onAppear for proper async handling
+            await searchFiltersViewModel.search()
         }
-        .onAppear() {
-            searchFiltersViewModel.search()
-        }
+    }
+    
+    // MARK: - Helper Methods
+    
+    /// Handles filter selection with proper state updates
+    private func handleFilterSelection(_ filter: SearchFilter) {
+        // Update the view model
+        searchFiltersViewModel.collectionSelection = filter
+        
+        // Update the binding
+        selectedFilter = filter
+        
+        // Notify parent through callback
+        onFilterSelected?(filter)
+        
+        // Dismiss the sheet
+        dismiss()
     }
     
     // MARK: - Helper Views
@@ -115,34 +131,8 @@ struct SearchFilters: View {
     private func filterRow(for filter: SearchFilter) -> some View {
         HStack(spacing: 10) {
             // Collection icon
-            Group {
-                if let image = filter.image {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 40, height: 40)
-                } else if let uiImage = filter.uiImage {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 40, height: 40)
-                } else if filter.iconUrl != nil {
-                    AsyncImage(
-                        url: filter.iconUrl,
-                        content: { image in
-                            image.resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 40, height: 40)
-                                .background(Color.black)
-                        },
-                        placeholder: {
-                            Color(.systemGray5)
-                                .frame(width: 40, height: 40)
-                        })
-                    .cornerRadius(5)
-                }
-            }
-            .frame(width: 40, height: 40)
+            filterIcon(for: filter)
+                .frame(width: 40, height: 40)
             
             // Collection name and identifier
             VStack(alignment: .leading, spacing: 2) {
@@ -182,13 +172,52 @@ struct SearchFilters: View {
         .listRowBackground(Color.clear)
     }
     
+    /// Extracts the icon logic into a separate view builder
+    @ViewBuilder
+    private func filterIcon(for filter: SearchFilter) -> some View {
+        Group {
+            if let image = filter.image {
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 40, height: 40)
+            } else if let uiImage = filter.uiImage {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 40, height: 40)
+            } else if filter.iconUrl != nil {
+                CachedAsyncImage(
+                    url: filter.iconUrl,
+                    content: { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 40, height: 40)
+                            .background(Color.black)
+                    },
+                    placeholder: {
+                        Color(.systemGray5)
+                            .frame(width: 40, height: 40)
+                    })
+                .cornerRadius(5)
+            }
+        }
+    }
+    
+    /// Checks if a filter is currently selected
     private func isSelected(_ filter: SearchFilter) -> Bool {
-        delegate?.collectionName == filter.name
+        selectedFilter.identifier == filter.identifier
     }
 }
 
 struct SearchFilters_Previews: PreviewProvider {
     static var previews: some View {
-        SearchFilters(searchFiltersViewModel: SearchFiltersViewModel(collectionType: .audio))
+        SearchFilters(
+            searchFiltersViewModel: SearchFiltersViewModel(collectionType: .audio),
+            selectedFilter: .constant(SearchFilter(name: "All", identifier: "")),
+            onFilterSelected: { filter in
+                print("Filter selected: \(filter.name)")
+            }
+        )
     }
 }

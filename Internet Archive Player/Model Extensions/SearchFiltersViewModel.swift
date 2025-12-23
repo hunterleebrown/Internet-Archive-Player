@@ -23,17 +23,15 @@ class SearchFiltersViewModel: ObservableObject {
         self.collectionType = collectionType
     }
 
-    func search() {
-        Task {
-            // Use cached data instead of making a new network request
-            self.items = await cache.getFilters(for: self.collectionType)
-            
-            // Load user filters (these appear on both audio and video screens)
-            self.userFilters = cache.userFilters
-            
-            if self.items.isEmpty {
-                print("No filters available for \(self.collectionType.rawValue)")
-            }
+    func search() async {
+        // Use cached data instead of making a new network request
+        self.items = await cache.getFilters(for: self.collectionType)
+        
+        // Load user filters (these appear on both audio and video screens)
+        self.userFilters = cache.userFilters
+        
+        if self.items.isEmpty {
+            print("No filters available for \(self.collectionType.rawValue)")
         }
     }
     

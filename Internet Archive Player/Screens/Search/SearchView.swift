@@ -135,7 +135,7 @@ struct SearchView: View {
     private var collectionDisplayCard: some View {
         HStack(spacing: 8) {
             if let imageUrl = searchFilter.iconUrl {
-                AsyncImage(
+                CachedAsyncImage(
                     url: imageUrl,
                     content: { image in
                         image.resizable()
@@ -216,11 +216,38 @@ struct SearchView: View {
         let type = self.viewModel.mediaTypes[self.viewModel.mediaType]
         if let topCollectionType = ArchiveTopCollectionType(rawValue: type.rawValue) {
             let filterViewModel = SearchFiltersViewModel(collectionType: topCollectionType)
-            SearchFilters(searchFiltersViewModel: filterViewModel, delegate: self)
+            SearchFilters(
+                searchFiltersViewModel: filterViewModel,
+                selectedFilter: $searchFilter,
+                onFilterSelected: { [self] filter in
+                    handleFilterSelection(filter)
+                }
+            )
         }
     }
     
     // MARK: - Helper Methods
+    
+    /// Handles filter selection from the SearchFilters sheet
+    private func handleFilterSelection(_ filter: SearchFilter) {
+        // Add filter to cache (will only add if identifier doesn't already exist)
+        CollectionFilterCache.shared.addUserFilter(filter)
+        
+        // Update local state
+        searchFilter = filter
+        collectionName = filter.name
+        collectionIdentifier = filter.identifier
+        
+        // Close the sheet
+        showCollections = false
+        
+        // Trigger search with the new filter
+        viewModel.search(
+            query: viewModel.searchText,
+            collection: filter.identifier.isEmpty ? nil : filter.identifier,
+            loadMore: false
+        )
+    }
     
     /// Handles when any item is tapped
     private func handleItemTap(_ item: ArchiveMetaData) {
