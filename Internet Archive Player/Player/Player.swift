@@ -116,6 +116,10 @@ class Player: NSObject, ObservableObject {
         self.nowPlayingSession = session
 
         super.init()
+        
+        // Clean up any orphaned files first, before loading playlists
+        PersistenceController.shared.cleanupOrphans()
+        
         sessionRemote(session: session)
         playlistFetchController.delegate = self
         favoritesFetchController.delegate = self

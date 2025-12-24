@@ -15,7 +15,7 @@ struct DebugView: View {
     @State private var playerSkin: PlayerControlsSkin = .classic
 
     var body: some View {
-        VStack{
+        VStack(alignment: .leading, spacing: 10){
             HStack{
                 Text("Player skin: ")
                     .foregroundColor(.fairyRed)
@@ -33,6 +33,22 @@ struct DebugView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
+            // Orphan cleanup section
+            HStack {
+                Text("Orphaned files: ")
+                    .foregroundColor(.fairyRed)
+                Text("\(viewModel.orphanedFiles.count)")
+                Spacer()
+                if viewModel.orphanedFiles.count > 0 {
+                    Button("Clean Up Orphans") {
+                        viewModel.cleanupOrphans()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.fairyRed)
+                }
+            }
+
+
             HStack{
                 Text("Downloaded files: ")
                     .foregroundColor(.fairyRed)
@@ -40,6 +56,7 @@ struct DebugView: View {
                 Spacer()
                 Text("\(viewModel.report?.totalSize() ?? 0) bytes")
             }
+            
 
             List{
                 ForEach(viewModel.localFiles) { archiveFile in
@@ -52,13 +69,33 @@ struct DebugView: View {
                             HStack(alignment: .top, spacing: 0){
                                 Text(archiveFile.displayTitle)
                                     .font(.caption)
+//                                Text(archiveFile.description)
+//                                    .font(.caption2)
                                 Spacer()
                                 Text("\(archiveFile.calculatedSize ?? "") mb")
                                     .font(.caption)
                             }
                             Text(archiveFile.name ?? "")
                                 .font(.caption)
-
+                            
+                            // Show which playlists contain this file
+                            let playlistNames = archiveFile.containingPlaylistNames()
+                            if !playlistNames.isEmpty {
+                                VStack(alignment: .leading, spacing:2) {
+                                    Text("Included in:")
+                                        .font(.caption)
+                                    ForEach(playlistNames, id: \.self) { playlistName in
+                                        Text(playlistName)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            } else {
+                                Text("Not in any playlist")
+                                    .font(.caption2)
+                                    .foregroundColor(.orange)
+                            }
                         }
                         
                         Spacer()
@@ -102,6 +139,7 @@ extension DebugView {
     class ViewModel: ObservableObject {
         @Published var report: DownloadReport?
         @Published var localFiles: [ArchiveFileEntity] = []
+        @Published var orphanedFiles: [ArchiveFileEntity] = []
         
         private let viewContext = PersistenceController.shared.container.viewContext
         
@@ -116,10 +154,24 @@ extension DebugView {
             do {
                 let allFiles = try viewContext.fetch(fetchRequest)
                 localFiles = allFiles.filter { $0.isLocalFile() }
+                
+                // Identify orphaned files (local files not in any playlist)
+                orphanedFiles = localFiles.filter { file in
+                    !PersistenceController.shared.isOnPlaylist(entity: file)
+                }
             } catch {
                 print("Failed to fetch local files: \(error.localizedDescription)")
                 localFiles = []
+                orphanedFiles = []
             }
+        }
+        
+        func cleanupOrphans() {
+            // Use the PersistenceController's cleanupOrphans method
+            PersistenceController.shared.cleanupOrphans()
+            // Refresh after cleanup
+            fetchLocalFiles()
+            startDownloadReport()
         }
         
         func removeDownload(file: ArchiveFileEntity) {

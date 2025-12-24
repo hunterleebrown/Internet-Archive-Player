@@ -112,6 +112,23 @@ struct PersistenceController {
 
         return false
     }
+    
+    /// Returns all playlists that contain the given file entity
+    public func getPlaylistsContaining(entity: ArchiveFileEntity) -> [PlaylistEntity] {
+        let fetchRequest: NSFetchRequest<PlaylistEntity> = PlaylistEntity.fetchRequest()
+        do {
+            let playlists = try container.viewContext.fetch(fetchRequest)
+            return playlists.filter { playlist in
+                if let playlistFiles = playlist.files?.array as? [ArchiveFileEntity] {
+                    return playlistFiles.contains(entity)
+                }
+                return false
+            }
+        } catch let error {
+            print("Error fetching playlists containing file: \(error)")
+            return []
+        }
+    }
 
     // MARK: - Favorite Archives
     
@@ -218,5 +235,23 @@ extension PersistenceController {
             }
         }
         save()
+    }
+    
+    /// Clean up all orphaned files that aren't in any playlist
+    func cleanupOrphans() {
+        let fetchRequest: NSFetchRequest<ArchiveFileEntity> = ArchiveFileEntity.fetchRequest()
+        do {
+            let allFiles = try container.viewContext.fetch(fetchRequest)
+            let orphanedFiles = allFiles.filter { file in
+                !isOnPlaylist(entity: file)
+            }
+            
+            if !orphanedFiles.isEmpty {
+                print("🧹 Found \(orphanedFiles.count) orphaned files. Cleaning up...")
+                cleanupOrphanedFiles(from: orphanedFiles)
+            }
+        } catch {
+            print("Failed to check for orphaned files: \(error)")
+        }
     }
 }
