@@ -231,6 +231,15 @@ extension PersistenceController {
         for file in files {
             if !isOnPlaylist(entity: file) {
                 print("🧹 Cleaning up orphaned ArchiveFileEntity: \(file.name ?? "unknown")")
+                
+                // Remove downloaded file from disk if it exists
+                do {
+                    try Downloader.removeDownload(file: file)
+                } catch {
+                    // If file doesn't exist or can't be deleted, log but continue
+                    print("⚠️ Could not remove downloaded file: \(error.localizedDescription)")
+                }
+                
                 delete(file, false)
             }
         }
