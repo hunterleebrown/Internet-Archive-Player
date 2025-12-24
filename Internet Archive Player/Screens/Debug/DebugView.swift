@@ -60,41 +60,33 @@ struct DebugView: View {
 
             List{
                 ForEach(viewModel.localFiles) { archiveFile in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(archiveFile.identifier ?? "Unknown")
-                                .font(.caption)
-                                .bold()
-                                .frame(alignment: .leading)
-                            HStack(alignment: .top, spacing: 0){
-                                Text(archiveFile.displayTitle)
-                                    .font(.caption)
-//                                Text(archiveFile.description)
-//                                    .font(.caption2)
-                                Spacer()
-                                Text("\(archiveFile.calculatedSize ?? "") mb")
-                                    .font(.caption)
-                            }
-                            Text(archiveFile.name ?? "")
-                                .font(.caption)
+                    HStack(alignment: .top, spacing: 8) {
+                        // Two-column property/value layout
+                        VStack(alignment: .leading, spacing: 2) {
+                            PropertyRow(property: "Archive Title", value: archiveFile.archiveTitle ?? "Unknown")
+                            PropertyRow(property: "Identifier", value: archiveFile.identifier ?? "Unknown")
+                            PropertyRow(property: "Title", value: archiveFile.displayTitle)
+                            PropertyRow(property: "File Name", value: archiveFile.name ?? "")
+                            PropertyRow(property: "Size", value: "\(archiveFile.calculatedSize ?? "") mb")
                             
                             // Show which playlists contain this file
                             let playlistNames = archiveFile.containingPlaylistNames()
                             if !playlistNames.isEmpty {
-                                VStack(alignment: .leading, spacing:2) {
-                                    Text("Included in:")
-                                        .font(.caption)
-                                    ForEach(playlistNames, id: \.self) { playlistName in
-                                        Text(playlistName)
-                                            .font(.caption2)
-                                            .foregroundColor(.secondary)
+                                HStack(alignment: .top, spacing: 4) {
+                                    Text("Playlists:")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 70, alignment: .leading)
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        ForEach(playlistNames, id: \.self) { playlistName in
+                                            Text(playlistName)
+                                                .font(.system(size: 10))
+                                                .foregroundColor(.primary)
+                                        }
                                     }
                                 }
-                                .frame(maxWidth: .infinity, alignment: .leading)
                             } else {
-                                Text("Not in any playlist")
-                                    .font(.caption2)
-                                    .foregroundColor(.orange)
+                                PropertyRow(property: "Playlists", value: "None", valueColor: .orange)
                             }
                         }
                         
@@ -109,11 +101,11 @@ struct DebugView: View {
                         } label: {
                             Image(systemName: "ellipsis")
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 44, height: 44)
+                                .frame(width: 30, height: 30)
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .padding(5)
+                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
+                    .padding(.vertical, 2)
                 }
                 .onDelete { indexSet in
                     viewModel.removeDownloads(at: indexSet)
@@ -133,6 +125,25 @@ struct DebugView: View {
         }
     }
 
+}
+
+// Helper view for property/value rows
+struct PropertyRow: View {
+    let property: String
+    let value: String
+    var valueColor: Color = .primary
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 4) {
+            Text(property + ":")
+                .font(.system(size: 10))
+                .foregroundColor(.secondary)
+                .frame(width: 70, alignment: .leading)
+            Text(value)
+                .font(.system(size: 10))
+                .foregroundColor(valueColor)
+        }
+    }
 }
 
 extension DebugView {
