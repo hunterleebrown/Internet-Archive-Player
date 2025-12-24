@@ -397,8 +397,17 @@ extension AudioPlayerView {
 
             // Initialize playlist
             if let playlist = playlist {
-                self.playlistFiles = playlist
+
+               let sortedPlaylist = playlist.sorted { lf, rf in
+                    if let lTrack = Int(lf.track ?? ""), let rTrack = Int(rf.track ?? "") {
+                        return lTrack < rTrack
+                    }
+                    return false
+                }
+
+                self.playlistFiles = sortedPlaylist
                 // Find the starting index
+
                 if let index = playlist.firstIndex(where: { $0.name == audioFile.name }) {
                     self.currentTrackIndex = index
                 }

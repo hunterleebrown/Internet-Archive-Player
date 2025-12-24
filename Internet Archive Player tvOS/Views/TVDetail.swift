@@ -219,21 +219,21 @@ struct TVDetail: View {
                     }
                     
                     // Audio files list (right side)
-                    if self.viewModel.audioFiles.count > 0 {
+                    if self.viewModel.sortedAudioFiles().count > 0 {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Audio")
                                 .font(.system(size: 28, weight: .bold))
                                 .foregroundColor(.white)
                             
                             List {
-                                ForEach(self.viewModel.audioFiles, id: \.self) { file in
+                                ForEach(self.viewModel.sortedAudioFiles(), id: \.self) { file in
                                     NavigationLink {
                                         if let archiveDoc = self.viewModel.archiveDoc {
                                             AudioPlayerView(
                                                 audioFile: file,
                                                 artworkURL: imageUrl,
                                                 archiveDoc: archiveDoc,
-                                                playlist: self.viewModel.audioFiles
+                                                playlist: self.viewModel.sortedAudioFiles()
                                             )
                                         }
                                     } label: {
