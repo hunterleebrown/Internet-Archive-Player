@@ -39,8 +39,8 @@ struct SearchFilters_tvOS: View {
         }
         .padding(.horizontal, 60)
         .padding(.vertical, 8)
-        .onAppear {
-            viewModel.search()
+        .task {
+            await viewModel.search()
         }
     }
     

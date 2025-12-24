@@ -46,9 +46,9 @@ struct TVSearchView: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
                 .background(Color.black.opacity(0.3))
-                .onAppear {
-                    audioFiltersViewModel.search()
-                    moviesFiltersViewModel.search()
+                .task {
+                    await audioFiltersViewModel.search()
+                    await moviesFiltersViewModel.search()
                 }
                 
                 Divider()
