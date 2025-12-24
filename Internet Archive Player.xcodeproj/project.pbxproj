@@ -182,7 +182,6 @@
 		5ABF75682AAFC4D7001B158B /* ci_post_xcodebuild.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = ci_post_xcodebuild.sh; sourceTree = "<group>"; };
 		5AC10D5A281C988C00119C4E /* InternetArchivePlayer.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = InternetArchivePlayer.xcdatamodel; sourceTree = "<group>"; };
 		5AC10D5C281C98B200119C4E /* Persistence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
-		5AC10D5E281C98FC00119C4E /* InternetArchivePlayer 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "InternetArchivePlayer 2.xcdatamodel"; sourceTree = "<group>"; };
 		5AC5B2B1281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveFile+ArchiveFileEntity.swift"; sourceTree = "<group>"; };
 		5AC5B2B3281CA4B000CDE937 /* EntityFileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EntityFileView.swift; sourceTree = "<group>"; };
 		5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlaylistEntity+Extension.swift"; sourceTree = "<group>"; };
@@ -1383,7 +1382,6 @@
 		5AC10D59281C988C00119C4E /* InternetArchivePlayer.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				5AC10D5E281C98FC00119C4E /* InternetArchivePlayer 2.xcdatamodel */,
 				5AC10D5A281C988C00119C4E /* InternetArchivePlayer.xcdatamodel */,
 			);
 			currentVersion = 5AC10D5A281C988C00119C4E /* InternetArchivePlayer.xcdatamodel */;

@@ -49,9 +49,21 @@ struct DownloadReport {
     }
 }
 
-class Downloader: NSObject {
+class Downloader: NSObject, @unchecked Sendable {
 
     static var downloadedSubject = PassthroughSubject<(ArchiveFileEntity), Never>()
+
+    public static var mainDirectory: String = "iaPlayer"
+
+    private let file: ArchiveFileEntity
+    private var downloadTask: URLSessionDownloadTask?
+    private var delegate: FileViewDownloadDelegate?
+
+    init(_ file: ArchiveFileEntity, delegate: FileViewDownloadDelegate) {
+        self.file = file
+        self.delegate = delegate
+    }
+
 
     private lazy var percentFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
@@ -62,7 +74,6 @@ class Downloader: NSObject {
         return formatter
     }()
 
-    public static var mainDirectory: String = "iaPlayer"
 
     public static func directory() -> URL {
         return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent(Downloader.mainDirectory)
@@ -88,20 +99,9 @@ class Downloader: NSObject {
         }
     }
 
-    private let file: ArchiveFileEntity
-    private var downloadTask: URLSessionDownloadTask?
-    private var delegate: FileViewDownloadDelegate?
-
-    init(_ file: ArchiveFileEntity, delegate: FileViewDownloadDelegate) {
-        self.file = file
-        self.delegate = delegate
-    }
-
-
     private lazy var urlSession = URLSession(configuration: .default,
                                              delegate: self,
                                              delegateQueue: nil)
-
 
     public func downloadFile() throws {
         if isFileDownloaded() {

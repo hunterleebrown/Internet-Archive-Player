@@ -15,7 +15,7 @@ struct DebugView: View {
     @State private var playerSkin: PlayerControlsSkin = .classic
 
     var body: some View {
-        VStack{
+        VStack(alignment: .leading, spacing: 10){
             HStack{
                 Text("Player skin: ")
                     .foregroundColor(.fairyRed)
@@ -33,6 +33,22 @@ struct DebugView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
+            // Orphan cleanup section
+            HStack {
+                Text("Orphaned files: ")
+                    .foregroundColor(.fairyRed)
+                Text("\(viewModel.orphanedFiles.count)")
+                Spacer()
+                if viewModel.orphanedFiles.count > 0 {
+                    Button("Clean Up Orphans") {
+                        viewModel.cleanupOrphans()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.fairyRed)
+                }
+            }
+
+
             HStack{
                 Text("Downloaded files: ")
                     .foregroundColor(.fairyRed)
@@ -40,25 +56,38 @@ struct DebugView: View {
                 Spacer()
                 Text("\(viewModel.report?.totalSize() ?? 0) bytes")
             }
+            
 
             List{
                 ForEach(viewModel.localFiles) { archiveFile in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(archiveFile.identifier ?? "Unknown")
-                                .font(.caption)
-                                .bold()
-                                .frame(alignment: .leading)
-                            HStack(alignment: .top, spacing: 0){
-                                Text(archiveFile.displayTitle)
-                                    .font(.caption)
-                                Spacer()
-                                Text("\(archiveFile.calculatedSize ?? "") mb")
-                                    .font(.caption)
+                    HStack(alignment: .top, spacing: 8) {
+                        // Two-column property/value layout
+                        VStack(alignment: .leading, spacing: 2) {
+                            PropertyRow(property: "Archive Title", value: archiveFile.archiveTitle ?? "Unknown")
+                            PropertyRow(property: "Identifier", value: archiveFile.identifier ?? "Unknown")
+                            PropertyRow(property: "Title", value: archiveFile.displayTitle)
+                            PropertyRow(property: "File Name", value: archiveFile.name ?? "")
+                            PropertyRow(property: "Size", value: "\(archiveFile.calculatedSize ?? "") mb")
+                            
+                            // Show which playlists contain this file
+                            let playlistNames = archiveFile.containingPlaylistNames()
+                            if !playlistNames.isEmpty {
+                                HStack(alignment: .top, spacing: 4) {
+                                    Text("Playlists:")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 70, alignment: .leading)
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        ForEach(playlistNames, id: \.self) { playlistName in
+                                            Text(playlistName)
+                                                .font(.system(size: 10))
+                                                .foregroundColor(.primary)
+                                        }
+                                    }
+                                }
+                            } else {
+                                PropertyRow(property: "Playlists", value: "None", valueColor: .orange)
                             }
-                            Text(archiveFile.name ?? "")
-                                .font(.caption)
-
                         }
                         
                         Spacer()
@@ -72,11 +101,11 @@ struct DebugView: View {
                         } label: {
                             Image(systemName: "ellipsis")
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 44, height: 44)
+                                .frame(width: 30, height: 30)
                         }
                     }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .padding(5)
+                    .listRowInsets(EdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4))
+                    .padding(.vertical, 2)
                 }
                 .onDelete { indexSet in
                     viewModel.removeDownloads(at: indexSet)
@@ -98,10 +127,30 @@ struct DebugView: View {
 
 }
 
+// Helper view for property/value rows
+struct PropertyRow: View {
+    let property: String
+    let value: String
+    var valueColor: Color = .primary
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 4) {
+            Text(property + ":")
+                .font(.system(size: 10))
+                .foregroundColor(.secondary)
+                .frame(width: 70, alignment: .leading)
+            Text(value)
+                .font(.system(size: 10))
+                .foregroundColor(valueColor)
+        }
+    }
+}
+
 extension DebugView {
     class ViewModel: ObservableObject {
         @Published var report: DownloadReport?
         @Published var localFiles: [ArchiveFileEntity] = []
+        @Published var orphanedFiles: [ArchiveFileEntity] = []
         
         private let viewContext = PersistenceController.shared.container.viewContext
         
@@ -116,10 +165,24 @@ extension DebugView {
             do {
                 let allFiles = try viewContext.fetch(fetchRequest)
                 localFiles = allFiles.filter { $0.isLocalFile() }
+                
+                // Identify orphaned files (local files not in any playlist)
+                orphanedFiles = localFiles.filter { file in
+                    !PersistenceController.shared.isOnPlaylist(entity: file)
+                }
             } catch {
                 print("Failed to fetch local files: \(error.localizedDescription)")
                 localFiles = []
+                orphanedFiles = []
             }
+        }
+        
+        func cleanupOrphans() {
+            // Use the PersistenceController's cleanupOrphans method
+            PersistenceController.shared.cleanupOrphans()
+            // Refresh after cleanup
+            fetchLocalFiles()
+            startDownloadReport()
         }
         
         func removeDownload(file: ArchiveFileEntity) {

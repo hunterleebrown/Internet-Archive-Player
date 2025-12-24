@@ -60,5 +60,15 @@ extension ArchiveFileEntity {
 
     return request
   }
+  
+  /// Returns all playlists that contain this file
+  public func containingPlaylists() -> [PlaylistEntity] {
+      return PersistenceController.shared.getPlaylistsContaining(entity: self)
+  }
+  
+  /// Returns the names of all playlists that contain this file
+  public func containingPlaylistNames() -> [String] {
+      return containingPlaylists().compactMap { $0.name }
+  }
 }
 
