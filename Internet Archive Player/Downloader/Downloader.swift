@@ -49,7 +49,7 @@ struct DownloadReport {
     }
 }
 
-class Downloader: NSObject {
+class Downloader: NSObject, @unchecked Sendable {
 
     static var downloadedSubject = PassthroughSubject<(ArchiveFileEntity), Never>()
 
