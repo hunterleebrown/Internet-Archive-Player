@@ -106,7 +106,7 @@ struct EntityFileView: View {
     // MARK: - Subviews
     
     private var thumbnailView: some View {
-        AsyncImage(url: archiveFile.iconUrl) { image in
+        CachedAsyncImage(url: archiveFile.iconUrl) { image in
             image
                 .resizable()
                 .aspectRatio(contentMode: .fill)

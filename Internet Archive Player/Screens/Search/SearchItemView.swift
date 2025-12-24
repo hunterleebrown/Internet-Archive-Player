@@ -15,7 +15,7 @@ struct SearchItemView<Item: SearchItemDisplayable>: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             // Image with fixed aspect ratio
-            AsyncImage(url: item.displayIconUrl) { image in
+            CachedAsyncImage(url: item.displayIconUrl) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)

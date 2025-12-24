@@ -50,7 +50,7 @@ struct DetailDescription: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // Icon and basic info
                     HStack(alignment: .top, spacing: 12) {
-                        AsyncImage(
+                        CachedAsyncImage(
                             url: doc.iconUrl,
                             content: { image in
                                 image.resizable()
@@ -243,7 +243,7 @@ private struct CollectionsMetadataRow: View {
                     ForEach(collectionArchives) { archive in
                         HStack(alignment: .top, spacing: 6) {
                             // Collection icon
-                            AsyncImage(url: archive.metadata?.iconUrl) { image in
+                            CachedAsyncImage(url: archive.metadata?.iconUrl) { image in
                                 image
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)

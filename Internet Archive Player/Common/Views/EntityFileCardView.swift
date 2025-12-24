@@ -138,28 +138,25 @@ struct EntityFileCardView: View {
             .padding(5.0)
         }
         .background(
-//            Color(uiColor:viewModel.uiImage?.averageColor ?? .black)
 
-            AsyncImage(url: archiveFile.iconUrl, transaction: Transaction(animation: .spring())) { phase in
-                switch phase {
-                case .empty:
-                    Color.clear
-
-                case .success(let image):
+            CachedAsyncImage(
+                url: archiveFile.iconUrl,
+                content: { image in
                     image
                         .resizable()
                         .scaledToFill()
                         .frame(height: 66, alignment: .top)
-
-
-                case .failure(_):
-                    EmptyView()
-
-                @unknown default:
-                    EmptyView()
+                },
+                placeholder: {
+                    Color.black
+                        .frame(height: 66)
+                        .cornerRadius(5)
+                        .overlay(
+                            Image(systemName: "music.note")
+                                .foregroundColor(.fairyCream.opacity(0.5))
+                        )
                 }
-            }
-
+            )
 
         )
         .onReceive(EntityFileCardView.backgroundPass) { url in
