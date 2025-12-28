@@ -76,20 +76,20 @@ struct Home: View {
                 // Search Tab - First for discovery
 
                 NavigationStack {
-                    Browse()
-                }
-                .tabItem {
-                    Label("Browse", systemImage: "list.bullet.rectangle")
-                }
-                .tag(SelectedTab.browse)
-
-                NavigationStack {
                     SearchView()
                 }
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
                 .tag(SelectedTab.search)
+
+                NavigationStack {
+                    Browse()
+                }
+                .tabItem {
+                    Label("Browse", systemImage: "list.bullet.rectangle")
+                }
+                .tag(SelectedTab.browse)
 
                 // Now Playing Tab - Where the action happens
                 NavigationStack {

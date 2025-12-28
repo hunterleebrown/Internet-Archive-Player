@@ -63,7 +63,7 @@ struct Browse: View {
                                 }
                             }
                         } header: {
-                            Text("User")
+                            Text("Previously Searched Collections")
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.fairyRed)
