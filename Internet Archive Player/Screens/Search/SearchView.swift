@@ -84,11 +84,8 @@ struct SearchView: View {
     
     private var collectionFilterRow: some View {
         VStack(spacing: 8) {
-            HStack(spacing: 12) {
-                filterButton
-                collectionDisplayCard
-            }
-            
+            collectionDisplayCard
+
             // Long press hint
             HStack(spacing: 4) {
                 Image(systemName: "hand.tap")
@@ -133,41 +130,44 @@ struct SearchView: View {
     }
     
     private var collectionDisplayCard: some View {
-        HStack(spacing: 8) {
-            if let imageUrl = searchFilter.iconUrl {
-                CachedAsyncImage(
-                    url: imageUrl,
-                    content: { image in
-                        image.resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 24, height: 24)
-                            .background(Color.black)
-                    },
-                    placeholder: {
-                        Color(.black)
-                            .frame(width: 24, height: 24)
-                    })
-                .cornerRadius(4)
-            }
+
+        Button {
+            showCollections = true
+        } label: {
+                    HStack(spacing: 8) {
+                        if let imageUrl = searchFilter.iconUrl {
+                            CachedAsyncImage(
+                                url: imageUrl,
+                                content: { image in
+                                    image.resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 24, height: 24)
+                                        .background(Color.black)
+                                },
+                                placeholder: {
+                                    Color(.black)
+                                        .frame(width: 24, height: 24)
+                                })
+                            .cornerRadius(4)
+                        }
             
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Collection")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                Text(searchFilter.name)
-                    .font(.caption)
-                    .bold()
-                    .foregroundColor(.primary)
-            }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Collection")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text(searchFilter.name)
+                                .font(.caption)
+                                .bold()
+                                .foregroundColor(.primary)
+                        }
             
-            Spacer()
+                        Spacer()
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(UIColor.systemGray6))
-        )
+        .buttonStyle(.glass)
     }
     
     private var searchResultsList: some View {
@@ -447,7 +447,7 @@ extension View {
 // MARK: - Search Result Row
 
 /// A row in the search results list that handles tap gestures
-private struct SearchResultRow: View {
+struct SearchResultRow: View {
     let doc: ArchiveMetaData
     let isLastItem: Bool
     let onTap: () -> Void
