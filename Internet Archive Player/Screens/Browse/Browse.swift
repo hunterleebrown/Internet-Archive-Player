@@ -107,6 +107,10 @@ struct BrowseResultsView: View {
                 searchResultsList
             }
         }
+        .listStyle(PlainListStyle())
+        .listRowInsets(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
         .navigationTitle(filter.name)
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -155,9 +159,12 @@ struct BrowseResultsView: View {
                         .buttonStyle(PlainButtonStyle()) // Prevents button styling interference
                     }
                 }
+                .listStyle(PlainListStyle())
+                .listRowInsets(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
         }
-        .listStyle(PlainListStyle())
         .navigationDestination(for: SearchFilter.self) { filter in
             // Nested navigation for sub-collections
             BrowseResultsView(filter: filter)
@@ -220,17 +227,7 @@ extension Browse {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(UIColor.systemGray6))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.clear, lineWidth: 2)
-        )
-        .listRowInsets(EdgeInsets(top: 3, leading: 16, bottom: 3, trailing: 16))
+        .listRowInsets(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
     }
@@ -285,6 +282,11 @@ extension Browse {
         @Published var moviesFilters: [SearchFilter] = []
         @Published var userFilters: [SearchFilter] = []
 
+        private var rows = 50
+        private var page: Int = 1
+        private var totalPages = 0
+        private var numberOfResults = 0
+
         let service: PlayerArchiveService
         private var isLoadingMore: Bool = false
         var searchStarted: Bool = false
@@ -295,9 +297,9 @@ extension Browse {
 
         @MainActor
         func fetchInitialCollections() {
-            audioFilters = CollectionFilterCache.shared.audioFilters
-            moviesFilters = CollectionFilterCache.shared.moviesFilters
-            userFilters = CollectionFilterCache.shared.userFilters
+            audioFilters = CollectionFilterCache.shared.audioFilters.filter { $0.identifier != "" }
+            moviesFilters = CollectionFilterCache.shared.moviesFilters.filter { $0.identifier != "" }
+            userFilters = CollectionFilterCache.shared.userFilters.filter { $0.identifier != "" }
         }
 
         @MainActor
@@ -311,19 +313,28 @@ extension Browse {
             Task { @MainActor in
                 do {
 
+
                     if !self.isLoadingMore {
+                        self.page = 1
+                        self.totalPages = 0
                         self.items.removeAll()
                     }
 
                     let format: ArchiveFileFormat? = nil //self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
 //                    let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
 //                    print(query)
-                    let data = try await self.service.searchPPSAsync(query: query, mediaTypes: [.audio, .movies, .collection], format: format, collection: collection)
+                    let data = try await self.service.searchPPSAsync(
+                        query: query,
+                        mediaTypes: [.audio, .movies, .collection],
+                        rows: self.rows,
+                        page: self.page,
+                        format: format,
+                        collection: collection)
 
-//                    self.numberOfResults = data.response.numFound
-//                    self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
+                    self.numberOfResults = data.response.numFound
+                    self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
 
-//                    self.page += 1
+                    self.page += 1
 
 //                    print("The Page Number is: \(self.page)")
 
@@ -408,7 +419,12 @@ class BrowseResultsViewModel: ObservableObject {
     let service: PlayerArchiveService
     private var isLoadingMore: Bool = false
     private var searchTask: Task<Void, Never>?
-    
+
+    private var rows = 50
+    private var page: Int = 1
+    private var totalPages = 0
+    private var numberOfResults = 0
+
     init() {
         self.service = PlayerArchiveService()
     }
@@ -429,10 +445,18 @@ class BrowseResultsViewModel: ObservableObject {
                 let data = try await self.service.searchPPSAsync(
                     query: query,
                     mediaTypes: [.audio, .movies, .collection],
+                    rows: self.rows,
+                    page: self.page,
                     format: nil,
                     collection: collection
                 )
-                
+
+
+                self.numberOfResults = data.response.numFound
+                self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
+
+                self.page += 1
+
                 // Sort results to put collections at the top
                 let sortedDocs = data.response.docs.sorted { lhs, rhs in
                     let lhsIsCollection = lhs.mediatype == .collection
