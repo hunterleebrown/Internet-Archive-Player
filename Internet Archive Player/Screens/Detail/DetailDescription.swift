@@ -67,11 +67,7 @@ struct DetailDescription: View {
 
                         VStack(alignment: .leading, spacing: 6) {
                             if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
-                                Text(artist)
-                                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
-                                    .font(.subheadline)
-                                    .bold()
-                                    .multilineTextAlignment(.leading)
+                                MetadataRow(label: "Artist/Creator", value: artist)
                             }
                         }
                     }
@@ -94,6 +90,10 @@ struct DetailDescription: View {
 
                         if let uploader = doc.uploader {
                             MetadataRow(label: "Uploader", value: uploader)
+                        }
+
+                        if let date = doc.date {
+                            MetadataRow(label: "Date", value: date)
                         }
                     }
                     .padding(.horizontal, 20)

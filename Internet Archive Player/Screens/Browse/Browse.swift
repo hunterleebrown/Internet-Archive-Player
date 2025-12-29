@@ -22,7 +22,7 @@ struct Browse: View {
             .navigationDestination(for: SearchFilter.self) { filter in
                 BrowseResultsView(filter: filter)
             }
-            .navigationTitle("Browse")
+            .navigationTitle("Browse Collections")
             .task {
                 viewModel.loadCollections()
             }
@@ -128,6 +128,9 @@ struct BrowseResultsView: View {
                     systemImage: "magnifyingglass",
                     description: Text("No items found for \(filter.name)")
                 )
+
+                Spacer()
+
             } else {
                 resultsList
             }
@@ -258,7 +261,7 @@ final class BrowseResultsViewModel: ObservableObject {
                 page += 1
                 
                 if items.isEmpty {
-                    throw ArchiveServiceError.nodata
+//                    throw ArchiveServiceError.nodata
                 }
             } catch {
                 guard !error.localizedDescription.lowercased().contains("cancel") else { return }
