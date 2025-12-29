@@ -12,7 +12,7 @@ struct Browse: View {
     @StateObject private var viewModel = BrowseViewModel()
 
     var body: some View {
-//        NavigationStack {
+        NavigationStack {
             List {
                 filtersSection(title: "Audio", filters: viewModel.audioFilters)
                 filtersSection(title: "Movies", filters: viewModel.moviesFilters)
@@ -22,12 +22,12 @@ struct Browse: View {
             .navigationDestination(for: SearchFilter.self) { filter in
                 BrowseResultsView(filter: filter)
             }
-            .navigationTitle("Browse")
+            .navigationTitle("Browse Collections")
             .task {
                 viewModel.loadCollections()
             }
             .avoidPlayer()
-//        }
+        }
     }
     
     @ViewBuilder
@@ -128,6 +128,9 @@ struct BrowseResultsView: View {
                     systemImage: "magnifyingglass",
                     description: Text("No items found for \(filter.name)")
                 )
+
+                Spacer()
+
             } else {
                 resultsList
             }
@@ -258,7 +261,7 @@ final class BrowseResultsViewModel: ObservableObject {
                 page += 1
                 
                 if items.isEmpty {
-                    throw ArchiveServiceError.nodata
+//                    throw ArchiveServiceError.nodata
                 }
             } catch {
                 guard !error.localizedDescription.lowercased().contains("cancel") else { return }
