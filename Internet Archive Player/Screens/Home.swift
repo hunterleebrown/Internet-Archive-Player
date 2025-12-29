@@ -129,7 +129,7 @@ struct Home: View {
 
                 // Debug Tab
                 NavigationStack {
-                    DebugView()
+                    SettingsView()
                 }
                 .tabItem {
                     Label("Settings", systemImage: "gear")
