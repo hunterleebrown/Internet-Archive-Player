@@ -26,6 +26,7 @@ struct Browse: View {
             .task {
                 viewModel.loadCollections()
             }
+            .avoidPlayer()
         }
     }
     
@@ -73,7 +74,7 @@ struct FilterRowView: View {
                 }
             }
         }
-        .listRowInsets(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
     }
@@ -131,6 +132,7 @@ struct BrowseResultsView: View {
                 resultsList
             }
         }
+        .avoidPlayer()
         .navigationTitle(filter.name)
         .navigationBarTitleDisplayMode(.inline)
         .task {
@@ -150,9 +152,8 @@ struct BrowseResultsView: View {
                 }
         }
         .buttonStyle(.plain)
-        .listStyle(.plain)
-        .listRowInsets(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
-        .listRowSeparator(.hidden)
+        .listStyle(PlainListStyle())
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         .listRowBackground(Color.clear)
         .navigationDestination(for: SearchFilter.self) { filter in
             BrowseResultsView(filter: filter)
@@ -160,19 +161,32 @@ struct BrowseResultsView: View {
         .navigationDestination(for: String.self) { identifier in
             Detail(identifier)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+
     }
     
     @ViewBuilder
     private func resultLink(for doc: ArchiveMetaData) -> some View {
         if doc.mediatype == .collection {
-            NavigationLink(value: doc.asSearchFilter()) {
-                SearchItemView(item: doc)
-            }
+
+            SearchItemView(item: doc)
+                .background(
+                    NavigationLink(value: doc.asSearchFilter()) {
+                        EmptyView() // Empty label
+                    }
+                        .opacity(0) // Hide the link itself
+                )
+                .contentShape(Rectangle())
 
         } else if let identifier = doc.identifier {
-            NavigationLink(value: identifier) {
-                SearchItemView(item: doc)
-            }
+            SearchItemView(item: doc)
+                .background(
+                    NavigationLink(value: identifier) {
+                        EmptyView() // Empty label
+                    }
+                        .opacity(0) // Hide the link itself
+                )
+                .contentShape(Rectangle())
         }
     }
 }
