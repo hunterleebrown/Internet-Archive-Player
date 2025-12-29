@@ -60,7 +60,7 @@ struct SearchView: View {
         }
         .background(Color(UIColor.systemBackground))
     }
-    
+
     private var mediaTypePicker: some View {
         Picker("What media type?", selection: $viewModel.mediaType) {
             Label("Audio", systemImage: "hifispeaker")
@@ -171,44 +171,97 @@ struct SearchView: View {
     }
     
     private var searchResultsList: some View {
-        List {
-            ForEach(viewModel.items, id: \.self) { doc in
-                SearchResultRow(
-                    doc: doc,
-                    isLastItem: doc == viewModel.items.last,
-                    onTap: { handleItemTap(doc) },
-                    onAppear: {
-                        if doc == viewModel.items.last {
-                            viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: true)
+        ZStack {
+            List {
+                ForEach(viewModel.items, id: \.self) { doc in
+                    SearchResultRow(
+                        doc: doc,
+                        isLastItem: doc == viewModel.items.last,
+                        onTap: { handleItemTap(doc) },
+                        onAppear: {
+                            if doc == viewModel.items.last {
+                                viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: true)
+                            }
                         }
-                    }
-                )
-                .contextMenu {
+                    )
+                    .contextMenu {
 
-                    if let meta = viewModel.firstCollection(doc) {
+                        if let meta = viewModel.firstCollection(doc) {
+                            Button {
+                                setSearchFilter(meta)
+                            } label: {
+                                Label("Filter by Collection \(meta.archiveTitle ?? "Unknown")", systemImage: "line.3.horizontal.decrease.circle")
+                            }
+
+                        }
+
                         Button {
-                            setSearchFilter(meta)
+                            try? iaPlayer.addFavoriteArchive(doc)
                         } label: {
-                            Label("Filter by Collection \(meta.archiveTitle ?? "Unknown")", systemImage: "line.3.horizontal.decrease.circle")
+                            Label("Add to Bookmarks", systemImage: "bookmark")
                         }
-
-                    }
-
-                    Button {
-                        try? iaPlayer.addFavoriteArchive(doc)
-                    } label: {
-                        Label("Add to Bookmarks", systemImage: "bookmark")
                     }
                 }
             }
+            .listStyle(PlainListStyle())
+            .opacity(viewModel.noDataFound ? 0 : 1)
+            
+            // No results view
+            if viewModel.noDataFound {
+                noResultsView
+            }
         }
-        .listStyle(PlainListStyle())
         .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search The Internet Archive")
         .onSubmit(of: .search, {
             viewModel.search(query: viewModel.searchText, collection: collectionIdentifier, loadMore: false)
         })
-        .zIndex(viewModel.noDataFound ? 2 : 1)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private var noResultsView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 60))
+                .foregroundColor(.fairyRed)
+
+            VStack(spacing: 8) {
+                Text("No Results Found")
+                    .font(.title2)
+                    .bold()
+                
+                Text("Try adjusting your search or collection filter")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            if !searchFilter.identifier.isEmpty {
+                Button {
+                    // Reset to "All" filter
+                    searchFilter = SearchFilter(name: "All", identifier: "")
+                    collectionName = "All"
+                    collectionIdentifier = nil
+                    viewModel.search(query: viewModel.searchText, collection: nil, loadMore: false)
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("Clear Collection Filter")
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Color.gray, lineWidth: 1.5)
+                    )
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.top, 20)
+        .padding(.horizontal, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .transition(.opacity.combined(with: .scale(scale: 0.9)))
     }
     
     @ViewBuilder
@@ -320,7 +373,11 @@ extension SearchView {
         private var rows = 50
         private var totalPages = 0
 
-        var searchStarted: Bool = false
+        // Track the current search task so we can cancel it
+        private var currentSearchTask: Task<Void, Never>?
+        
+        // Track search ID to ensure we only process the latest search results
+        private var currentSearchID = UUID()
 
         let service: PlayerArchiveService
 
@@ -329,17 +386,26 @@ extension SearchView {
         }
 
         @MainActor
-        func search(query: String, collection:String? = nil, loadMore: Bool) {
-
-            guard !searchText.isEmpty, searchText.count > 2, !searchStarted  else { return }
+        func search(query: String, collection: String? = nil, loadMore: Bool) {
+            guard !searchText.isEmpty, searchText.count > 2 else { return }
+            
+            // Cancel any existing search
+            currentSearchTask?.cancel()
+            
+            // Generate a new search ID for this search
+            let searchID = UUID()
+            currentSearchID = searchID
+            
             self.isSearching = true
             self.noDataFound = false
             self.isLoadingMore = loadMore
-            self.searchStarted = true
             self.archiveError = nil
-            Task { @MainActor in
+            
+            currentSearchTask = Task { @MainActor in
                 do {
-
+                    // Check if we've been cancelled before doing work
+                    try Task.checkCancellation()
+                    
                     if !self.isLoadingMore {
                         self.page = 1
                         self.totalPages = 0
@@ -349,7 +415,24 @@ extension SearchView {
                     let format: ArchiveFileFormat? = nil //self.mediaTypes[self.mediaType] == .movies ? nil : .mp3
                     let searchMediaType: ArchiveMediaType = self.mediaTypes[self.mediaType]
                     print(query)
-                    let data = try await self.service.searchPPSAsync(query: query, mediaTypes: [searchMediaType, .collection], rows: self.rows, page: self.page, format: format, collection: collection)
+                    
+                    let data = try await self.service.searchPPSAsync(
+                        query: query,
+                        mediaTypes: [searchMediaType, .collection],
+                        rows: self.rows,
+                        page: self.page,
+                        format: format,
+                        collection: collection
+                    )
+                    
+                    // Check if this search is still the current one
+                    guard searchID == self.currentSearchID else {
+                        print("Search results discarded - newer search in progress")
+                        return
+                    }
+                    
+                    // Check if we've been cancelled after the network call
+                    try Task.checkCancellation()
 
                     self.numberOfResults = data.response.numFound
                     self.totalPages = Int(ceil(Double(self.numberOfResults) / Double(self.rows)))
@@ -386,23 +469,43 @@ extension SearchView {
                     }
 
                     self.isSearching = false
-                    self.searchStarted = false
 
                     if self.items.count == 0 {
                         throw ArchiveServiceError.nodata
                     }
 
-                } catch let error as ArchiveServiceError {
-                    withAnimation(.easeIn(duration: 0.33)) {
-                        self.archiveError = error.description
-                        self.noDataFound = true
+                } catch is CancellationError {
+                    // Task was cancelled, don't update UI or show errors
+                    print("Search cancelled")
+                    // Only reset isSearching if this was the current search
+                    if searchID == self.currentSearchID {
                         self.isSearching = false
-                        self.searchStarted = false
                     }
                     
-                    // Also show in universal error overlay
-                    Task { @MainActor in
-                        ArchiveErrorManager.shared.showError(error)
+                } catch let error as ArchiveServiceError {
+                    // Only show error if this is still the current search
+                    guard searchID == self.currentSearchID else { return }
+                    
+                    // Handle "no data" case separately - show in-view message
+                    switch error {
+                    case .nodata:
+                        withAnimation(.easeIn(duration: 0.33)) {
+                            self.archiveError = nil // Clear error message
+                            self.noDataFound = true
+                            self.isSearching = false
+                        }
+                    default:
+                        // For other errors, show both in-view and error overlay
+                        withAnimation(.easeIn(duration: 0.33)) {
+                            self.archiveError = error.description
+                            self.noDataFound = false
+                            self.isSearching = false
+                        }
+                        
+                        // Show in universal error overlay for non-nodata errors
+                        Task { @MainActor in
+                            ArchiveErrorManager.shared.showError(error)
+                        }
                     }
                     
                 } catch {
@@ -410,14 +513,19 @@ extension SearchView {
                     let errorDescription = error.localizedDescription.lowercased()
                     guard !errorDescription.contains("cancelled") && !errorDescription.contains("canceled") else {
                         // User cancelled the operation, don't show error
+                        if searchID == self.currentSearchID {
+                            self.isSearching = false
+                        }
                         return
                     }
+                    
+                    // Only show error if this is still the current search
+                    guard searchID == self.currentSearchID else { return }
                     
                     withAnimation(.easeIn(duration: 0.33)) {
                         self.archiveError = "An unexpected error occurred: \(error.localizedDescription)"
                         self.noDataFound = true
                         self.isSearching = false
-                        self.searchStarted = false
                     }
                     
                     // Also show in universal error overlay

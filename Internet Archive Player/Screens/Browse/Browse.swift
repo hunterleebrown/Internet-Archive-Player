@@ -12,7 +12,7 @@ struct Browse: View {
     @StateObject private var viewModel = BrowseViewModel()
 
     var body: some View {
-        NavigationStack {
+//        NavigationStack {
             List {
                 filtersSection(title: "Audio", filters: viewModel.audioFilters)
                 filtersSection(title: "Movies", filters: viewModel.moviesFilters)
@@ -27,7 +27,7 @@ struct Browse: View {
                 viewModel.loadCollections()
             }
             .avoidPlayer()
-        }
+//        }
     }
     
     @ViewBuilder
