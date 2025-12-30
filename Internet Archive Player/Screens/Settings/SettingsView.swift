@@ -96,7 +96,7 @@ struct SettingsView: View {
                             ExpandableSection(
                                 title: "About",
                                 isExpanded: $showAbout,
-                                content: "This app is an independent client for accessing content from the Internet Archive. All music and content is provided by archive.org. This app and its design are © 2025 Hunter Lee Brown."
+                                content: "This app is an independent client for accessing content from the Internet Archive. All music and content is provided by archive.org. This app and its design are created by Hunter Lee Brown."
                             )
                             
                             Divider()
@@ -123,7 +123,7 @@ struct SettingsView: View {
                     SettingCard(title: "Developer") {
                         NavigationLink(destination: DebugView()) {
                             HStack {
-                                Text("Debug Tools")
+                                Text("Debug Info")
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Image(systemName: "chevron.right")
@@ -297,19 +297,10 @@ extension SettingsView {
         }
         
         private func loadTextFile(named name: String, fallback: String) -> String {
-            // First, let's try to find the file
-            guard let url = Bundle.main.url(forResource: name, withExtension: "txt") else {                
-                // Debug: List all txt files in bundle
-                if let resourcePath = Bundle.main.resourcePath {
-                    let fileManager = FileManager.default
-                    if let files = try? fileManager.contentsOfDirectory(atPath: resourcePath) {
-                        let txtFiles = files.filter { $0.hasSuffix(".txt") }
-                    }
-                }
+            guard let url = Bundle.main.url(forResource: name, withExtension: "txt") else {
                 return fallback
             }
             
-            // Try to read the file
             do {
                 let content = try String(contentsOf: url, encoding: .utf8)
                 return content
