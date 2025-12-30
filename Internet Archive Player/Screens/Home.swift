@@ -51,8 +51,12 @@ struct Home: View {
 
             if iaPlayer.playingFile != nil {
                 HStack {
-                    Spacer()
-                    
+//                    Spacer()
+
+                    PlayerButton(iaPlayer.playing ? .pause : .play, CGSize(width: 44, height: 4)) {
+                        iaPlayer.didTapPlayButton()
+                    }
+
                     Button(action: {
                         withAnimation {
                             showControls.toggle()

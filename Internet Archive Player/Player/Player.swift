@@ -86,7 +86,8 @@ class Player: NSObject, ObservableObject {
     private var observing = false
     private var observingStatus = false
     fileprivate var observerContext = 0
-    private var playing = false
+
+    @Published var playing = false
 
     private var playingImage: MPMediaItemArtwork?
     private var artworkLoadTask: Task<Void, Never>?
