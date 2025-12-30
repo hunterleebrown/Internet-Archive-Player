@@ -66,24 +66,24 @@ struct DetailDescription: View {
                         .frame(width: 66, height: 66)
 
                         VStack(alignment: .leading, spacing: 6) {
-                            if let artist = doc.artist ?? doc.creator?.joined(separator: ", ") {
+                            if let artist = doc.artist ?? doc.creator?.joined(separator: ", "), !artist.isEmpty {
                                 MetadataRow(label: "Artist/Creator", value: artist)
                             }
                         }
                     }
                     .padding(.horizontal, 20)
-                    
+
                     // Metadata section
                     VStack(alignment: .leading, spacing: 12) {
                         if let identifier = doc.identifier {
                             MetadataRow(label: "Identifier", value: identifier)
                         }
-                        
+
                         // Collections with icons
                         if !doc.collectionArchives.isEmpty {
                             CollectionsMetadataRow(collectionArchives: doc.collectionArchives, dismiss: dismiss)
                         }
-                        
+
                         if let publisher = doc.publisher, !publisher.isEmpty {
                             MetadataRow(label: "Publisher", value: publisher.joined(separator: ", "))
                         }
@@ -125,24 +125,26 @@ struct DetailDescription: View {
                         }
                         .padding(.horizontal, 20)
                     }
-                    
+
                     // Description section
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Description")
-                            .font(.headline)
-                            .foregroundColor(.fairyRed)
+                    if !doc.description.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Description")
+                                .font(.headline)
+                                .foregroundColor(.fairyRed)
+                                .padding(.horizontal, 20)
+
+                            WebView(htmlString: doc.description.joined(separator: ""),
+                                    bodyFontSize: fontSize,
+                                    bodyFontFamily: fontFamily,
+                                    bodyFontWeight: fontWeight,
+                                    contentHeight: $webViewHeight
+                            )
+                            .frame(height: webViewHeight)
                             .padding(.horizontal, 20)
-                        
-                        WebView(htmlString: doc.description.joined(separator: ""),
-                                bodyFontSize: fontSize,
-                                bodyFontFamily: fontFamily,
-                                bodyFontWeight: fontWeight,
-                                contentHeight: $webViewHeight
-                        )
-                        .frame(height: webViewHeight)
-                        .padding(.horizontal, 20)
+                        }
+                        .padding(.bottom, 20)
                     }
-                    .padding(.bottom, 20)
                 }
                 .padding(.top, 8)
             }

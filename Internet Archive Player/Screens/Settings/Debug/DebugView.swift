@@ -11,27 +11,10 @@ import CoreData
 
 struct DebugView: View {
     @EnvironmentObject var iaPlayer: Player
-    @ObservedObject var viewModel: ViewModel = ViewModel()
-    @State private var playerSkin: PlayerControlsSkin = .classic
+    @StateObject var viewModel: ViewModel = ViewModel()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10){
-            HStack{
-                Text("Player skin: ")
-                    .foregroundColor(.fairyRed)
-                Picker("Player Skin", selection: $playerSkin) {
-                    ForEach(PlayerControlsSkin.allCases, id: \.self) {
-                        Text($0.rawValue.capitalized)
-                    }
-                    .onChange(of: playerSkin) {
-                        withAnimation {
-                            iaPlayer.playerSkin = playerSkin
-                        }
-                    }
-                }
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
 
             // Orphan cleanup section
             HStack {
@@ -119,9 +102,6 @@ struct DebugView: View {
         .task{
             viewModel.startDownloadReport()
             viewModel.fetchLocalFiles()
-            if let skin = iaPlayer.playerSkin {
-                playerSkin = skin
-            }
         }
     }
 

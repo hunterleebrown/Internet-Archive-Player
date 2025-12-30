@@ -1,0 +1,32 @@
+IA Player does not collect, store, or transmit any personal information or user data. The app operates entirely on your device and communicates only with Internet Archive's public servers to retrieve content.
+
+What We Don't Collect:
+
+- Personal identification information
+- Usage analytics or statistics
+- Device information
+- Location data
+- Browsing history
+- Search queries
+
+Data Storage:
+
+All downloaded content and playlists are stored locally on your device. This data remains on your device and is never transmitted to any third-party servers.
+
+Internet Archive Communication:
+
+The app communicates directly with Internet Archive's public API to search for and stream content. This communication is subject to Internet Archive's own privacy policy, which can be found at https://archive.org/about/terms.php
+
+Third-Party Services:
+
+This app does not integrate with any third-party analytics, advertising, or tracking services.
+
+Your Control:
+
+You maintain complete control over all data stored by this app. You can delete downloaded content and playlists at any time through the app's interface.
+
+Changes to This Policy:
+
+Any updates to this privacy policy will be reflected in future app updates.
+
+Last Updated: December 29, 2024
