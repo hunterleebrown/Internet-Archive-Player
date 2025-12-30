@@ -50,12 +50,15 @@ struct Home: View {
         ZStack(alignment: .bottom) {
 
             if iaPlayer.playingFile != nil {
-                HStack {
-//                    Spacer()
+                HStack(spacing: 2) {
+                    Spacer()
 
-                    PlayerButton(iaPlayer.playing ? .pause : .play, CGSize(width: 44, height: 4)) {
+                    PlayerButton(iaPlayer.playing ? .pause : .play, CGSize(width: 40, height: 40)) {
                         iaPlayer.didTapPlayButton()
                     }
+                    .padding(2)
+                    .background(Color.fairyRed)
+                    .cornerRadius(10)
 
                     Button(action: {
                         withAnimation {
