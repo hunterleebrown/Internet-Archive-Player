@@ -41,10 +41,22 @@ struct SettingsView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             
-                            Text("© 2025 Hunter Lee Brown")
+                            Text("Hunter Lee Brown")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .padding(.top, 4)
+                            
+                            Link(destination: URL(string: "mailto:iacompanion@hunterleebrown.com")!) {
+                                Text("iacompanion@hunterleebrown.com")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
+                            
+                            Link(destination: URL(string: "https://hunterleebrown.com/IA")!) {
+                                Text("Support & Info")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
                         }
                     }
                     .frame(maxWidth: .infinity)

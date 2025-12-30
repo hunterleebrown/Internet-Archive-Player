@@ -191,6 +191,9 @@
 		5AC5B2B1281C9F9600CDE937 /* ArchiveFile+ArchiveFileEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveFile+ArchiveFileEntity.swift"; sourceTree = "<group>"; };
 		5AC5B2B3281CA4B000CDE937 /* EntityFileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EntityFileView.swift; sourceTree = "<group>"; };
 		5AC5DBA3281F7C36004D64DB /* PlaylistEntity+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlaylistEntity+Extension.swift"; sourceTree = "<group>"; };
+		5AC87D472F0449E600A3E9AA /* Disclaimer.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = Disclaimer.html; sourceTree = "<group>"; };
+		5AC87D482F0449E600A3E9AA /* Privacy.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = Privacy.html; sourceTree = "<group>"; };
+		5AC87D492F0449E600A3E9AA /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		5AC8A6B02EEB675E00D962B9 /* ArchiveMetaData+ArchiveMetaDataEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArchiveMetaData+ArchiveMetaDataEntity.swift"; sourceTree = "<group>"; };
 		5AC8A6B12EEB67F100D962B9 /* FavoriteArchivesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteArchivesView.swift; sourceTree = "<group>"; };
 		5AC8A6B22EEB681300D962B9 /* FAVORITE_ARCHIVES_IMPLEMENTATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FAVORITE_ARCHIVES_IMPLEMENTATION.md; sourceTree = "<group>"; };
@@ -384,6 +387,9 @@
 		5A7687FC2F031D400044C828 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				5AC87D472F0449E600A3E9AA /* Disclaimer.html */,
+				5AC87D482F0449E600A3E9AA /* Privacy.html */,
+				5AC87D492F0449E600A3E9AA /* index.html */,
 				5A7687FD2F031D5E0044C828 /* SettingsView.swift */,
 				5A7687FF2F0327C20044C828 /* Disclaimer.txt */,
 				5A7688032F032BF60044C828 /* Privacy.txt */,
