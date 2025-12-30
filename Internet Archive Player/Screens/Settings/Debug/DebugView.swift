@@ -11,7 +11,7 @@ import CoreData
 
 struct DebugView: View {
     @EnvironmentObject var iaPlayer: Player
-    @ObservedObject var viewModel: ViewModel = ViewModel()
+    @StateObject var viewModel: ViewModel = ViewModel()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10){

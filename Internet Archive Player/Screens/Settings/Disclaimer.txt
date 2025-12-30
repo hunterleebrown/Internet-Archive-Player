@@ -1,0 +1,11 @@
+IA Player provides access to publicly available media content from the Internet Archive (archive.org). This app is an independent client and is not affiliated with or endorsed by the Internet Archive.
+
+All content is sourced directly from Internet Archive's public collections. Content availability, quality, and accuracy are determined by Internet Archive and its contributors. This app allows users to download and store media files locally on their device for offline playback, but does not host, distribute, or modify content from the Internet Archive's servers.
+
+User Responsibilities
+
+Users are responsible for ensuring their use of accessed content complies with applicable copyright laws and licensing terms. Some content may be subject to geographic restrictions or licensing limitations. Downloaded content is stored locally on your device for personal use only.
+
+By using this app, you agree to respect the rights of content creators and to use accessed materials in accordance with their intended purpose and any applicable licenses.
+
+For questions about specific content, licensing, or Internet Archive's terms of service, please visit archive.org.

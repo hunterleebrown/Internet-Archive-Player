@@ -107,9 +107,10 @@ struct PlaylistDrawer: View {
                             .winAmpValue()
                             .foregroundColor(.green)
                             .monospaced()
-                    } else {
+                    } else { 
                         scrollView(proxy: proxy)
                             .foregroundColor(.fairyCream)
+                            .background(Color(.fairyRed).brightness(-0.30))
                     }
                 }
             }
