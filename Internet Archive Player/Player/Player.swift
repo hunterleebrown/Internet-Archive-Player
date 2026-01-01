@@ -125,44 +125,56 @@ class Player: NSObject, ObservableObject {
         playlistFetchController.delegate = self
         favoritesFetchController.delegate = self
 
+        // Setup playlists
+        setupMainPlaylist()
+        setupFavoritesPlaylist()
+        
+        // Load favorite archives
+        favoriteArchives = PersistenceController.shared.fetchAllFavoriteArchives()
+
+        NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+    }
+    
+    // MARK: - Playlist Setup
+    
+    private func setupMainPlaylist() {
         do {
-          try playlistFetchController.performFetch()
+            try playlistFetchController.performFetch()
             if let playlist = playlistFetchController.fetchedObjects?.first {
                 mainPlaylist = playlist
                 if let files = mainPlaylist?.files?.array as? [ArchiveFileEntity] {
                     items = files
                 }
             } else {
+                // Create the main playlist if it doesn't exist
                 mainPlaylist = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
                 mainPlaylist?.name = Self.mainListName
                 mainPlaylist?.permanent = true
                 PersistenceController.shared.save()
             }
         } catch {
-          print("failed to fetch items!")
+            print("Failed to fetch main playlist: \(error.localizedDescription)")
         }
-
+    }
+    
+    private func setupFavoritesPlaylist() {
         do {
-          try favoritesFetchController.performFetch()
+            try favoritesFetchController.performFetch()
             if let favoritesList = favoritesFetchController.fetchedObjects?.first {
                 favoritesPlaylist = favoritesList
                 if let files = favoritesPlaylist?.files?.array as? [ArchiveFileEntity] {
                     favoriteItems = files
                 }
             } else {
+                // Create the favorites playlist if it doesn't exist
                 favoritesPlaylist = PlaylistEntity(context: PersistenceController.shared.container.viewContext)
                 favoritesPlaylist?.name = Self.favoritesListName
                 favoritesPlaylist?.permanent = true
                 PersistenceController.shared.save()
             }
         } catch {
-          print("failed to fetch favorite items!")
+            print("Failed to fetch favorites playlist: \(error.localizedDescription)")
         }
-
-        // Load favorite archives
-        favoriteArchives = PersistenceController.shared.fetchAllFavoriteArchives()
-
-        NotificationCenter.default.addObserver(self, selector: #selector(continuePlaying), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
     }
 
     private let playingSubject = PassthroughSubject<Bool, Never>()
