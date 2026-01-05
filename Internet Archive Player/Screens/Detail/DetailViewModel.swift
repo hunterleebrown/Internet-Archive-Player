@@ -20,6 +20,7 @@ final class DetailViewModel: ObservableObject {
     @Published var audioFiles = [ArchiveFile]()
     @Published var movieFiles = [ArchiveFile]()
     @Published var JP2Files = [ArchiveFile]()
+    @Published var txtFiles = [ArchiveFile]()
     @Published var playingFile: ArchiveFileEntity?
     @Published var playlistArchiveFiles: [ArchiveFile]?
     @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
@@ -100,8 +101,11 @@ final class DetailViewModel: ObservableObject {
                 self.movieFiles = desiredVideo(files:video)
             }
 
-            let texts = doc.files.filter{ $0.format == .singlePageProcessedJP2Zip }
-            self.JP2Files = texts
+            let flips = doc.files.filter{ $0.format == .singlePageProcessedJP2Zip }
+            self.JP2Files = flips
+
+            let texts = doc.files.filter{ $0.format == .djvutxt }
+            self.txtFiles = texts
 
             if let art = doc.preferredAlbumArt {
                 //self.backgroundIconUrl = icon

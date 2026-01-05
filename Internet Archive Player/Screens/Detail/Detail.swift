@@ -524,7 +524,7 @@ struct Detail: View {
                             }
 
                             if self.viewModel.JP2Files.count > 0 {
-                                Text("Texts")
+                                Text("Flip Book")
                                     .font(.subheadline)
                                     .bold()
                                     .foregroundColor(.black)
@@ -536,9 +536,9 @@ struct Detail: View {
                                         )
                                         .fill(Color.white.opacity(0.5))
                                     )
-                                
+
                                 ForEach(self.viewModel.JP2Files, id: \.self) { file in
-                                    
+
                                     NavigationLink {
                                         if let archive = viewModel.archive,
                                            let zipFileName = viewModel.getBookReaderZipFile() {
@@ -551,6 +551,30 @@ struct Detail: View {
                                     }
                                 }
                             }
+
+                            if self.viewModel.txtFiles.count > 0 {
+                                Text("Text Files")
+                                    .font(.subheadline)
+                                    .bold()
+                                    .foregroundColor(.black)
+                                    .padding(5)
+                                    .background(
+                                        RoundedRectangle(
+                                            cornerRadius: detailCornerRadius,
+                                            style: .continuous
+                                        )
+                                        .fill(Color.white.opacity(0.5))
+                                    )
+
+                                ForEach(self.viewModel.txtFiles, id: \.self) { file in
+
+                                    self.createFileView(file)
+                                        .padding(.leading, 5.0)
+                                        .padding(.trailing, 5.0)
+
+                                }
+                            }
+
                         }
                         .padding(10)
                     }
@@ -650,6 +674,12 @@ struct Detail: View {
 
     private func menuActions(archiveFile: ArchiveFile) -> [MenuAction] {
         var actions = [MenuAction]()
+
+        if archiveFile.format == .singlePageProcessedJP2Zip || 
+           archiveFile.format == .djvutxt || 
+           archiveFile.format == .other {
+            return []
+        }
 
         let playlist = MenuAction(name: "Add to Now Playing", action:  {
             do  {
