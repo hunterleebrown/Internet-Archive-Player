@@ -65,6 +65,9 @@
 		5A9E301B2F0B24FA005DF540 /* BookReaderPreviewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9E301A2F0B24FA005DF540 /* BookReaderPreviewHelper.swift */; };
 		5A9E301D2F0B251B005DF540 /* BOOK_READER_SUMMARY.md in Resources */ = {isa = PBXBuildFile; fileRef = 5A9E301C2F0B251B005DF540 /* BOOK_READER_SUMMARY.md */; };
 		5A9E301F2F0B268E005DF540 /* IMPORT_FIX_SUMMARY.md in Resources */ = {isa = PBXBuildFile; fileRef = 5A9E301E2F0B268E005DF540 /* IMPORT_FIX_SUMMARY.md */; };
+		5A9E30212F0B3EF6005DF540 /* TextReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9E30202F0B3EF6005DF540 /* TextReaderView.swift */; };
+		5A9E30232F0B3F10005DF540 /* TextReaderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9E30222F0B3F10005DF540 /* TextReaderViewModel.swift */; };
+		5A9E30252F0B3F3E005DF540 /* TEXT_READER_README.md in Resources */ = {isa = PBXBuildFile; fileRef = 5A9E30242F0B3F3E005DF540 /* TEXT_READER_README.md */; };
 		5AA391A52A4F4C8A00C65A48 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA391A42A4F4C8A00C65A48 /* Home.swift */; };
 		5AA73BF02EEF51730047B904 /* HistoryDrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */; };
 		5ABAAAC52EF8BEA0004C1AD7 /* PlaylistDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ABAAAC42EF8BEA0004C1AD7 /* PlaylistDrawer.swift */; };
@@ -198,6 +201,9 @@
 		5A9E301A2F0B24FA005DF540 /* BookReaderPreviewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookReaderPreviewHelper.swift; sourceTree = "<group>"; };
 		5A9E301C2F0B251B005DF540 /* BOOK_READER_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BOOK_READER_SUMMARY.md; sourceTree = "<group>"; };
 		5A9E301E2F0B268E005DF540 /* IMPORT_FIX_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = IMPORT_FIX_SUMMARY.md; sourceTree = "<group>"; };
+		5A9E30202F0B3EF6005DF540 /* TextReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextReaderView.swift; sourceTree = "<group>"; };
+		5A9E30222F0B3F10005DF540 /* TextReaderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextReaderViewModel.swift; sourceTree = "<group>"; };
+		5A9E30242F0B3F3E005DF540 /* TEXT_READER_README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TEXT_READER_README.md; sourceTree = "<group>"; };
 		5AA391A42A4F4C8A00C65A48 /* Home.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Home.swift; sourceTree = "<group>"; };
 		5AA73BEF2EEF50940047B904 /* HistoryDrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryDrawerView.swift; sourceTree = "<group>"; };
 		5AAF285727B9C83D00ED2B30 /* Internet-Archive-Player-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Internet-Archive-Player-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -683,6 +689,9 @@
 				5AEEA0A52EF8F31D008243DA /* ARCHIVE_ERROR_OVERLAY_GUIDE.md */,
 				5A9E300D2F0B1F00005DF540 /* Book */,
 				5A9E301E2F0B268E005DF540 /* IMPORT_FIX_SUMMARY.md */,
+				5A9E30202F0B3EF6005DF540 /* TextReaderView.swift */,
+				5A9E30222F0B3F10005DF540 /* TextReaderViewModel.swift */,
+				5A9E30242F0B3F3E005DF540 /* TEXT_READER_README.md */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -831,6 +840,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5A9E30252F0B3F3E005DF540 /* TEXT_READER_README.md in Resources */,
 				5A9E301F2F0B268E005DF540 /* IMPORT_FIX_SUMMARY.md in Resources */,
 				5ADED06D279B608F00FB2E6D /* Iconochive-Regular.ttf in Resources */,
 				5ABF75692AAFC4D8001B158B /* ci_post_xcodebuild.sh in Resources */,
@@ -910,6 +920,7 @@
 				5A4F2D592A50781D00DCDF95 /* UIImageView+Extension.swift in Sources */,
 				5AC8A6C12EEB73A400D962B9 /* ArchiveMetaDataEntity+CoreDataProperties.swift in Sources */,
 				5AFEC5072A99880800E0BFD3 /* NewFavoritesView.swift in Sources */,
+				5A9E30232F0B3F10005DF540 /* TextReaderViewModel.swift in Sources */,
 				5AD6BC54279CCED100495070 /* PlayerButton.swift in Sources */,
 				5A0E15232EF207F8000A80D2 /* HistoryArchiveFileEntity+Extensions.swift in Sources */,
 				5ADED071279B63C300FB2E6D /* BackgroundColorModifier.swift in Sources */,
@@ -919,6 +930,7 @@
 				5AE69CD22A846DBE0062CC5D /* DetailDescription.swift in Sources */,
 				5AA73BF02EEF51730047B904 /* HistoryDrawerView.swift in Sources */,
 				5AC8A6BB2EEB737A00D962B9 /* FavoriteArchivesView.swift in Sources */,
+				5A9E30212F0B3EF6005DF540 /* TextReaderView.swift in Sources */,
 				5A0E15182EF1EB4D000A80D2 /* CachedAsyncImage.swift in Sources */,
 				CEF72C9A27B5D72600B8AF15 /* FileView.swift in Sources */,
 				5A9E30132F0B246F005DF540 /* BookReaderView.swift in Sources */,

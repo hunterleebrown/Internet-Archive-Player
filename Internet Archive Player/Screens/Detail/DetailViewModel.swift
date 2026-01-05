@@ -256,6 +256,13 @@ final class DetailViewModel: ObservableObject {
     public var hasReadableBook: Bool {
         return getBookReaderZipFile() != nil && archive != nil
     }
+    
+    // MARK: - Text Reader Support
+    
+    /// Check if this archive has readable text files
+    public var hasReadableText: Bool {
+        return !txtFiles.isEmpty
+    }
 
     public func previewAudio(file: ArchiveFile) {
         guard let url = file.url else { return }

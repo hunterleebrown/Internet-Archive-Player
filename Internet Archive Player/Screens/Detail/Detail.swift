@@ -567,11 +567,13 @@ struct Detail: View {
                                     )
 
                                 ForEach(self.viewModel.txtFiles, id: \.self) { file in
-
-                                    self.createFileView(file)
-                                        .padding(.leading, 5.0)
-                                        .padding(.trailing, 5.0)
-
+                                    NavigationLink {
+                                        TextReaderView(archiveFile: file)
+                                    } label: {
+                                        self.createFileView(file)
+                                            .padding(.leading, 5.0)
+                                            .padding(.trailing, 5.0)
+                                    }
                                 }
                             }
 

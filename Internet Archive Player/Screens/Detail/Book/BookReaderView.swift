@@ -7,6 +7,7 @@
 
 import SwiftUI
 import iaAPI
+import Photos
 
 struct BookReaderView: View {
     @StateObject private var viewModel: BookReaderViewModel
@@ -17,6 +18,9 @@ struct BookReaderView: View {
     
     @State private var showingPagePicker = false
     @State private var isControlsVisible = true
+    @State private var showingSaveAlert = false
+    @State private var saveAlertMessage = ""
+    @State private var isSavingImage = false
     
     init(archive: Archive, zipFileName: String) {
         self.archive = archive
@@ -70,6 +74,87 @@ struct BookReaderView: View {
                 totalPages: viewModel.totalPages
             )
         }
+        .alert("Save Image", isPresented: $showingSaveAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveAlertMessage)
+        }
+    }
+    
+    /// Save the current page image to Photos
+    private func saveCurrentPageImage() {
+        guard !isSavingImage else { return }
+        
+        isSavingImage = true
+        
+        Task {
+            do {
+                // Get the image URL for current page
+                guard let imageURL = viewModel.urlForPage(viewModel.currentPage) else {
+                    showSaveError("Failed to generate image URL")
+                    return
+                }
+                
+                // Download the image
+                let (data, _) = try await URLSession.shared.data(from: imageURL)
+                
+                guard let image = UIImage(data: data) else {
+                    showSaveError("Failed to load image")
+                    return
+                }
+                
+                // Check photo library permission
+                let status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
+                
+                switch status {
+                case .notDetermined:
+                    let newStatus = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+                    if newStatus == .authorized || newStatus == .limited {
+                        await saveImage(image)
+                    } else {
+                        showSaveError("Photo library access denied. Please enable in Settings.")
+                    }
+                    
+                case .authorized, .limited:
+                    await saveImage(image)
+                    
+                case .denied, .restricted:
+                    showSaveError("Photo library access denied. Please enable in Settings.")
+                    
+                @unknown default:
+                    showSaveError("Unable to access photo library")
+                }
+                
+            } catch {
+                showSaveError("Failed to download image: \(error.localizedDescription)")
+            }
+            
+            await MainActor.run {
+                isSavingImage = false
+            }
+        }
+    }
+    
+    @MainActor
+    private func saveImage(_ image: UIImage) async {
+        do {
+            try await PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAsset(from: image)
+            }
+            
+            saveAlertMessage = "Image saved to Photos successfully!"
+            showingSaveAlert = true
+            
+        } catch {
+            saveAlertMessage = "Failed to save image: \(error.localizedDescription)"
+            showingSaveAlert = true
+        }
+    }
+    
+    @MainActor
+    private func showSaveError(_ message: String) {
+        saveAlertMessage = message
+        showingSaveAlert = true
     }
     
     private var overlayControls: some View {
@@ -115,6 +200,32 @@ struct BookReaderView: View {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(.ultraThinMaterial)
             )
+            
+            // Save Image Button
+            Button {
+                saveCurrentPageImage()
+            } label: {
+                HStack(spacing: 8) {
+                    if isSavingImage {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Image(systemName: "square.and.arrow.down")
+                            .font(.system(size: 20))
+                    }
+                    Text(isSavingImage ? "Saving..." : "Save to Photos")
+                        .font(.headline)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+            }
+            .disabled(isSavingImage)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.ultraThinMaterial)
+            )
+            .padding(.top, 12)
             .padding(.bottom, 40)
         }
         .transition(.move(edge: .bottom).combined(with: .opacity))

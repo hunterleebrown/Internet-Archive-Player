@@ -24,5 +24,7 @@
             <string>hunterleebrown.ia-player.url</string>
         </dict>
     </array>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>We need access to save book pages to your photo library.</string>
 </dict>
 </plist>

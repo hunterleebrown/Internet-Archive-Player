@@ -244,7 +244,7 @@ final class BrowseResultsViewModel: ObservableObject {
             do {
                 let data = try await service.searchPPSAsync(
                     query: collection,
-                    mediaTypes: [.audio, .movies, .collection],
+                    mediaTypes: [.audio, .movies, .collection, .texts],
                     rows: rows,
                     page: page,
                     format: nil,
