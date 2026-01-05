@@ -13,6 +13,7 @@ import SwiftUI
 private struct CachedFilterData: Codable {
     let audioFilters: [SearchFilter]
     let moviesFilters: [SearchFilter]
+    let textsFilters: [SearchFilter]
     let userFilters: [SearchFilter]
     let timestamp: Date
 }
@@ -27,6 +28,7 @@ class CollectionFilterCache: ObservableObject {
     // Cached filters by collection type
     @Published private(set) var audioFilters: [SearchFilter] = []
     @Published private(set) var moviesFilters: [SearchFilter] = []
+    @Published private(set) var textsFilters: [SearchFilter] = []
     @Published private(set) var userFilters: [SearchFilter] = []
     
     // Dictionary for fast lookup by identifier
@@ -36,6 +38,7 @@ class CollectionFilterCache: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var hasLoadedAudio = false
     @Published private(set) var hasLoadedMovies = false
+    @Published private(set) var hasLoadedTexts = false
     
     // Error handling
     @Published var errorMessage: String?
@@ -71,6 +74,7 @@ class CollectionFilterCache: ObservableObject {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadFilters(for: .audio) }
             group.addTask { await self.loadFilters(for: .movies) }
+            group.addTask { await self.loadFilters(for: .texts) }
         }
         
         // Save fresh data to disk
@@ -94,11 +98,12 @@ class CollectionFilterCache: ObservableObject {
             // Restore filters
             audioFilters = cachedData.audioFilters
             moviesFilters = cachedData.moviesFilters
+            textsFilters = cachedData.textsFilters
             userFilters = cachedData.userFilters
             
             // Rebuild lookup dictionary
             filtersByIdentifier = [:]
-            for filter in (audioFilters + moviesFilters + userFilters) {
+            for filter in (audioFilters + moviesFilters + textsFilters + userFilters) {
                 if !filter.identifier.isEmpty {
                     filtersByIdentifier[filter.identifier] = filter
                 }
@@ -107,6 +112,7 @@ class CollectionFilterCache: ObservableObject {
             // Mark as loaded if we have data
             hasLoadedAudio = !audioFilters.isEmpty
             hasLoadedMovies = !moviesFilters.isEmpty
+            hasLoadedTexts = !textsFilters.isEmpty
             
             print("Loaded filters from disk cache")
         } catch {
@@ -121,6 +127,7 @@ class CollectionFilterCache: ObservableObject {
         let cacheData = CachedFilterData(
             audioFilters: audioFilters,
             moviesFilters: moviesFilters,
+            textsFilters: textsFilters,
             userFilters: userFilters,
             timestamp: Date()
         )
@@ -171,7 +178,16 @@ class CollectionFilterCache: ObservableObject {
             }
             
             // Add "All" filter at the beginning
-            let iconName = type == .movies ? "video" : "hifispeaker"
+            let iconName: String
+            switch type {
+            case .audio:
+                iconName = "hifispeaker"
+            case .movies:
+                iconName = "video"
+            case .texts:
+                iconName = "book"
+            }
+            
             let allFilter = SearchFilter(
                 name: "All \(type.rawValue.capitalized)",
                 identifier: "",
@@ -189,7 +205,8 @@ class CollectionFilterCache: ObservableObject {
                 moviesFilters = filters
                 hasLoadedMovies = true
             case .texts:
-                break // Not currently supported
+                textsFilters = filters
+                hasLoadedTexts = true
             }
             
             // Update lookup dictionary
@@ -246,7 +263,10 @@ class CollectionFilterCache: ObservableObject {
             }
             return moviesFilters
         case .texts:
-            return []
+            if !hasLoadedTexts {
+                await loadFilters(for: type)
+            }
+            return textsFilters
         }
     }
     
@@ -292,10 +312,12 @@ class CollectionFilterCache: ObservableObject {
     func clearCache() {
         audioFilters = []
         moviesFilters = []
+        textsFilters = []
         userFilters = []
         filtersByIdentifier = [:]
         hasLoadedAudio = false
         hasLoadedMovies = false
+        hasLoadedTexts = false
         
         // Remove disk cache
         try? FileManager.default.removeItem(at: cacheFileURL)

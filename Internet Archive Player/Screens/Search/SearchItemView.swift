@@ -127,6 +127,8 @@ struct SearchItemView<Item: SearchItemDisplayable>: View {
             return "video"
         case .collection:
             return "tray.2"
+        case .texts:
+            return "book"
         default:
             return "questionmark"
         }

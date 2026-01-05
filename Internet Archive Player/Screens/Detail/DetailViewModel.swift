@@ -15,9 +15,11 @@ import AVKit
 final class DetailViewModel: ObservableObject {
     private var iaPlayer: Player?
     let service: PlayerArchiveService
+    @Published var archive: Archive? = nil
     @Published var archiveDoc: ArchiveMetaData? = nil
     @Published var audioFiles = [ArchiveFile]()
     @Published var movieFiles = [ArchiveFile]()
+    @Published var JP2Files = [ArchiveFile]()
     @Published var playingFile: ArchiveFileEntity?
     @Published var playlistArchiveFiles: [ArchiveFile]?
     @Published var backgroundIconUrl: URL = URL(string: "http://archive.org")!
@@ -75,8 +77,15 @@ final class DetailViewModel: ObservableObject {
             let doc = try await self.service.getArchiveAsync(with: identifier)
 
             withAnimation {
+                self.archive = doc
                 self.archiveDoc = doc.metadata
             }
+
+            #if DEBUG
+            print(self.archive?.dir ?? "No dir")
+            print(self.archive?.d1 ?? "No d1")
+            print(self.archive?.d2 ?? "No d2")
+            #endif
 
             self.audioFiles = doc.non78Audio.sorted{
                 guard let track1 = $0.track, let track2 = $1.track else { return false}
@@ -90,6 +99,9 @@ final class DetailViewModel: ObservableObject {
             if video.count > 0 {
                 self.movieFiles = desiredVideo(files:video)
             }
+
+            let texts = doc.files.filter{ $0.format == .singlePageProcessedJP2Zip }
+            self.JP2Files = texts
 
             if let art = doc.preferredAlbumArt {
                 //self.backgroundIconUrl = icon
@@ -227,6 +239,18 @@ final class DetailViewModel: ObservableObject {
             }
             return false
         }
+    }
+    
+    // MARK: - Book Reader Support
+    
+    /// Get the JP2 zip file for book reading
+    public func getBookReaderZipFile() -> String? {
+        return JP2Files.first { $0.format == .singlePageProcessedJP2Zip }?.name
+    }
+    
+    /// Check if this archive has a readable book
+    public var hasReadableBook: Bool {
+        return getBookReaderZipFile() != nil && archive != nil
     }
 
     public func previewAudio(file: ArchiveFile) {

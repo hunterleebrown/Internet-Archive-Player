@@ -276,19 +276,19 @@ struct Detail: View {
 
                     VStack(alignment: .center, spacing: 5.0) {
 
-                        if self.viewModel.audioFiles.isEmpty &&
+                        if self.viewModel.JP2Files.isEmpty && self.viewModel.audioFiles.isEmpty &&
                             self.viewModel.movieFiles.isEmpty {
                             VStack(alignment: .center, spacing: 12) {
                                 Image(systemName: "exclamationmark.triangle")
                                     .font(.system(size: 40))
                                     .foregroundColor(.secondary.opacity(0.5))
 
-                                Text("No Playable Files")
+                                Text("No Playable or Viewable Files")
                                     .font(.headline)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.primary)
 
-                                Text("This archive doesn't contain audio or video files compatible with the app")
+                                Text("This archive doesn't contain audio, video, or text files compatible with the app")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                     .multilineTextAlignment(.center)
@@ -522,6 +522,35 @@ struct Detail: View {
                                         }
                                 }
                             }
+
+                            if self.viewModel.JP2Files.count > 0 {
+                                Text("Texts")
+                                    .font(.subheadline)
+                                    .bold()
+                                    .foregroundColor(.black)
+                                    .padding(5)
+                                    .background(
+                                        RoundedRectangle(
+                                            cornerRadius: detailCornerRadius,
+                                            style: .continuous
+                                        )
+                                        .fill(Color.white.opacity(0.5))
+                                    )
+                                
+                                ForEach(self.viewModel.JP2Files, id: \.self) { file in
+                                    
+                                    NavigationLink {
+                                        if let archive = viewModel.archive,
+                                           let zipFileName = viewModel.getBookReaderZipFile() {
+                                            BookReaderView(archive: archive, zipFileName: zipFileName)
+                                        }
+                                    } label: {
+                                        self.createFileView(file)
+                                            .padding(.leading, 5.0)
+                                            .padding(.trailing, 5.0)
+                                    }
+                                }
+                            }
                         }
                         .padding(10)
                     }
@@ -542,57 +571,7 @@ struct Detail: View {
                     }
                 }
             }
-            .background(
-                GeometryReader { geometry in
-                    VStack(spacing: 0) {
-                        if let img = self.backgroundURL,
-                           let color = viewModel.averageColor {
-
-                            ZStack(alignment: .top) {
-
-                                Color(color)
-
-                                AsyncImage(url: img, transaction: Transaction(animation: .spring())) { phase in
-                                    switch phase {
-                                    case .empty:
-                                        Color.clear
-
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: geometry.size.width, height: 400, alignment: .top)
-                                            .transition(.opacity)
-                                            .blur(radius: backgroundBlur)
-
-                                    case .failure(_):
-                                        EmptyView()
-
-                                    @unknown default:
-                                        EmptyView()
-                                    }
-                                }
-                                .frame(height: 400)
-                                .clipped()
-                            }
-
-
-                            if let gradient = viewModel.gradient {
-                                LinearGradient(
-                                    gradient: gradient,
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                                .ignoresSafeArea() // Makes the gradient cover the entire screen
-                            } else {
-                                Color(color)
-                            }
-
-                        }
-
-                    }
-                }
-            )
+            .background(backgroundView)
             .listStyle(.plain)
         }
     }
@@ -603,6 +582,70 @@ struct Detail: View {
                  backgroundColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyRed : .fairyRedAlpha,
                  textColor: self.viewModel.playingFile?.url?.absoluteURL == archiveFile.url?.absoluteURL ? .fairyCream : .white,
                  ellipsisAction: self.menuActions(archiveFile: archiveFile) )
+    }
+    
+    @ViewBuilder
+    private var backgroundView: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                if let img = self.backgroundURL,
+                   let color = viewModel.averageColor {
+                    
+                    backgroundImageSection(geometry: geometry, imageURL: img, color: color)
+                    
+                    backgroundGradientSection(color: color)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func backgroundImageSection(geometry: GeometryProxy, imageURL: URL, color: UIColor) -> some View {
+        ZStack(alignment: .top) {
+            Color(color)
+            
+            AsyncImage(url: imageURL, transaction: Transaction(animation: .spring())) { phase in
+                backgroundImagePhaseView(phase: phase, geometry: geometry)
+            }
+            .frame(height: 400)
+            .clipped()
+        }
+    }
+    
+    @ViewBuilder
+    private func backgroundImagePhaseView(phase: AsyncImagePhase, geometry: GeometryProxy) -> some View {
+        switch phase {
+        case .empty:
+            Color.clear
+            
+        case .success(let image):
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: geometry.size.width, height: 400, alignment: .top)
+                .transition(.opacity)
+                .blur(radius: backgroundBlur)
+            
+        case .failure(_):
+            EmptyView()
+            
+        @unknown default:
+            EmptyView()
+        }
+    }
+    
+    @ViewBuilder
+    private func backgroundGradientSection(color: UIColor) -> some View {
+        if let gradient = viewModel.gradient {
+            LinearGradient(
+                gradient: gradient,
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+        } else {
+            Color(color)
+        }
     }
 
     private func menuActions(archiveFile: ArchiveFile) -> [MenuAction] {

@@ -67,6 +67,8 @@ struct SearchView: View {
                 .tag(0)
             Label("Video", systemImage: "video")
                 .tag(1)
+            Label("Text", systemImage: "book")
+                .tag(3)
         }
         .pickerStyle(.segmented)
         .controlSize(.large)
@@ -366,7 +368,7 @@ extension SearchView {
 
         @Published var identifier: String?
 
-        public let mediaTypes: [ArchiveMediaType] = [.audio, .movies, .collection]
+        public let mediaTypes: [ArchiveMediaType] = [.audio, .movies, .collection, .texts]
         private var isLoadingMore: Bool = false
         private var page: Int = 1
         private var numberOfResults = 0

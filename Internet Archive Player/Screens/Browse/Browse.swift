@@ -16,6 +16,7 @@ struct Browse: View {
             List {
                 filtersSection(title: "Audio", filters: viewModel.audioFilters)
                 filtersSection(title: "Movies", filters: viewModel.moviesFilters)
+                filtersSection(title: "Texts", filters: viewModel.textsFilters)
                 filtersSection(title: "Previously Searched Collections", filters: viewModel.userFilters)
             }
             .listStyle(.plain)
@@ -199,12 +200,14 @@ struct BrowseResultsView: View {
 final class BrowseViewModel: ObservableObject {
     @Published var audioFilters: [SearchFilter] = []
     @Published var moviesFilters: [SearchFilter] = []
+    @Published var textsFilters: [SearchFilter] = []
     @Published var userFilters: [SearchFilter] = []
     
     func loadCollections() {
         let cache = CollectionFilterCache.shared
         audioFilters = cache.audioFilters.filter { !$0.identifier.isEmpty }
         moviesFilters = cache.moviesFilters.filter { !$0.identifier.isEmpty }
+        textsFilters = cache.textsFilters.filter { !$0.identifier.isEmpty }
         userFilters = cache.userFilters.filter { !$0.identifier.isEmpty }
     }
 }

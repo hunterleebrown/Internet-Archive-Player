@@ -63,12 +63,12 @@ struct FavoriteArchiveItemView<Item: SearchItemDisplayable>: View {
                 
                 Spacer(minLength: 0)
                 
-                // Media type badge and heart icon
+                // Media type badge
                 HStack(spacing: 6) {
                     HStack(spacing: 4) {
-                        Image(systemName: item.mediatypeDisplay == .audio || item.mediatypeDisplay == .etree ? "hifispeaker" : item.mediatypeDisplay == .movies ? "video" : "questionmark")
+                        Image(systemName: mediaTypeIcon)
                             .font(.caption2)
-                        Text(item.mediatypeDisplay == .audio || item.mediatypeDisplay == .etree ? "Audio" : item.mediatypeDisplay == .movies ? "Video" : "Unknown")
+                        Text(mediaTypeLabel)
                             .font(.caption2)
                             .bold()
                     }
@@ -102,5 +102,31 @@ struct FavoriteArchiveItemView<Item: SearchItemDisplayable>: View {
         }
 
         return ""
+    }
+    
+    private var mediaTypeIcon: String {
+        switch item.mediatypeDisplay {
+        case .audio, .etree:
+            return "hifispeaker"
+        case .movies:
+            return "video"
+        case .texts:
+            return "book"
+        default:
+            return "questionmark"
+        }
+    }
+    
+    private var mediaTypeLabel: String {
+        switch item.mediatypeDisplay {
+        case .audio, .etree:
+            return "Audio"
+        case .movies:
+            return "Video"
+        case .texts:
+            return "Text"
+        default:
+            return "Unknown"
+        }
     }
 }
